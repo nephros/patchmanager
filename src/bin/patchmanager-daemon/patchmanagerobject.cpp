@@ -329,7 +329,7 @@ bool PatchManagerObject::applyPatch(const QString &patch)
     notify(displayName.toString(), true, ok);
 
     m_timer->start();
-    if (ok) {
+    if (ok && m_adaptor) {
         emit m_adaptor->applyPatchFinished(patch);
     }
     return ok;
@@ -362,7 +362,7 @@ bool PatchManagerObject::unapplyPatch(const QString &patch)
     notify(displayName.toString(), false, ok);
 
     m_timer->start();
-    if (ok) {
+    if (ok && m_adaptor) {
         emit m_adaptor->unapplyPatchFinished(patch);
     }
     return ok;
@@ -377,7 +377,8 @@ bool PatchManagerObject::unapplyAllPatches()
         ok &= unapplyPatch(patch);
     }
     m_timer->start();
-    emit m_adaptor->unapplyAllPatchesFinished();
+    if (m_adaptor)
+        emit m_adaptor->unapplyAllPatchesFinished();
     return ok;
 }
 
