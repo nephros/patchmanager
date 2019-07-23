@@ -42,6 +42,7 @@
 #include <QLocale>
 #include <QtDBus/QtDBus>
 #include "webcatalog.h"
+#include "webdownloader.h"
 
 static const char *HOMESCREEN_CODE = "homescreen";
 static const char *MESSAGES_CODE = "messages";

@@ -155,20 +155,6 @@ Page {
                 axis { x: 1; y: 0; z: 0 }
                 angle: mainColumn.rotAngle
             }
-
-            Item {
-                width: 1
-                height: flick.height - y
-            }
-
-            Label {
-                id: easterLabel
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.margins: Theme.horizontalPageMargin
-                horizontalAlignment: Text.AlignHCenter
-                wrapMode: Text.Wrap
-            }
         }
 
         VerticalScrollDecorator {}
@@ -199,7 +185,7 @@ Page {
                 mainColumn.heightChanged.disconnect(f)
             }
 
-            easterLabel.text = easterText
+            //easterLabel.text = easterText
             mainColumn.heightChanged.connect(f)
         }
     }

@@ -31,13 +31,14 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import org.nemomobile.dbus 2.0
+import Nemo.DBus 2.0
 import org.SfietKonstantin.patchmanager 2.0
 
 Page {
     id: container
 
     property string release
+    property bool pendingPatchesRefresh: true
 
     function dummy() {
         QT_TRANSLATE_NOOP("", "Browser")
@@ -57,9 +58,11 @@ Page {
     }
 
     onStatusChanged: {
-        if (status == PageStatus.Activating
-                && pageStack.currentPage.objectName == "WebPatchPage") {
-            patchmanagerDbusInterface.listPatches()
+        if (status == PageStatus.Activating) {
+            if (pendingPatchesRefresh) {
+                pendingPatchesRefresh = false
+                patchmanagerDbusInterface.listPatches()
+            }
         }
     }
 
@@ -150,16 +153,21 @@ Page {
             MenuItem {
                 text: qsTranslate("", "Unapply all patches")
                 onClicked: {
-                    patchmanagerDbusInterface.unapplyAllPatches()
-                    view.unapplyAll()
-                    view.busy = true
+                    Remorse.popupAction(container,
+                                        qsTranslate("", "Unapply all patches"),
+                                        function () {
+                                            patchmanagerDbusInterface.unapplyAllPatches()
+                                            view.unapplyAll()
+                                            view.busy = true
+                                        }, 3000)
                 }
             }
 
             MenuItem {
                 text: qsTranslate("", "Web catalog")
 
-                onClicked: pageStack.push(Qt.resolvedUrl("WebCatalogPage.qml"), {release: release})
+                onClicked: pageStack.push(Qt.resolvedUrl("WebCatalogPage.qml"), {release: release,
+                                                                                 "patchManagerPage": container})
             }
 
             MenuItem {

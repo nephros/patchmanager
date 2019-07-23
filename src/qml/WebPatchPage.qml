@@ -31,7 +31,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import org.nemomobile.dbus 2.0
+import Nemo.DBus 2.0
 import org.SfietKonstantin.patchmanager 2.0
 
 Page {
@@ -124,6 +124,11 @@ Page {
         id: view
         anchors.fill: parent
         contentHeight: content.height
+
+        MenuItem {
+            text: PatchManager.developerMode ? qsTranslate("", "Disable developer mode") : qsTranslate("", "Enable developer mode")
+            onClicked: PatchManager.developerMode = !PatchManager.developerMode
+        }
 
         ViewPlaceholder {
             enabled: !patchData.value
@@ -388,7 +393,7 @@ Page {
                         if (!PatchManager.developerMode && !isCompatible) {
                             errorMesageComponent.createObject(fileDelegate, {text: qsTranslate("", "This file is not compatible with SailfishOS version!")})
                         } else if (!fileDelegate.isInstalled) {
-                            remorseAction(qsTranslate("", "Install patch %1").arg(patchData.value.display_name), installPatch)
+                            remorseAction(qsTranslate("", "Install patch %1").arg(patchData.value.display_name), installPatch, 3000)
                         }
                     }
 

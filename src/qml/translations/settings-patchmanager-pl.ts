@@ -1,11 +1,13 @@
-<?xml version="1.0" ?><!DOCTYPE TS><TS language="pl" version="2.1">
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE TS>
+<TS version="2.1" language="pl">
 <context>
-    <name/>
+    <name></name>
     <message>
         <location filename="AboutPage.qml" line="48"/>
         <location filename="PatchManagerPage.qml" line="116"/>
         <source>About</source>
-        <translation>O</translation>
+        <translation>O programie</translation>
     </message>
     <message>
         <location filename="AboutPage.qml" line="62"/>

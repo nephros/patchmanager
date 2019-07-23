@@ -31,7 +31,7 @@
 
 import QtQuick 2.0
 import Sailfish.Silica 1.0
-import org.nemomobile.dbus 2.0
+import Nemo.DBus 2.0
 import org.SfietKonstantin.patchmanager 2.0
 
 Page {
@@ -41,10 +41,13 @@ Page {
     property string release
     property string search
     property bool searchVisible
+    property PatchManagerPage patchManagerPage
 
     onStatusChanged: {
         if (status == PageStatus.Active) {
             patchmanagerDbusInterface.listVersions()
+        } else if (status == PageStatus.Deactivating) {
+            patchManagerPage.pendingPatchesRefresh = true
         }
     }
 
@@ -68,6 +71,12 @@ Page {
         PullDownMenu {
             quickSelect: true
             visible: !container.author
+
+            MenuItem {
+                text: PatchManager.developerMode ? qsTranslate("", "Disable developer mode") : qsTranslate("", "Enable developer mode")
+                onClicked: PatchManager.developerMode = !PatchManager.developerMode
+            }
+
             MenuItem {
                 text: searchVisible ? qsTranslate("", "Hide search field") : qsTranslate("", "Show search field")
                 onClicked: {

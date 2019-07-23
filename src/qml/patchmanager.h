@@ -37,7 +37,6 @@
 #include <QTranslator>
 #include <QtNetwork>
 #include <QSettings>
-#include "webdownloader.h"
 
 class PatchManager: public QObject
 {
