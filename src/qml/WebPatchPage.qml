@@ -125,9 +125,11 @@ Page {
         anchors.fill: parent
         contentHeight: content.height
 
-        MenuItem {
-            text: PatchManager.developerMode ? qsTranslate("", "Disable developer mode") : qsTranslate("", "Enable developer mode")
-            onClicked: PatchManager.developerMode = !PatchManager.developerMode
+        PullDownMenu {
+            MenuItem {
+                text: PatchManager.developerMode ? qsTranslate("", "Disable developer mode") : qsTranslate("", "Enable developer mode")
+                onClicked: PatchManager.developerMode = !PatchManager.developerMode
+            }
         }
 
         ViewPlaceholder {
