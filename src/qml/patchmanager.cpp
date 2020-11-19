@@ -62,7 +62,7 @@ PatchManager::PatchManager(QObject *parent)
     : QObject(parent), m_appsNeedRestart(false), m_homescreenNeedRestart(false)
 {
     m_nam = new QNetworkAccessManager(this);
-    m_settings = new QSettings("/home/nemo/.config/patchmanager2.conf", QSettings::IniFormat, this);
+    m_settings = new QSettings(QDir::homePath() + "/.config/patchmanager2.conf", QSettings::IniFormat, this);
 }
 
 PatchManager *PatchManager::GetInstance(QObject *parent)

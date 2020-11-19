@@ -126,7 +126,6 @@ esac
 %{_datadir}/jolla-settings/pages/%{name}
 %{_datadir}/jolla-settings/entries/%{name}.json
 %{_datadir}/%{name}/icons/icon-m-patchmanager.png
-%attr(644,nemo,nemo) %ghost /home/nemo/.config/patchmanager2.conf
 
 %{_datadir}/themes/%{theme}/meegotouch/z1.0/icons/*.png
 %{_datadir}/themes/%{theme}/meegotouch/z1.25/icons/*.png
