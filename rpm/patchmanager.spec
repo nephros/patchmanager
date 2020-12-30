@@ -16,6 +16,7 @@ URL:        https://github.com/sailfishos-patches/patchmanager
 Source0:    %{name}-%{version}.tar.bz2
 Requires:   ausmt >= 1.3.0
 Requires:   unzip
+Requires:   dbus
 Conflicts:  jolla-settings-%{name}
 Obsoletes:  jolla-settings-%{name}
 Conflicts:  %{name}-ui
