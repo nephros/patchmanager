@@ -235,7 +235,7 @@ bool PatchManager::removeTranslator(const QString &patch)
 
 void PatchManager::activation(const QString &patch, const QString &version)
 {
-    QUrl url(CATALOG_URL"/"PROJECT_PATH);
+    QUrl url(CATALOG_URL "/" PROJECT_PATH);
     QUrlQuery query;
     query.addQueryItem("name", patch);
     query.addQueryItem("version", version);
@@ -258,7 +258,7 @@ void PatchManager::doVote(const QString &patch, int action)
         return;
     }
 
-    QUrl url(CATALOG_URL"/"PROJECT_PATH);
+    QUrl url(CATALOG_URL "/" PROJECT_PATH);
     QUrlQuery query;
     query.addQueryItem("name", patch);
     if (action == 0) {
@@ -293,6 +293,11 @@ QString PatchManager::valueIfExists(const QString &filename)
         return filename;
     }
     return QString();
+}
+
+bool PatchManager::fileExists(const QString &filename)
+{
+    return QFile::exists(filename);
 }
 
 bool PatchManager::callUninstallOldPatch(const QString &patch)

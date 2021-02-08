@@ -30,7 +30,7 @@
  */
 
 #include "patchmanagerobject.h"
-#include "notification.h"
+#include <nemonotifications-qt5/notification.h>
 #include "adaptor.h"
 #include <algorithm>
 #include <QtCore/QCoreApplication>
@@ -182,8 +182,7 @@ void PatchManagerObject::notify(const QString &patch, bool apply, bool success)
 
     Notification notification;
     notification.setAppName(qApp->translate("", "Patchmanager"));
-    notification.setHintValue("x-nemo-icon", "icon-m-patchmanager2");
-    notification.setHintValue("x-nemo-preview-icon", "icon-m-patchmanager2");
+    notification.setIcon("icon-m-patchmanager2");
     notification.setSummary(summary);
     notification.setBody(body);
     notification.setPreviewSummary(summary);

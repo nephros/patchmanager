@@ -8,3 +8,6 @@ documentation.list
 RPMS
 *.moc
 *.so
+src/icons/z*
+src/icons/ss
+*.list

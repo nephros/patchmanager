@@ -25,7 +25,7 @@ QJsonObject WebPatchData::value() const
 
 void WebPatchData::getJson(const QString &version)
 {
-    QUrl url(CATALOG_URL"/"PROJECT_PATH);
+    QUrl url(CATALOG_URL "/" PROJECT_PATH);
     QUrlQuery query;
     query.addQueryItem("name", _name);
     query.addQueryItem("version", version);
@@ -37,7 +37,7 @@ void WebPatchData::getJson(const QString &version)
 
 void WebPatchData::reload()
 {
-    QUrl url(CATALOG_URL"/"PROJECT_PATH);
+    QUrl url(CATALOG_URL "/" PROJECT_PATH);
     QUrlQuery query;
     query.addQueryItem("name", _name);
     url.setQuery(query);

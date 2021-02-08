@@ -56,7 +56,7 @@ void WebPatchesModel::componentComplete()
         endRemoveRows();
     }
 
-    QUrl url(CATALOG_URL"/"PROJECTS_PATH);
+    QUrl url(CATALOG_URL "/" PROJECTS_PATH);
     QUrlQuery query;
     foreach (const QString & key, _queryParams.keys()) {
         query.addQueryItem(key, _queryParams.value(key).toString());
