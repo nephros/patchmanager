@@ -68,6 +68,7 @@ public slots:
     void doVote(const QString &patch, int action);
     void checkEaster();
     QString valueIfExists(const QString & filename);
+    bool fileExists(const QString &filename);
     bool callUninstallOldPatch(const QString & patch);
 signals:
     void appsNeedRestartChanged();

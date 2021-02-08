@@ -3,13 +3,8 @@ TARGET = patchmanager
 
 QT = core dbus
 
-SOURCES += \
-    notification.cpp \
-    notificationmanagerproxy.cpp
-
-HEADERS += \
-    notification.h \
-    notificationmanagerproxy.h
+CONFIG += link_pkgconfig
+PKGCONFIG += nemonotifications-qt5
 
 HEADERS += \
     adaptor.h \
@@ -54,4 +49,3 @@ INSTALLS += patch
 
 # DBus
 system(qdbusxml2cpp dbus/org.SfietKonstantin.patchmanager.xml -i patchmanagerobject.h -a adaptor)
-system(qdbusxml2cpp org.freedesktop.Notifications.xml -p notificationmanagerproxy -c NotificationManagerProxy -i notification.h)

@@ -8,7 +8,7 @@
 Name:       patchmanager
 
 Summary:    Patchmanager allows you to manage Sailfish OS patches
-Version:    2.4.2
+Version:    2.4.2.1
 Release:    1
 Group:      Qt/Qt
 License:    TODO
@@ -21,12 +21,16 @@ Conflicts:  jolla-settings-%{name}
 Obsoletes:  jolla-settings-%{name}
 Conflicts:  %{name}-ui
 Obsoletes:  %{name}-ui
+# busybox bash/ash will hang QProcess in post install script
+Conflicts:  busybox-symlinks-bash
+Requires:   gnu-bash
 BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5DBus)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  pkgconfig(mlite5)
 BuildRequires:  pkgconfig(sailfishapp) >= 0.0.10
+BuildRequires:  pkgconfig(nemonotifications-qt5)
 BuildRequires:  sailfish-svg2png >= 0.1.5
 
 %description
