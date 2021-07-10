@@ -182,11 +182,10 @@ void PatchManagerObject::notify(const QString &patch, bool apply, bool success)
 
     Notification notification;
     notification.setAppName(qApp->translate("", "Patchmanager"));
-    notification.setIcon("icon-m-patchmanager2");
+    notification.setAppIcon("icon-m-patchmanager2");
     notification.setSummary(summary);
     notification.setBody(body);
     notification.setPreviewSummary(summary);
-    notification.setPreviewBody(body);
     notification.setTimestamp(QDateTime::currentDateTime());
     notification.publish();
 }
