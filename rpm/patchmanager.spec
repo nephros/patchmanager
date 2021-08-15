@@ -8,7 +8,7 @@
 Name:       patchmanager
 
 Summary:    Patchmanager allows you to manage Sailfish OS patches
-Version:    2.4.2.1
+Version:    2.4.2.2
 Release:    1
 Group:      Qt/Qt
 License:    TODO

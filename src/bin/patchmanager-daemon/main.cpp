@@ -57,6 +57,24 @@ int main(int argc, char **argv)
         exit(2);
     }
 
+    // Precaution for busybox ash/rpm hang bug which can cause headache
+    int ppid = getppid();
+    QFileInfo shellInfo(QString("/proc/%1/exe").arg(ppid));
+    if (shellInfo.isSymLink() && shellInfo.symLinkTarget().contains("busybox")) {
+        QFile cmdlineFile(QString("/proc/%1/cmdline").arg(ppid));
+        cmdlineFile.open(QIODevice::ReadOnly);
+        QString cmdline = cmdlineFile.readAll().replace('\0', ' ').trimmed();
+#ifdef QT_DEBUG
+        qDebug() << "shell: " << shellInfo.symLinkTarget();
+        qDebug() << "cmdline: " << cmdline;
+#endif
+        // installation: "/bin/sh /var/tmp/rpm-tmp.PH0qZu 2"
+        if (cmdline.startsWith("/bin/sh /var/tmp/rpm")) {
+            qDebug() << "Looks like you use buggy busybox ash!";
+            exit(2);
+        }
+    } else
+
     qputenv("DBUS_SESSION_BUS_ADDRESS", "unix:path=/run/user/100000/dbus/user_bus_socket");
 
     QCoreApplication app (argc, argv);
