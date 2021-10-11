@@ -3,6 +3,9 @@ Description=Patchmanager service
 Requires=dbus.service
 After=dbus.service
 Before=systemd-user-sessions.service
+# prevent PM from starting when the OS is updating:
+Conflicts=packagekit-offline-update.service sailfish-upgrade-ui.service
+ConditionPathExists=!/tmp/os-update-running
 
 [Service]
 Type=dbus
