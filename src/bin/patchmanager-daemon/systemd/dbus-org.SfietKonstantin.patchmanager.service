@@ -3,7 +3,6 @@ Description=Patchmanager service
 Requires=dbus.service
 After=dbus.service
 Before=systemd-user-sessions.service
-Conflicts=os-update.target
 
 [Service]
 Type=dbus
