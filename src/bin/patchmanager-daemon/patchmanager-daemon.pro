@@ -57,7 +57,9 @@ INSTALLS += dbusConf
 systemd.files = \
     systemd/dbus-org.SfietKonstantin.patchmanager.service \
     systemd/checkForUpdates-org.SfietKonstantin.patchmanager.service \
-    systemd/checkForUpdates-org.SfietKonstantin.patchmanager.timer
+    systemd/checkForUpdates-org.SfietKonstantin.patchmanager.timer \
+    systemd/system-update-patchmanager-post.service \
+    systemd/system-update-patchmanager-pre.service
 systemd.path = /usr/lib/systemd/system/
 INSTALLS += systemd
 

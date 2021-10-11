@@ -141,6 +141,7 @@ Links:
 
 mkdir -p %{buildroot}%{_unitdir}/multi-user.target.wants/
 ln -s ../dbus-org.SfietKonstantin.patchmanager.service %{buildroot}%{_unitdir}/multi-user.target.wants/
+ln -s ../system-update-patchmanager-post.service %{buildroot}%{_unitdir}/multi-user.target.wants/
 
 mkdir -p %{buildroot}%{_unitdir}/timers.target.wants/
 ln -s ../checkForUpdates-org.SfietKonstantin.patchmanager.timer %{buildroot}%{_unitdir}/timers.target.wants/
@@ -150,6 +151,8 @@ ln -s ../lipstick-patchmanager.service %{buildroot}/%{_userunitdir}/lipstick.ser
 
 mkdir -p %{buildroot}%{_datadir}/%{name}/patches
 
+mkdir -p %{buildroot}%{_unitdir}/system-update.target.wants/
+ln -s ../system-update-patchmanager-pre.service %{buildroot}%{_unitdir}/system-update.target.wants/
 
 %pre
 export NO_PM_PRELOAD=1
@@ -269,10 +272,14 @@ exit 0
 %{_datadir}/dbus-1/*/org.SfietKonstantin.patchmanager.*
 %config %{_sysconfdir}/dbus-1/system.d/org.SfietKonstantin.patchmanager.conf
 %{_unitdir}/dbus-org.SfietKonstantin.patchmanager.service
+%{_unitdir}/system-update-patchmanager-pre.service
+%{_unitdir}/system-update-patchmanager-post.service
 %{_unitdir}/multi-user.target.wants/dbus-org.SfietKonstantin.patchmanager.service
+%{_unitdir}/multi-user.target.wants/system-update-patchmanager-post.service
 %{_unitdir}/checkForUpdates-org.SfietKonstantin.patchmanager.service
 %{_unitdir}/checkForUpdates-org.SfietKonstantin.patchmanager.timer
 %{_unitdir}/timers.target.wants/checkForUpdates-org.SfietKonstantin.patchmanager.timer
+%{_unitdir}/system-update.target.wants/system-update-patchmanager-pre.service
 %{_sharedstatedir}/environment/patchmanager/10-dbus.conf
 %{_userunitdir}/dbus-org.SfietKonstantin.patchmanager.service
 %{_userunitdir}/lipstick-patchmanager.service

@@ -1,0 +1,13 @@
+[Unit]
+Description=Move away parts of Patchmanager which might affect a system update
+Before=system-update.target
+
+[Service]
+Type=oneshot
+ExecStart=
+ExecStart=-cp /etc/ld.so.preload /etc/ld.so.preload_pm3.bak
+ExecStart=sed -i '/libpreloadpatchmanager/ d' /etc/ld.so.preload
+ExecStartPost=-/sbin/ldconfig
+
+[Install]
+Wants=system-update-pre.target
