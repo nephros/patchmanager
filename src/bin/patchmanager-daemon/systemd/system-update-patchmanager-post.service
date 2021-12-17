@@ -6,9 +6,9 @@ ConditionPathExists=/etc/ld.so.preload_pm3.bak
 [Service]
 Type=oneshot
 ExecStart=
-ExecStart=-sed -i '/libpreloadpatchmanager/ d' /etc/ld.so.preload
+ExecStart=-/usr/bin/sed -i '/libpreloadpatchmanager/ d' /etc/ld.so.preload
 ExecStart=/bin/sh -c "printf '/usr/lib%s/libpreloadpatchmanager.so\n' $([ $(/usr/bin/getconf LONG_BIT) = 64 ] && printf '64') >> /etc/ld.so.preload"
-ExecStart=rm -f /etc/ld.so.preload_pm3.bak
+ExecStart=/usr/bin/rm -f /etc/ld.so.preload_pm3.bak
 ExecStartPost=-/sbin/ldconfig
 
 [Install]

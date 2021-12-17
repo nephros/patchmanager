@@ -5,8 +5,8 @@ Before=system-update.target
 [Service]
 Type=oneshot
 ExecStart=
-ExecStart=-cp /etc/ld.so.preload /etc/ld.so.preload_pm3.bak
-ExecStart=sed -i '/libpreloadpatchmanager/ d' /etc/ld.so.preload
+ExecStart=-/usr/bin/cp /etc/ld.so.preload /etc/ld.so.preload_pm3.bak
+ExecStart=s/usr/bin/ed -i '/libpreloadpatchmanager/ d' /etc/ld.so.preload
 ExecStartPost=-/sbin/ldconfig
 
 [Install]
