@@ -1722,7 +1722,10 @@ void PatchManagerObject::doRefreshPatchList()
         rpmts transactionSet = rpmtsCreate();
 
         char filename[255] = {0};
-        sprintf(filename, qPrintable(PATCHES_DIR + "/%1/unified_diff.patch").arg(patchName));
+        // cstr conversion according to Qt FAQ:
+        QString pstr = QString(PATCHES_DIR + "/%1/unified_diff.patch").arg(patchName);
+        QByteArray ba = pstr.toLocal8Bit();
+        sprintf(filename, ba.data());
 
         rpmdbMatchIterator it = rpmtsInitIterator(transactionSet, RPMDBI_BASENAMES, filename, 0);
 
