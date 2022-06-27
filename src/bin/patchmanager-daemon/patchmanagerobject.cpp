@@ -1722,7 +1722,7 @@ void PatchManagerObject::doRefreshPatchList()
         rpmts transactionSet = rpmtsCreate();
 
         char filename[255] = {0};
-        sprintf(filename, qPrintable(PATCHES_DIR) + "/%s/unified_diff.patch", patchName.toLatin1().constData());
+        sprintf(filename, qPrintable(PATCHES_DIR + "/%1/unified_diff.patch").arg(patchName));
 
         rpmdbMatchIterator it = rpmtsInitIterator(transactionSet, RPMDBI_BASENAMES, filename, 0);
 
