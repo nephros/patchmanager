@@ -1,6 +1,10 @@
 /*
  * Copyright (C) 2013 Lucien XU <sfietkonstantin@free.fr>
  * Copyright (C) 2016 Andrey Kozhevnikov <coderusinbox@gmail.com>
+ * Copyright (c) 2022 Patchmanager for SailfishOS contributors:
+ *                  - olf "Olf0" <https://github.com/Olf0>
+ *                  - Peter G. "nephros" <sailfish@nephros.org>
+ *                  - Vlad G. "b100dian" <https://github.com/b100dian>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -64,7 +68,8 @@ class PatchManager: public QObject
 {
     Q_OBJECT
     Q_PROPERTY(QString serverMediaUrl READ serverMediaUrl CONSTANT)
-    Q_PROPERTY(bool developerMode READ developerMode WRITE setDeveloperMode NOTIFY developerModeChanged)
+    Q_PROPERTY(bool developerMode READ developerMode WRITE setRelaxCompatCheck NOTIFY developerModeChanged)
+    Q_PROPERTY(bool relaxCompatCheck READ relaxCompatCheck WRITE setRelaxCompatCheck NOTIFY relaxCompatCheckChanged)
     Q_PROPERTY(bool applyOnBoot READ applyOnBoot WRITE setApplyOnBoot NOTIFY applyOnBootChanged)
     Q_PROPERTY(bool notifyOnSuccess READ notifyOnSuccess WRITE setNotifyOnSuccess NOTIFY notifyOnSuccessChanged)
     Q_PROPERTY(bool bitnessMangle READ bitnessMangle WRITE setBitnessMangle NOTIFY bitnessMangleChanged)
@@ -85,6 +90,8 @@ public:
     QString serverMediaUrl() const;
     bool developerMode() const;
     void setDeveloperMode(bool developerMode);
+    bool relaxCompatCheck() const;
+    void setRelaxCompatCheck(bool relaxCompatCheck);
     bool applyOnBoot() const;
     bool notifyOnSuccess() const;
     void setApplyOnBoot(bool applyOnBoot);
@@ -165,6 +172,7 @@ public slots:
 signals:
     void easterReceived(const QString & easterText);
     void developerModeChanged(bool developerMode);
+    void relaxCompatCheckChanged(bool relaxCompatCheck);
     void applyOnBootChanged(bool applyOnBoot);
     void notifyOnSuccessChanged(bool notifyOnSuccess);
     void bitnessMangleChanged(bool bitnessMangle);

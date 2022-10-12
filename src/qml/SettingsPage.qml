@@ -97,8 +97,16 @@ Page {
             }
 
             TextSwitch {
+                text: qsTranslate("", "Relax compatability check")
+                description: qsTranslate("", "Enable activating Patches, which are marked as compatible with any major-minor version of SailfishOS (e.g. a patch compatible with 4.4.0.58 will be shown as compatible with any 4.4 version. Note that Patches, which are actually incompatible, will not work.")
+                checked: PatchManager.relaxCompatCheck
+                onClicked: PatchManager.relaxCompatCheck = !PatchManager.relaxCompatCheck
+                automaticCheck: false
+            }
+
+            TextSwitch {
                 text: qsTranslate("", "Allow incompatible Patches")
-                description: qsTranslate("", "Enable activating Patches, which are not marked as compatible with the installed SailfishOS version. Note that Patches, which are actually incompatible, will not work.")
+                description: qsTranslate("", "Enable activating Patches, which are not marked as compatible with the installed SailfishOS version. Note that Patches, which are actually incompatible, will not work. This option will also enable some patch developer-centric features.")
                 checked: PatchManager.developerMode
                 onClicked: PatchManager.developerMode = !PatchManager.developerMode
                 automaticCheck: false
