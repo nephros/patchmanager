@@ -398,6 +398,13 @@ Page {
                     property bool forceCompatible: PatchManager.sfosVersionCheck !== VersionCheck.Strict
                     property bool isInstallable: isCompatible || forceCompatible
                     property bool isReinstallable: isInstalled && isInstallable
+                    //property bool isCompatible: modelData.compatible.indexOf(PatchManager.osVersion) >= 0
+                    property bool isCompatible: {
+                        const osv = PatchManager.osVersion;
+                        const checkVersion = osv.substr(osv.length - 3, osv.length ) // allow any patch compatible with minor-minor, assumes X.Y.Z.mm
+                        const compatVersions = modelData.compatible.map(function(v) { return v.substr(v.length -3, v.length) }) // reduce list of versions to X.Y.Z "compatible"
+                        return compatVersions.indexOf(checkVersion) >= 0
+                    }
 
                     onClicked: {
                         if (isReinstallable) {
