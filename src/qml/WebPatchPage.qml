@@ -332,10 +332,12 @@ Page {
                     contentHeight: filesContent.height
                     property bool isInstalled: !!container.versions && container.versions[modelData.project] == modelData.version
                     //property bool isCompatible: modelData.compatible.indexOf(PatchManager.osVersion) >= 0
-                    property string osv = PatchManager.osVersion;
-                    property string checkVersion = osv.substr(osv.length - 3, osv.length ) // allow any patch compatible with minor-minor, assumes X.Y.Z.mm
-                    propert var compatVersions = modelData.compatible.map(function(v) { return v.substr(v.length -3, v.length) }) // reduce list of versions to X.Y.Z "compatible"
-                    property bool isCompatible: compatVersions.indexOf(checkVersion) >= 0
+                    property bool isCompatible: {
+                        const osv = PatchManager.osVersion;
+                        const checkVersion = osv.substr(osv.length - 3, osv.length ) // allow any patch compatible with minor-minor, assumes X.Y.Z.mm
+                        const compatVersions = modelData.compatible.map(function(v) { return v.substr(v.length -3, v.length) }) // reduce list of versions to X.Y.Z "compatible"
+                        return compatVersions.indexOf(checkVersion) >= 0
+                    }
                     property bool isReinstallable: isInstalled && isCompatible
 
                     onClicked: {
