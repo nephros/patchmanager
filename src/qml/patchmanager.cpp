@@ -202,7 +202,7 @@ void PatchManager::setDeveloperMode(bool developerMode)
 
 int PatchManager::sfosVersionCheck() const
 {
-    return getSettingsSync(QStringLiteral("sfosVersionCheck"), 0);
+    return getSettingsSync(QStringLiteral("sfosVersionCheck"), 0).toInt();
 }
 
 void PatchManager::setSfosVersionCheck(int sfosVersionCheck)
