@@ -67,7 +67,7 @@ public:
         Strict,
         Relaxed,    // TODO, Issue #322
         Careless,   // RESERVED for future use, see https://github.com/sailfishos-patches/patchmanager/issues/333#issuecomment-1374118045
-        Reckless,
+        None,
     };
     Q_ENUM(CheckMode)
 private:
