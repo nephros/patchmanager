@@ -251,9 +251,9 @@ bool PatchManagerObject::makePatch(const QDir &root, const QString &patchPath, Q
         json[ISCOMPATIBLE_KEY] = true;
     } else {
         //json[ISCOMPATIBLE_KEY] = json[COMPATIBLE_KEY].toStringList().contains(m_osRelease);
-        int pos = m_osRelease.lastIndexOf(QChar('.'));
-        QString checkRelease = m_osRelease.left(pos);
-        QStringList filteredList = json[COMPATIBLE_KEY].toStringList().replaceInStrings(QRegExp("\.\d+$"), "");
+        QRegExp trim_rx = QRegExp("\.\d+$")
+        QString checkRelease = m_osRelease.remove(trim_rx)
+        QStringList filteredList = json[COMPATIBLE_KEY].toStringList().replaceInStrings(trim_rx, "");
         filteredList.removeDuplicates();
         json[ISCOMPATIBLE_KEY] = filteredList.contains(checkRelease);
     }
