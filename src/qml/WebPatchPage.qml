@@ -334,7 +334,7 @@ Page {
                     //property bool isCompatible: modelData.compatible.indexOf(PatchManager.osVersion) >= 0
                     property bool isCompatible: {
                         const osv = PatchManager.osVersion;
-                        const checkVersion = osv.substr(osv.length - 3, osv.length ) // allow any patch compatible with minor-minor, assumes X.Y.Z.mm
+                        const checkVersion = osv.substr(osv.length - 3, osv.length ) // allow any patch with compatible major.minor.micro release, but regardless of the pint release version. Assumes vX.Y.Z.P, with P comprising two diguts, which IS PLAINLY WRONG (see 3.0.0.9)! The dots are intended as separators, hence shall be used as such.
                         const compatVersions = modelData.compatible.map(function(v) { return v.substr(v.length -3, v.length) }) // reduce list of versions to X.Y.Z "compatible"
                         return compatVersions.indexOf(checkVersion) >= 0
                     }
