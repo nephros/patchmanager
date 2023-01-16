@@ -187,7 +187,6 @@ private slots:
 private:
     void restartService(const QString &serviceName);
 
-    void resetSystem();
     void clearFakeroot();
 
     void registerDBus();

@@ -828,90 +828,6 @@ void PatchManagerObject::restartService(const QString &serviceName)
     }
 }
 
-void PatchManagerObject::resetSystem()
-{
-    qDebug() << Q_FUNC_INFO;
-
-    unapplyAllPatches();
-
-    QStringList patchedFiles;
-    QDir patchesDir(PATCHES_DIR);
-    for (const QString &patchFolder : patchesDir.entryList(QDir::Dirs | QDir::NoDotAndDotDot)) {
-        qDebug() << Q_FUNC_INFO << "Processing Patch" << patchFolder;
-        QFile patchFile(QStringLiteral("%1/%2/unified_diff.patch").arg(PATCHES_DIR, patchFolder));
-        if (!patchFile.exists() || !patchFile.open(QFile::ReadOnly)) {
-            continue;
-        }
-        while (!patchFile.atEnd()) {
-            QByteArray line = patchFile.readLine();
-            if (!line.startsWith(QByteArrayLiteral("+++ "))) {
-                continue;
-            }
-            QString toPatch = QString::fromLatin1(line.split(' ')[1].split('\t')[0].split('\n')[0]);
-            QString path = toPatch;
-            while (!QFileInfo::exists(path) && path.count('/') > 1) {
-                path = path.mid(path.indexOf('/', 1));
-            }
-            if (!QFileInfo::exists(path)) {
-                if (toPatch.startsWith(QChar('/'))) {
-                    path = toPatch;
-                } else {
-                    path = toPatch.mid(toPatch.indexOf('/', 1));
-                }
-            }
-            if (!patchedFiles.contains(path)) {
-                qDebug() << Q_FUNC_INFO << "Found patched file" << path;
-                patchedFiles.append(path);
-            }
-        }
-    }
-
-    QStringList packages;
-    for (const QString &file : patchedFiles) {
-        qDebug() << Q_FUNC_INFO << "Processing patched file" << file;
-
-        QProcess rpmProc;
-        rpmProc.start(BIN_RPM, { QStringLiteral("-qf"), QStringLiteral("--qf"), QStringLiteral("%{NAME}"), file });
-        if (!rpmProc.waitForFinished(5000) || rpmProc.exitCode() != 0) {
-            continue;
-        }
-        const QString package = QString::fromLatin1(rpmProc.readAllStandardOutput());
-        if (package.isEmpty()) {
-            continue;
-        } else if (!packages.contains(package)) {
-            qDebug() << Q_FUNC_INFO << "Found RPM package to reinstall:" << package;
-            packages.append(package);
-        }
-    }
-
-    if (packages.isEmpty()) {
-        qDebug() << Q_FUNC_INFO << "Empty RPM package, hence nothing to reinstall.";
-        QCoreApplication::exit(0);
-        return;
-    }
-
-    qDebug() << Q_FUNC_INFO << "Refreshing repositories.";
-    QProcess refreshProc;
-    refreshProc.start(BIN_PKCON, { QStringLiteral("refresh") });
-    refreshProc.waitForFinished(-1);
-
-    for (const QString &package : packages) {
-        qDebug() << Q_FUNC_INFO << "Reinstalling RPM package" << package;
-
-        QProcess pkconProc;
-        pkconProc.start(BIN_PKCON, { QStringLiteral("install"), QStringLiteral("-y"), package });
-        pkconProc.waitForFinished(-1);
-
-        if (pkconProc.exitCode() == 0) {
-            qDebug() << Q_FUNC_INFO << "Successfully reinstalled RPM package.";
-        } else {
-            qDebug() << Q_FUNC_INFO << "Failed to reinstall RPM package!";
-        }
-    }
-
-    QCoreApplication::exit(0);
-}
-
 void PatchManagerObject::clearFakeroot()
 {
     qDebug() << Q_FUNC_INFO;
@@ -940,10 +856,6 @@ void PatchManagerObject::process()
 
     if (args.count() == 2 && args[1] == QStringLiteral("--daemon")) {
         initialize();
-    } else if (args[1] == QStringLiteral("--reset-system")) {
-         resetSystem();
-         QCoreApplication::exit(2);
-         return;
     } else if (args.count() > 1) {
         QDBusConnection connection = QDBusConnection::systemBus();
         qDebug() << Q_FUNC_INFO << "Has arguments, sending D-Bus message and quit.";
