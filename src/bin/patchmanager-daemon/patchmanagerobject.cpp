@@ -70,6 +70,8 @@
 #include <nemonotifications-qt5/notification.h>
 #include "inotifywatcher.h"
 
+#include <iostream>
+
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -890,6 +892,7 @@ void PatchManagerObject::resetSystem()
         return;
     }
 
+/*
     qDebug() << Q_FUNC_INFO << "Refreshing repositories.";
     QProcess refreshProc;
     refreshProc.start(BIN_PKCON, { QStringLiteral("refresh") });
@@ -907,6 +910,12 @@ void PatchManagerObject::resetSystem()
         } else {
             qDebug() << Q_FUNC_INFO << "Failed to reinstall RPM package!";
         }
+*/
+    std::cout << "## The automatic system reset function has been removed from Patchmanager." << std::endl;
+    std::cout << "## In order to re-install all packages affected by any of the installed patches, do the following:" << std::endl;
+    std::cout << BIN_PKCON.toUtf8().constData() << " refresh" << std::endl;
+    for (const QString &package : packages) {
+        std::cout << BIN_PKCON.toUtf8().constData() << " install -y --allow-reinstall " << package.toUtf8().constData() << std::endl;
     }
 
     QCoreApplication::exit(0);
