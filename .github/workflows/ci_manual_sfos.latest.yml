@@ -1,9 +1,6 @@
 name: Manual CI on SFOS-latest
 
-on:
-  push:
-    tags:
-      - '*'
+on: workflow_dispatch
 
 env:
   RELEASE: latest
