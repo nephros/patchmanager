@@ -20,6 +20,10 @@ int main(int argc, char *argv[])
         qInfo() << "Patchmanager UI: Setting applyOnBoot is active, exiting!";
         return 0;
     }
+    if (pm.value(QStringLiteral("settings/applied"), QStringList()).toStringList().isEmpty()) {
+        qInfo() << Q_FUNC_INFO << "Patchmanager UI: no patches configured to be activated, exiting!";
+        return 0;
+    }
 
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
 
