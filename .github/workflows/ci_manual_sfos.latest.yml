@@ -1,4 +1,4 @@
-name: CI on SFOS-latest (aarch64,armv7hl,i486)
+name: Manual CI on SFOS-latest
 
 on:
   push:
