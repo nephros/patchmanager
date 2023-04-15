@@ -811,6 +811,31 @@ void PatchManagerObject::doRestartKeyboard()
     restartService(QStringLiteral("maliit-server.service"));
 }
 
+void PatchManagerObject::restartBooster(const QString &booster, const QString &app)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QMetaObject::invokeMethod(this, NAME(doRestartBooster), Qt::QueuedConnection,
+                    Q_ARG(QString, booster),
+                    Q_ARG(QString, app)
+                    );
+}
+
+void PatchManagerObject::doRestartBooster(const QString &booster, const QString &app)
+{
+    qDebug() << Q_FUNC_INFO;
+
+    QString service;
+    if (!app.isEmpty()) {
+        service = booster + "@" + app + QStringLiteral(".service");
+    } else {
+        service = booster + QStringLiteral(".service");
+        qDebug() << Q_FUNC_INFO << "called without app parameter, restarting service:" << service;
+    }
+
+    restartService(service);
+}
+
 void PatchManagerObject::restartService(const QString &serviceName)
 {
     qDebug() << Q_FUNC_INFO << serviceName;

@@ -182,6 +182,9 @@ private slots:
     void restartKeyboard();
     void doRestartKeyboard();
 
+    void restartBooster(const QString &booster, const QString &app = nullptr);
+    void doRestartBooster(const QString &booster, const QString &app);
+
     QStringList getMangleCandidates();
 
 private:
