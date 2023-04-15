@@ -1306,6 +1306,15 @@ void PatchManagerObject::restartServices()
             QStringList arguments;
             arguments << categoryToProcess[category];
             QProcess::execute(QStringLiteral("killall"), arguments);
+
+            if ((category == BROWSER_CODE) || (category == EMAIL_CODE)) {
+                    restartBooster(QStringLiteral("booster-browser"), categoryToProcess[category]);
+            }
+
+            if (category == CAMERA_CODE) {
+                    restartBooster(QStringLiteral("booster-silica-media"), categoryToProcess[category]);
+            }
+
         }
     }
 
