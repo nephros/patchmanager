@@ -39,6 +39,18 @@ static const char *blacklist_paths_startswith[] = {
     "/proc",
     "/run",
     "/tmp",
+    "/lost+found",
+    // firmware and vendor stuff
+    "/mnt/vendor",
+    "/apex",
+    "/data",
+    "/linkerconfig",
+    "/metadata",
+    "/odm",
+    "/oem",
+    "/system",
+    "/system_ext",
+    "/vendor",
 };
 
 static const char *blacklist_paths_equal[] = {
