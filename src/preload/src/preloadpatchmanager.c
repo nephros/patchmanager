@@ -51,10 +51,25 @@ static const char *blacklist_paths_startswith[] = {
     "/system",
     "/system_ext",
     "/vendor",
+    // security
+    "/etc/pki",            // certificates
+    "/usr/lib/security",   // PAM modules
+    "/usr/lib64/security", // PAM modules
 };
 
 static const char *blacklist_paths_equal[] = {
     "/",
+    // ourselves
+    "/usr/lib/libpreloadpatchmanager.so",
+    "/usr/lib64/libpreloadpatchmanager.so",
+    // security
+    "/etc/sudoers",
+    "/etc/passwd",
+    "/etc/passwd-",
+    "/etc/group",
+    "/etc/group-",
+    "/etc/shadow",
+    "/etc/shadow-",
 };
 
 static int debug_output() {
