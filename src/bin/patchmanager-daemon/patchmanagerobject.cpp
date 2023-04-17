@@ -747,6 +747,7 @@ void PatchManagerObject::initialize()
 
     m_serverThread = new QThread(this);
     connect(m_serverThread, &QThread::finished, this, [this](){
+        qInfo() << "Thread finished. Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
         m_localServer->close();
     });
     connect(m_localServer, &QLocalServer::newConnection, this, &PatchManagerObject::startReadingLocalServer, Qt::DirectConnection);
@@ -1523,11 +1524,13 @@ void PatchManagerObject::startReadingLocalServer()
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
             }
+            m_redir_req_patched += 1; // accounting
         } else {
             payload = request;
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
             }
+            m_redir_req_orig += 1; // accounting
         }
         clientConnection->write(payload);
         clientConnection->flush();
@@ -1803,6 +1806,8 @@ void PatchManagerObject::doRefreshPatchList()
     if (m_adaptor) {
         emit m_adaptor->listPatchesChanged();
     }
+
+    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
 }
 
 void PatchManagerObject::doListPatches(const QDBusMessage &message)
