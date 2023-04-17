@@ -399,6 +399,18 @@ QStringList PatchManagerObject::getMangleCandidates()
     return m_mangleCandidates;
 }
 
+void PatchManagerObject::printStats()
+{
+    qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
+    qInfo().noquote() << "Patchmanager Daemon runtime stats:"
+            << "\n  Daemon life-time: ..............." << uptime << "seconds"
+            << "\n  Currently active patches: ......." << m_appliedPatches.count()
+            << "\n  File accesses redirected: ......." << m_sockrq_patched
+            << "\n  File accesses passed as-is: ....." << m_sockrq_passed
+            << "\n  Known patched files: ............" << m_originalWatcher->files().count()
+            << "\n===========================";
+}
+
 /*!
     Reads operating system (\c{VERSION_ID}) version from \c /etc/os-release and sets \c m_osRelease to its value.
     Calls lateInitialize() afterwards.
@@ -516,10 +528,13 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
 PatchManagerObject::~PatchManagerObject()
 {
     if (m_dbusRegistered) {
+        qInfo() << Q_FUNC_INFO << "Unregistering D-Bus object and service.";
         QDBusConnection connection = QDBusConnection::systemBus();
         connection.unregisterService(DBUS_SERVICE_NAME);
         connection.unregisterObject(DBUS_PATH_NAME);
     }
+    printStats();
+    qInfo() << "PatchmanagerObject destroyed.";
 }
 
 void PatchManagerObject::registerDBus()
@@ -778,6 +793,8 @@ void PatchManagerObject::initialize()
 {
     qInfo() << "Patchmanager: Initialized version " << qApp->applicationVersion();
 
+    m_startuptime = QDateTime::currentDateTimeUtc();
+
     QTranslator *translator = new QTranslator(this);
     bool success = translator->load(QLocale(getLang()),
                                    QStringLiteral("settings-patchmanager"),
@@ -882,6 +899,7 @@ void PatchManagerObject::initialize()
 
     m_serverThread = new QThread(this);
     connect(m_serverThread, &QThread::finished, this, [this](){
+        qInfo() << "Thread finished."; printStats();
         m_localServer->close();
     });
     connect(m_localServer, &QLocalServer::newConnection, this, &PatchManagerObject::startReadingLocalServer, Qt::DirectConnection);
@@ -1825,6 +1843,7 @@ void PatchManagerObject::onTimerAction()
 {
     qDebug() << Q_FUNC_INFO;
     checkForUpdates();
+    printStats();
 }
 
 void PatchManagerObject::startReadingLocalServer()
@@ -1869,10 +1888,12 @@ void PatchManagerObject::startReadingLocalServer()
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
             }
+            m_sockrq_patched  += 1; // accounting
         } else { // failed state or file is unpatched
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
             }
+            m_sockrq_passed += 1; // accounting
         }
         clientConnection->write(payload);
         clientConnection->flush();
@@ -2143,9 +2164,12 @@ void PatchManagerObject::doRefreshPatchList()
 
     qDebug().noquote() << QJsonDocument::fromVariant(debug).toJson(QJsonDocument::Indented);
 
+    printStats();
+
     if (m_adaptor) {
         emit m_adaptor->listPatchesChanged();
     }
+
 }
 
 void PatchManagerObject::doListPatches(const QDBusMessage &message)
