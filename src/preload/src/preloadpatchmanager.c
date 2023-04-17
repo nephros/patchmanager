@@ -2,6 +2,7 @@
 
 //#define NO_INTERCEPT
 #define ALLOW_ALL_USERS
+#define ALLOW_ALL_PROCESSES
 
 #include <dlfcn.h>
 #include <stdarg.h>
@@ -230,6 +231,16 @@ static const char *blacklist_paths_equal[] = {
     "/etc/shadow-",
 };
 
+#ifndef ALLOW_ALL_PROCESSES
+static const char *blacklist_callers[] = {
+    "/sbin/init",
+    "/usr/lib/systemd/systemd",
+    "/usr/lib/systemd/systemd-udevd",
+    "/usr/bin/dbus-daemon",
+    "/usr/sbin/mce",
+};
+#endif //#ifndef ALLOW_ALL_PROCESSES
+
 static int debug_output() {
     static int debug_output_read = 0;
     static int debug_output_value = 0;
@@ -319,6 +330,38 @@ static int pm_validate_name(const char *name)
     return 1;
 }
 
+static int pm_validate_caller() {
+
+#ifndef ALLOW_ALL_PROCESSES
+    const int pid = getpid();
+
+    // https://stackoverflow.com/questions/15545341/process-name-from-its-pid-in-linux
+    char* name = (char*)calloc(1024,sizeof(char));
+    if(name){
+        sprintf(name, "/proc/%d/cmdline",pid);
+        FILE* f = fopen(name,"r");
+        if(f){
+            size_t size;
+            size = fread(name, sizeof(char), 1024, f);
+            if(size>0){
+                if('\n'==name[size-1])
+                    name[size-1]='\0';
+            }
+            fclose(f);
+        }
+    }
+
+    for (unsigned int i = 0; i < sizeof(blacklist_callers) / sizeof(*blacklist_callers); i++) {
+        const char *blacklisted = blacklist_callers[i];
+        if (strcmp(blacklisted, name) == 0) {
+            return 0;
+        }
+    }
+#endif //ifndef ALLOW_ALL_PROCESSES
+    return 1;
+}
+
+
 static int no_preload() {
     static int pm_preload_read = 0;
     static int no_pm_preload = 0;
@@ -355,6 +398,10 @@ int open64(const char *pathname, int flags, ...)
     const int d_pm_validate_flags = pm_validate_flags(flags);
     const int d_pm_validate_name = pm_validate_name(new_name);
 
+    //const int pid = getpid();
+    //const char *ps_name = get_process_name_by_pid(pid);
+    const int d_pm_validate_caller = pm_validate_caller();
+
     if (debug_output()) {
         char dir_name[PATH_MAX];
         strcpy(dir_name, new_name);
@@ -364,7 +411,7 @@ int open64(const char *pathname, int flags, ...)
                 getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
     }
 
-    if (!d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
+    if (!d_no_preload && d_pm_validate_uid && d_pm_validate_caller && d_pm_validate_flags && d_pm_validate_name) {
         pm_name(new_name);
         if (debug_output()) {
             fprintf(stderr, "[open64] new_name: %s\n", new_name);
@@ -399,6 +446,9 @@ int open(const char *pathname, int flags, ...)
     const int d_pm_validate_uid = pm_validate_uid(getuid());
     const int d_pm_validate_flags = pm_validate_flags(flags);
     const int d_pm_validate_name = pm_validate_name(new_name);
+    //const int pid = getpid();
+    //const char *ps_name = get_process_name_by_pid(pid);
+    const int d_pm_validate_caller = pm_validate_caller();
 
     if (debug_output()) {
         char dir_name[PATH_MAX];
@@ -409,7 +459,7 @@ int open(const char *pathname, int flags, ...)
                 getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
     }
 
-    if (!d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
+    if (!d_no_preload && d_pm_validate_uid && d_pm_validate_caller && d_pm_validate_flags && d_pm_validate_name) {
         pm_name(new_name);
         if (debug_output()) {
             fprintf(stderr, "[open] new_name: %s\n", new_name);
