@@ -42,6 +42,7 @@
 #include <QtCore/QVariantList>
 #include <QtCore/QVector>
 #include <QtCore/QDir>
+#include <QtCore/QDateTime>
 
 #include <QDBusConnection>
 #include <QDBusContext>
@@ -107,6 +108,8 @@ public slots:
     void votePatch(const QString &patch, int action);
 
     QString checkEaster();
+
+    QString statistics();
 
     QVariantList downloadCatalog(const QVariantMap &params);
     QVariantMap downloadPatchInfo(const QString &name);
@@ -200,6 +203,8 @@ private:
     void startLocalServer();
     void initialize();
 
+    QString gatherStats() const;
+
     QString getPatchName(const QString patch) const;
 
     QString getRpmName(const QString &rpm) const;
@@ -267,6 +272,10 @@ private:
 
     Journal *m_journal = nullptr;
     bool m_failed = false;
+
+    quint64 m_sockrq_patched = 0;
+    quint64 m_sockrq_passed  = 0;
+    QDateTime m_startuptime;
 
     QTimer *m_sessionBusConnector = nullptr;
     QDBusConnection m_sbus;

@@ -9,6 +9,10 @@
             <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
             <arg name="result" type="a{sv}" direction="out" />
         </method>
+        <method name="statistics">
+            <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QString"/>
+            <arg name="result" type="s" direction="out" />
+        </method>
         <method name="isPatchApplied">
             <arg name="patch" type="s" direction="in" />
             <arg name="applied" type="b" direction="out" />
