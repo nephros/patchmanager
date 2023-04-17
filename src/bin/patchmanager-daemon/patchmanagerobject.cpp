@@ -433,10 +433,13 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
 PatchManagerObject::~PatchManagerObject()
 {
     if (m_dbusRegistered) {
+        qInfo() << Q_FUNC_INFO << "Unregistering D-Bus object and service.";
         QDBusConnection connection = QDBusConnection::systemBus();
         connection.unregisterService(DBUS_SERVICE_NAME);
         connection.unregisterObject(DBUS_PATH_NAME);
     }
+    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
+    qInfo() << "PatchmanagerObject destroyed.";
 }
 
 void PatchManagerObject::registerDBus()
@@ -1807,7 +1810,6 @@ void PatchManagerObject::doRefreshPatchList()
         emit m_adaptor->listPatchesChanged();
     }
 
-    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
 }
 
 void PatchManagerObject::doListPatches(const QDBusMessage &message)
@@ -1816,6 +1818,8 @@ void PatchManagerObject::doListPatches(const QDBusMessage &message)
     QVariantList result;
     QStringList order = getSettings(QStringLiteral("order"), QStringList()).toStringList();
     qDebug() << Q_FUNC_INFO << "order:" << order;
+
+    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
 
     for (const QString &patchName : order) {
         if (m_metadata.contains(patchName)) {
