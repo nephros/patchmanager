@@ -438,7 +438,7 @@ PatchManagerObject::~PatchManagerObject()
         connection.unregisterService(DBUS_SERVICE_NAME);
         connection.unregisterObject(DBUS_PATH_NAME);
     }
-    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime.currentDateTimeUtc()) ;
+    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
     qInfo() << "PatchmanagerObject destroyed.";
 }
 
@@ -646,7 +646,7 @@ void PatchManagerObject::initialize()
 {
     qInfo() << Q_FUNC_INFO << "Patchmanager version" << qApp->applicationVersion();
 
-    m_startup = QDateTime.currentDateTimeUtc();
+    m_startuptime = QDateTime::currentDateTimeUtc();
 
     QTranslator *translator = new QTranslator(this);
     bool success = translator->load(QLocale(getLang()),
