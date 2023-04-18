@@ -43,6 +43,8 @@
 #include <QtCore/QVector>
 #include <QtCore/QDir>
 
+#include <QTime>
+
 #include <QDBusConnection>
 #include <QDBusContext>
 #include <QDBusMessage>
@@ -260,6 +262,7 @@ private:
 
     quint64 m_redir_req_patched = 0;
     quint64 m_redir_req_orig = 0;
+    QTime m_startuptime;
 
     QTimer *m_sessionBusConnector = nullptr;
     QDBusConnection m_sbus;

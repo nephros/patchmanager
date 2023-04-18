@@ -438,7 +438,7 @@ PatchManagerObject::~PatchManagerObject()
         connection.unregisterService(DBUS_SERVICE_NAME);
         connection.unregisterObject(DBUS_PATH_NAME);
     }
-    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
+    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime.currentDateTimeUtc()) ;
     qInfo() << "PatchmanagerObject destroyed.";
 }
 
@@ -646,6 +646,8 @@ void PatchManagerObject::initialize()
 {
     qInfo() << Q_FUNC_INFO << "Patchmanager version" << qApp->applicationVersion();
 
+    m_startup = QDateTime.currentDateTimeUtc();
+
     QTranslator *translator = new QTranslator(this);
     bool success = translator->load(QLocale(getLang()),
                                    QStringLiteral("settings-patchmanager"),
@@ -750,7 +752,7 @@ void PatchManagerObject::initialize()
 
     m_serverThread = new QThread(this);
     connect(m_serverThread, &QThread::finished, this, [this](){
-        qInfo() << "Thread finished. Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
+        qInfo() << "Thread finished. Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime.currentDateTimeUtc()) ;
         m_localServer->close();
     });
     connect(m_localServer, &QLocalServer::newConnection, this, &PatchManagerObject::startReadingLocalServer, Qt::DirectConnection);
@@ -1819,7 +1821,7 @@ void PatchManagerObject::doListPatches(const QDBusMessage &message)
     QStringList order = getSettings(QStringLiteral("order"), QStringList()).toStringList();
     qDebug() << Q_FUNC_INFO << "order:" << order;
 
-    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig.";
+    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime.currentDateTimeUtc()) ;
 
     for (const QString &patchName : order) {
         if (m_metadata.contains(patchName)) {
