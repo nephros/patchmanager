@@ -327,12 +327,12 @@ QStringList PatchManagerObject::getMangleCandidates()
 void PatchManagerObject::printStats()
 {
     qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
-    qInfo().noQuote() << "Runtime stats:"
-            << "\n  Daemon life-time:        " << uptime
-            << "\n  Calls redirected:        " << m_redir_req_patched
-            << "\n  Calls passed as-is:      " << m_redir_req_orig
-            << "\n  Known changed files:     " << m_patchedFiles.count()
-            << "\n  Curently active patches: " << m_appliedPatches.count()
+    qInfo().noquote() << "Patchmanager Daemon runtime stats:"
+            << "\n  Daemon life-time: ..............." << uptime << "seconds"
+            << "\n  Curently active patches: ........" << m_appliedPatches.count()
+            << "\n  File accesses redirected: ......." << m_sockrq_patched
+            << "\n  File accesses passed as-is: ....." << m_sockrq_passed
+            << "\n  Known changed files: ............" << m_originalWatcher->files().count()
             << "\n===========================";
 }
 void PatchManagerObject::getVersion()
@@ -1541,13 +1541,13 @@ void PatchManagerObject::startReadingLocalServer()
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
             }
-            m_redir_req_patched += 1; // accounting
+            m_sockrq_patched  += 1; // accounting
         } else {
             payload = request;
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
             }
-            m_redir_req_orig += 1; // accounting
+            m_sockrq_passed += 1; // accounting
         }
         clientConnection->write(payload);
         clientConnection->flush();
@@ -1820,6 +1820,8 @@ void PatchManagerObject::doRefreshPatchList()
 
     qDebug().noquote() << QJsonDocument::fromVariant(debug).toJson(QJsonDocument::Indented);
 
+    printStats();
+
     if (m_adaptor) {
         emit m_adaptor->listPatchesChanged();
     }
@@ -1832,8 +1834,6 @@ void PatchManagerObject::doListPatches(const QDBusMessage &message)
     QVariantList result;
     QStringList order = getSettings(QStringLiteral("order"), QStringList()).toStringList();
     qDebug() << Q_FUNC_INFO << "order:" << order;
-
-    printStats();
 
     for (const QString &patchName : order) {
         if (m_metadata.contains(patchName)) {

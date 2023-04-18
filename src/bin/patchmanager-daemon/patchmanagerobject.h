@@ -261,8 +261,8 @@ private:
     Journal *m_journal = nullptr;
     bool m_failed = false;
 
-    quint64 m_redir_req_patched = 0;
-    quint64 m_redir_req_orig = 0;
+    quint64 m_sockrq_patched = 0;
+    quint64 m_sockrq_passed  = 0;
     QDateTime m_startuptime;
 
     QTimer *m_sessionBusConnector = nullptr;
