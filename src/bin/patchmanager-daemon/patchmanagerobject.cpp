@@ -329,10 +329,10 @@ void PatchManagerObject::printStats()
     qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
     qInfo().noquote() << "Patchmanager Daemon runtime stats:"
             << "\n  Daemon life-time: ..............." << uptime << "seconds"
-            << "\n  Curently active patches: ........" << m_appliedPatches.count()
+            << "\n  Currently active patches: ......." << m_appliedPatches.count()
             << "\n  File accesses redirected: ......." << m_sockrq_patched
             << "\n  File accesses passed as-is: ....." << m_sockrq_passed
-            << "\n  Known changed files: ............" << m_originalWatcher->files().count()
+            << "\n  Known patched files: ............" << m_originalWatcher->files().count()
             << "\n===========================";
 }
 void PatchManagerObject::getVersion()
