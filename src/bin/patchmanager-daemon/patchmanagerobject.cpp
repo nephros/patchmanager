@@ -324,6 +324,17 @@ QStringList PatchManagerObject::getMangleCandidates()
     return m_mangleCandidates;
 }
 
+void PatchManagerObject::printStats()
+{
+    qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
+    qInfo().noQuote() << "Runtime stats:"
+            << "\n  Daemon life-time:        " << uptime
+            << "\n  Calls redirected:        " << m_redir_req_patched
+            << "\n  Calls passed as-is:      " << m_redir_req_orig
+            << "\n  Known changed files:     " << m_patchedFiles.count()
+            << "\n  Curently active patches: " << m_appliedPatches.count()
+            << "\n===========================";
+}
 void PatchManagerObject::getVersion()
 {
     qDebug() << Q_FUNC_INFO;
@@ -438,7 +449,7 @@ PatchManagerObject::~PatchManagerObject()
         connection.unregisterService(DBUS_SERVICE_NAME);
         connection.unregisterObject(DBUS_PATH_NAME);
     }
-    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
+    printStats();
     qInfo() << "PatchmanagerObject destroyed.";
 }
 
@@ -752,7 +763,7 @@ void PatchManagerObject::initialize()
 
     m_serverThread = new QThread(this);
     connect(m_serverThread, &QThread::finished, this, [this](){
-        qInfo() << "Thread finished. Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime.currentDateTimeUtc()) ;
+        qInfo() << "Thread finished."; printStats();
         m_localServer->close();
     });
     connect(m_localServer, &QLocalServer::newConnection, this, &PatchManagerObject::startReadingLocalServer, Qt::DirectConnection);
@@ -1496,6 +1507,7 @@ void PatchManagerObject::onTimerAction()
 {
     qDebug() << Q_FUNC_INFO;
     checkForUpdates();
+    printStats();
 }
 
 void PatchManagerObject::startReadingLocalServer()
@@ -1821,7 +1833,7 @@ void PatchManagerObject::doListPatches(const QDBusMessage &message)
     QStringList order = getSettings(QStringLiteral("order"), QStringList()).toStringList();
     qDebug() << Q_FUNC_INFO << "order:" << order;
 
-    qInfo() << "Redirect stats:" << m_redir_req_patched << "calls redirected," << m_redir_req_orig << "passed to orig since" << m_startuptime.secsTo(QDateTime.currentDateTimeUtc()) ;
+    printStats();
 
     for (const QString &patchName : order) {
         if (m_metadata.contains(patchName)) {

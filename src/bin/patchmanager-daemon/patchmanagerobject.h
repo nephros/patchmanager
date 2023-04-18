@@ -42,8 +42,7 @@
 #include <QtCore/QVariantList>
 #include <QtCore/QVector>
 #include <QtCore/QDir>
-
-#include <QDateTime>
+#include <QtCore/QDateTime>
 
 #include <QDBusConnection>
 #include <QDBusContext>
@@ -197,6 +196,8 @@ private:
 
     void startLocalServer();
     void initialize();
+
+    void printStats();
 
     QString getPatchName(const QString patch) const;
 
