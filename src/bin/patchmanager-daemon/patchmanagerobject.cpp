@@ -999,6 +999,8 @@ void PatchManagerObject::process()
             }
         } else if (args[1] == QStringLiteral("--unapply-all")) {
             method = QStringLiteral("unapplyAllPatches");
+        } else if (args[1] == QStringLiteral("--save-as-good")) {
+            method = QStringLiteral("setKnownGood");
         } else {
             return;
         }
