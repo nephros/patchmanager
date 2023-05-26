@@ -313,7 +313,6 @@ void PatchManagerObject::setAppliedPatches(const QSet<QString> &patches)
     putSettings(QStringLiteral("applied"), QStringList(patches.toList()));
 }
 
-
 QSet<QString> PatchManagerObject::getLastGoodPatches() const
 {
     return getSettings(QStringLiteral("lastknowngood"), QStringList()).toStringList().toSet();
@@ -1366,8 +1365,11 @@ bool PatchManagerObject::getLoaded() const
 
 void PatchManagerObject::revertToLastGood()
 {
-    m_appliedPatches = getLastGoodPatches();
-    setAppliedPatches(m_appliedPatches);
+    QSet<QString> patches = getLastGoodPatches();
+    if (!patches.empty()) {
+        m_appliedPatches = patches;
+        setAppliedPatches(patches);
+    }
 }
 
 void PatchManagerObject::resolveFailure()
