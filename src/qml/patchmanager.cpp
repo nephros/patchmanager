@@ -668,6 +668,13 @@ void PatchManager::revertToLastGood()
     m_interface->revertToLastGood();
 }
 
+void PatchManager::setKnownGood()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_interface->setKnownGood();
+}
+
 void PatchManager::resolveFailure()
 {
     qDebug() << Q_FUNC_INFO;
