@@ -1369,6 +1369,7 @@ void PatchManagerObject::revertToLastGood()
     if (!patches.empty()) {
         m_appliedPatches = patches;
         setAppliedPatches(patches);
+        refreshPatchList();
     }
 }
 
