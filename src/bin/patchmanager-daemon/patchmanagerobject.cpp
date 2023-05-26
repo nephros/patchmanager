@@ -324,7 +324,7 @@ void PatchManagerObject::setLastGoodPatches(const QSet<QString> &patches)
     putSettings(QStringLiteral("lastknowngood"), QStringList(patches.toList()));
 }
 
-void PatchManagerObject::setKnownGood() const
+void PatchManagerObject::setKnownGood()
 {
     setLastGoodPatches(getAppliedPatches());
 }
