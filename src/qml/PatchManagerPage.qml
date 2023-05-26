@@ -202,6 +202,12 @@ Page {
             }
 
             MenuItem {
+                text: qsTranslate("", "Load Pre-Failure List")
+                visible: PatchManager.failure
+                onClicked: menuRemorse.execute( text, function() { PatchManager.call(PatchManager.revertToLastGood()) } )
+            }
+
+            MenuItem {
                 text: qsTranslate("", "Resolve failure")
                 visible: PatchManager.failure
                 onClicked: PatchManager.resolveFailure()

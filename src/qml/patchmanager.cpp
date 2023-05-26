@@ -661,6 +661,13 @@ void PatchManager::onLoadedChanged(bool loaded)
     emit loadedChanged(m_loaded);
 }
 
+void PatchManager::revertToLastGood()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_interface->revertToLastGood();
+}
+
 void PatchManager::resolveFailure()
 {
     qDebug() << Q_FUNC_INFO;

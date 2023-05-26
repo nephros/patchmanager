@@ -1355,6 +1355,12 @@ bool PatchManagerObject::getLoaded() const
     return m_serverThread->isRunning();
 }
 
+void PatchManagerObject::revertToLastGood()
+{
+    m_appliedPatches = getLastGoodPatches();
+    setAppliedPatches(m_appliedPatches);
+}
+
 void PatchManagerObject::resolveFailure()
 {
     qDebug() << Q_FUNC_INFO;
