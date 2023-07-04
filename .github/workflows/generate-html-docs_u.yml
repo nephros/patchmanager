@@ -1,0 +1,45 @@
+name: Generate docs on Ubuntu
+
+on:
+  push:
+    branches: ["documentation"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+env:
+  RELEASE: latest
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+    env:
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: "documentation"
+
+#    - name: Prepare
+#      run: |
+#        mkdir output
+
+    - name: Build Docs
+      run: |
+        sudo apt-get -qq update
+        sudo apt-get -qq install -y qdoc-qt5
+        sudo apt-get -qq install -y qtbase5-dev
+        sudo apt-get -qq install -y git-core
+        git clone --depth 1 -b upgrade-4.5.0 https://github.com/sailfishos/sailfish-qdoc-template doc/qdoc/sailfish-qdoc-template
+        qtchooser -print-env
+        qdoc --version
+        /bin/bash -c ./makedocs
+        echo ==== LIST OF RESULTS ====
+        find doc/generated -type f
+    - name: Upload artifact
+      uses: actions/upload-pages-artifact@v1
+      with:
+        path: './doc/generated'
+

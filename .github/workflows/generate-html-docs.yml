@@ -1,0 +1,40 @@
+name: Generate docs on SFOS
+
+on:
+  push:
+    branches: ["documentation"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+
+env:
+  RELEASE: latest
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    env:
+      SEGMENT_DOWNLOAD_TIMEOUT_MINS: 3
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+      with:
+        ref: "documentation"
+
+    - name: Prepare
+      run: mkdir output
+
+    - name: Build
+      run: docker run --rm --privileged -v $PWD:/share coderus/sailfishos-platform-sdk:$RELEASE /bin/bash -c "
+            sb2 -m sdk-install -R zypper in git-core;
+            sb2 -m sdk-install -R zypper in qt5-qttools-qdoc;
+            sb2 -m sdk-install -R zypper in qt5-tools;
+            mkdir -p build ;
+            cd build ;
+            cp -r /share/* . ;
+            mkdir -p doc/generated;
+            sb2 ./makedocs;
+            sudo cp -r doc/generated share/output"
+
+
