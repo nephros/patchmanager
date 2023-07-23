@@ -343,7 +343,7 @@ void PatchManagerObject::notify(const QString &patch, NotifyAction action)
 
 /*!
     Returns the list of applied patches via getSettings().
-    \sa getSettings(), getSettings(), setAppliedPatches()
+    \sa putSettings(), setAppliedPatches()
 */
 QSet<QString> PatchManagerObject::getAppliedPatches() const
 {
@@ -352,18 +352,26 @@ QSet<QString> PatchManagerObject::getAppliedPatches() const
 
 /*!
     Saves the list of applied \a patches via \c putSettings().
-    \sa getSettings(), getSettings(), getAppliedPatches()
+    \sa getSettings(), getAppliedPatches()
 */
 void PatchManagerObject::setAppliedPatches(const QSet<QString> &patches)
 {
     putSettings(QStringLiteral("applied"), QStringList(patches.toList()));
 }
 
+/*!
+    Returns the list of successfully automatically applied \a patches via \c getSettings().
+    \sa putSettings(), setLastKnownGood()
+*/
 QSet<QString> PatchManagerObject::getLastGoodPatches() const
 {
     return getSettings(QStringLiteral("lastknowngood"), QStringList()).toStringList().toSet();
 }
 
+/*!
+    Saves the list of successfully automatically applied \a patches via \c putSettings().
+    \sa getSettings(), getSettings(), getLastKnownGood()
+*/
 void PatchManagerObject::setLastGoodPatches(const QSet<QString> &patches)
 {
     putSettings(QStringLiteral("lastknowngood"), QStringList(patches.toList()));
@@ -1594,6 +1602,7 @@ bool PatchManagerObject::getLoaded() const
     return m_serverThread->isRunning();
 }
 
+/*! Loads the list of "Last Known Good" patches if available, and applies them. */
 void PatchManagerObject::revertToLastGood()
 {
     QSet<QString> patches = getLastGoodPatches();
