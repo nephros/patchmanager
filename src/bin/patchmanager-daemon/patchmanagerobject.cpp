@@ -377,6 +377,10 @@ void PatchManagerObject::setLastGoodPatches(const QSet<QString> &patches)
     putSettings(QStringLiteral("lastknowngood"), QStringList(patches.toList()));
 }
 
+/*!
+    Saves the list of currently applied \a patches as "Last Known Good" via \c  getLastKnownGood().
+    \sa getSettings(), getSettings(), getLastKnownGood()
+*/
 void PatchManagerObject::setKnownGood()
 {
     setLastGoodPatches(getAppliedPatches());
