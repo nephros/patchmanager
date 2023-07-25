@@ -3,7 +3,7 @@
 <html lang="en">
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<!-- index.qdoc -->
+<!-- patchdev.qdoc -->
   <title>Patch Metadata | Patchmanager Documentation</title>
   <link rel="stylesheet" type="text/css" href="style/offline.css" />
 </head>
@@ -21,20 +21,141 @@
   </div>
 </div>
 <div class="content">
-  <link rel="prev" href="pmconfig.html" />
+  <link rel="prev" href="patchdev.html" />
 <p class="naviNextPrevious headerNavi">
-<a class="prevPage" href="pmconfig.html">Patchmanager Configuration Files</a>
+<a class="prevPage" href="patchdev.html">Patch Developer Documentation</a>
 </p><p/>
-<div class="sidebar"><div class="sidebar-content" id="sidebar-content"></div></div>
+<div class="sidebar">
+<div class="toc">
+<h3><a name="toc">Contents</a></h3>
+<ul>
+<li class="level2"><a href="#example-patch-json">Example patch.json</a></li>
+<li class="level2"><a href="#description-of-options">Description of options:</a></li>
+<li class="level2"><a href="#list-of-supported-categories">List of supported categories:</a></li>
+<li class="level2"><a href="#example-patch-json-in-legacy-format">Example patch.json in legacy format</a></li>
+<li class="level3"><a href="#description-of-options">Description of options:</a></li>
+<li class="level3"><a href="#list-of-supported-categories">List of supported categories:</a></li>
+</ul>
+</div>
+<div class="sidebar-content" id="sidebar-content"></div></div>
 <h1 class="title">Patch Metadata</h1>
 <span class="subtitle"></span>
 <!-- $$$patchmeta.html-description -->
 <div class="descr"> <a name="details"></a>
 <a name="metadata"></a><p>JSON file.</p>
+<p>The metadata file contains information about a Patch. It is a simple JSON file, that must be named <code>patch.json</code>.</p>
+<ul>
+<li>for the <a href="patchmeta.html#newjson">modern format</a></li>
+<li>for the much simpler <a href="patchmeta.html#legacyjson">legacy format</a></li>
+</ul>
+<p>Either format is supported, but the modern one provides more useful features and is recommended.</p>
+<a name="example-patch-json"></a>
+<h3 >Example patch.json</h3>
+<a name="newjson"></a><p>This describes the format of <code>patch.json</code>.</p>
+<p><b>Warning:</b> This is automatically generated and added to your Patch distribution if you choose to upload your Patch to the Web Catalog. Hence you should NOT include one with your Patch if you do that.</p>
+<p>If you distribute your Patch some other way, e.g&#x2e; as an RPM package, you must provide a valid <code>patch.json</code> file.</p>
+<pre class="cpp">
+ {
+     &quot;author&quot;: &quot;Jim Example&quot;,
+     &quot;name&quot;: &quot;the-internal-patch-name&quot;,
+     &quot;display_name&quot;: &quot;Human-facing Patch Name&quot;,
+     &quot;version&quot;: &quot;1.0&#x2e;0&quot;,
+     &quot;category&quot;: &quot;calendar&quot;,
+     &quot;description&quot;: &quot;This is a long description of what this Patch does.\nIt will be displayed in the Patch page.&quot;,
+     &quot;discussion&quot;: &quot;https://example.org/forum/thead?id=9999&quot;,
+     &quot;sources&quot;: &quot;https://git.example.org/patch.git&quot;,
+     &quot;donations&quot;: &quot;https://example.org/donate&quot;,
+     &quot;compatible&quot;: [ &quot;3.2&#x2e;1&#x2e;20&quot;, &quot;3.3&#x2e;0&#x2e;14&quot;, &quot;3.3&#x2e;0&#x2e;16&quot; ],
+     &quot;id&quot;: NNN,
+     &quot;last_updated&quot;: &quot;2020-04-28T06:56:21.931&quot;,
+ }
+</pre>
+<a name="description-of-options"></a>
+<h3 >Description of options:</h3>
+<p>Required / Recommended:</p>
+<ul>
+<li>name: An internal name for the Patch. As this is used as a directory name, it should only contain alphanumeric characters, underscores and hyphens. Notably NO spaces, dollar signs or other special characters should be used!</li>
+<li>display_name: The name of the Patch, which will be shown on the patch list.</li>
+<li>version: A version string. It MUST be in the format X.Y&#x2e;Z</li>
+<li>author: The name of the principal Patch author or maintainer. Either use your real name, as displayed on Github or Twitter, or your usual nickname.</li>
+<li>compatible: A list of SailfishOS releases the Patch works on. Versions MUST be given in full with all four fields populated, e.g&#x2e; &quot;3.3&#x2e;0&#x2e;16&quot; (using just &quot;3.3&quot; is invalid).</li>
+</ul>
+<p>Optional:</p>
+<ul>
+<li>description: Explanation of what the Patch does.</li>
+<li>category: This is used to structure the list of Patches in categories, but also certain categories will cause Patchmanager to restart affected system services or applications. For example, Patches in the category &quot;homescreen&quot; will prompt the user to restart Lipstick after their activation.</li>
+<li>discussion, sources, donations: Optional links to websites.</li>
+<li>last_updated&quot;: An ISO date string, the Web Catalog sets this. It is used for sorting and update detection.</li>
+</ul>
+<p>Reserved:</p>
+<ul>
+<li>id: A numeric ID used by Web Catalog. This MUST NOT be included in Patches which are not distributed via Web Catalog.</li>
+</ul>
+<a name="list-of-supported-categories"></a>
+<h3 >List of supported categories:</h3>
+<p><b>Warning:</b> Supplying no category, or a category not on this list will cause the Patch to be shown in the category &quot;other&quot;.</p>
+<ul>
+<li>&quot;homescreen&quot; - will restart Lipstick</li>
+<li>&quot;silica&quot; - will restart Lipstick</li>
+<li>&quot;keyboard&quot; - will restart the keyboard service</li>
+</ul>
+<p>These will stop or restart the corresponding system applications (e.g&#x2e; the jolla-browser) after activating the Patch.</p>
+<ul>
+<li>&quot;browser&quot;</li>
+<li>&quot;calendar&quot;</li>
+<li>&quot;camera&quot;</li>
+<li>&quot;clock&quot;</li>
+<li>&quot;contacts&quot;</li>
+<li>&quot;email&quot;</li>
+<li>&quot;gallery&quot;</li>
+<li>&quot;media&quot;</li>
+<li>&quot;messages&quot;</li>
+<li>&quot;phone&quot;</li>
+<li>&quot;settings&quot;</li>
+</ul>
+<a name="example-patch-json-in-legacy-format"></a>
+<h3 >Example patch.json in legacy format</h3>
+<a name="legacyjson"></a><p>This describes the format of the <code>patch.json</code> file in the <i>legacy</i> format. While this is still supported in Patchmanager 3, if possible switch to <a href="patchmeta.html#newjson">the new format</a> as it supports more useful information.</p>
+<pre class="cpp">
+ {
+     &quot;name&quot;: &quot;Example Patch Name&quot;,
+     &quot;description&quot;: &quot;This is a long description of what this Patch does.\nIt will be displayed on the Patch page.&quot;,
+     &quot;category&quot;: &quot;email&quot;,
+     &quot;infos&quot;: {
+         &quot;maintainer&quot;: &quot;username&quot;
+     },
+ }
+</pre>
+<a name="description-of-options"></a>
+<h4 >Description of options:</h4>
+<ul>
+<li>name: The &quot;display name&quot; of the patch, which will be shown on the Patch list.</li>
+<li>description: Explanation of what the Patch does.</li>
+<li>category: This is used to structure the list of Patches in categories, but also certain categories will cause Patchmanager to restart affected system services or applications. For example, Patches in the category &quot;homescreen&quot; will prompt the user to restart Lipstick after their activation.</li>
+<li>maintainer: The name of the principal Patch author or maintainer. Either use your real name, as displayed on Github or Twitter, or your usual nickname.</li>
+</ul>
+<a name="list-of-supported-categories"></a>
+<h4 >List of supported categories:</h4>
+<ul>
+<li>&quot;homescreen&quot; - will restart Lipstick</li>
+<li>&quot;silica&quot; - will restart Lipstick</li>
+<li>&quot;keyboard&quot; - will restart the keyboard service</li>
+<li>&quot;browser&quot;</li>
+<li>&quot;calendar&quot;</li>
+<li>&quot;camera&quot;</li>
+<li>&quot;clock&quot;</li>
+<li>&quot;contacts&quot;</li>
+<li>&quot;email&quot;</li>
+<li>&quot;gallery&quot;</li>
+<li>&quot;media&quot;</li>
+<li>&quot;messages&quot;</li>
+<li>&quot;phone&quot;</li>
+<li>&quot;settings&quot;</li>
+</ul>
 </div>
 <!-- @@@patchmeta.html -->
 <p class="naviNextPrevious footerNavi">
-<a class="prevPage" href="pmconfig.html">Patchmanager Configuration Files</a>
+<a class="prevPage" href="patchdev.html">Patch Developer Documentation</a>
 </p>
 <div align='center'><hr/> <p><small>Patchmanager Documentation
 Copyright (c) 2023 Patchmanager for SailfishOS contributors.
