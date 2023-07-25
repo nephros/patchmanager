@@ -50,13 +50,13 @@
         <page name="patchmeta.html" href="patchmeta.html" status="active" location="patchdev.qdoc" filepath="/home/nemo/devel/git/patchmanager/repo/src/patchdev.qdoc" lineno="86" subtype="page" title="Patch Metadata" fulltitle="Patch Metadata" subtitle="" module="patchmanager">
             <target name="metadata"/>
             <target name="newjson"/>
+            <target name="jsoncats"/>
             <target name="legacyjson"/>
             <contents name="example-patch-json" title="Example patch.json" level="2"/>
             <contents name="description-of-options" title="Description of options:" level="2"/>
             <contents name="list-of-supported-categories" title="List of supported categories:" level="2"/>
             <contents name="example-patch-json-in-legacy-format" title="Example patch.json in legacy format" level="2"/>
             <contents name="description-of-options" title="Description of options:" level="3"/>
-            <contents name="list-of-supported-categories" title="List of supported categories:" level="3"/>
         </page>
         <page name="user.html" href="user.html" status="active" location="user.qdoc" filepath="/home/nemo/devel/git/patchmanager/repo/src/user.qdoc" lineno="1" subtype="page" title="Patchmanager for SailfishOS" fulltitle="Patchmanager for SailfishOS" subtitle="" module="patchmanager">
             <contents name="launching" title="Launching" level="1"/>

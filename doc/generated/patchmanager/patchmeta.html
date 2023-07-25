@@ -34,7 +34,6 @@
 <li class="level2"><a href="#list-of-supported-categories">List of supported categories:</a></li>
 <li class="level2"><a href="#example-patch-json-in-legacy-format">Example patch.json in legacy format</a></li>
 <li class="level3"><a href="#description-of-options">Description of options:</a></li>
-<li class="level3"><a href="#list-of-supported-categories">List of supported categories:</a></li>
 </ul>
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
@@ -42,18 +41,14 @@
 <span class="subtitle"></span>
 <!-- $$$patchmeta.html-description -->
 <div class="descr"> <a name="details"></a>
-<a name="metadata"></a><p>JSON file.</p>
+<a name="metadata"></a><p>A JSON file.</p>
 <p>The metadata file contains information about a Patch. It is a simple JSON file, that must be named <code>patch.json</code>.</p>
-<ul>
-<li>for the <a href="patchmeta.html#newjson">modern format</a></li>
-<li>for the much simpler <a href="patchmeta.html#legacyjson">legacy format</a></li>
-</ul>
-<p>Either format is supported, but the modern one provides more useful features and is recommended.</p>
+<p><b>Warning:</b> This files is automatically generated and added to your Patch distribution if you choose to upload your Patch to the Web Catalog. You should NOT include one with your Patch if you do that.</p>
+<p>If you distribute your Patch some other way, e.g&#x2e; as an RPM package, you must provide a valid <code>patch.json</code> file.</p>
+<p>You may use either the <a href="patchmeta.html#newjson">modern format</a> or the much simpler <a href="patchmeta.html#legacyjson">legacy format</a>. Both are supported, but the modern one provides more useful features and is recommended.</p>
 <a name="example-patch-json"></a>
 <h3 >Example patch.json</h3>
-<a name="newjson"></a><p>This describes the format of <code>patch.json</code>.</p>
-<p><b>Warning:</b> This is automatically generated and added to your Patch distribution if you choose to upload your Patch to the Web Catalog. Hence you should NOT include one with your Patch if you do that.</p>
-<p>If you distribute your Patch some other way, e.g&#x2e; as an RPM package, you must provide a valid <code>patch.json</code> file.</p>
+<a name="newjson"></a><p>This describes the preferred format of <code>patch.json</code>.</p>
 <pre class="cpp">
  {
      &quot;author&quot;: &quot;Jim Example&quot;,
@@ -93,7 +88,7 @@
 </ul>
 <a name="list-of-supported-categories"></a>
 <h3 >List of supported categories:</h3>
-<p><b>Warning:</b> Supplying no category, or a category not on this list will cause the Patch to be shown in the category &quot;other&quot;.</p>
+<a name="jsoncats"></a><p><b>Warning:</b> Supplying no category, or a category not on this list will cause the Patch to be shown in the category &quot;other&quot;, and no affected applications will be restarted after the patch is activated.</p>
 <ul>
 <li>&quot;homescreen&quot; - will restart Lipstick</li>
 <li>&quot;silica&quot; - will restart Lipstick</li>
@@ -131,26 +126,8 @@
 <ul>
 <li>name: The &quot;display name&quot; of the patch, which will be shown on the Patch list.</li>
 <li>description: Explanation of what the Patch does.</li>
-<li>category: This is used to structure the list of Patches in categories, but also certain categories will cause Patchmanager to restart affected system services or applications. For example, Patches in the category &quot;homescreen&quot; will prompt the user to restart Lipstick after their activation.</li>
 <li>maintainer: The name of the principal Patch author or maintainer. Either use your real name, as displayed on Github or Twitter, or your usual nickname.</li>
-</ul>
-<a name="list-of-supported-categories"></a>
-<h4 >List of supported categories:</h4>
-<ul>
-<li>&quot;homescreen&quot; - will restart Lipstick</li>
-<li>&quot;silica&quot; - will restart Lipstick</li>
-<li>&quot;keyboard&quot; - will restart the keyboard service</li>
-<li>&quot;browser&quot;</li>
-<li>&quot;calendar&quot;</li>
-<li>&quot;camera&quot;</li>
-<li>&quot;clock&quot;</li>
-<li>&quot;contacts&quot;</li>
-<li>&quot;email&quot;</li>
-<li>&quot;gallery&quot;</li>
-<li>&quot;media&quot;</li>
-<li>&quot;messages&quot;</li>
-<li>&quot;phone&quot;</li>
-<li>&quot;settings&quot;</li>
+<li>category: see <a href="patchmeta.html#jsoncats">above</a></li>
 </ul>
 </div>
 <!-- @@@patchmeta.html -->
