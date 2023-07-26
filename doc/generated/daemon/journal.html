@@ -33,6 +33,9 @@
 </div>
 <div class="sidebar-content" id="sidebar-content"></div></div>
 <h1 class="title">Journal Class</h1>
+<!-- $$$Journal-brief -->
+<p>Interface to the systemd Journal. <a href="#details">More...</a></p>
+<!-- @@@Journal -->
 <div class="table"><table class="alignedsummary">
 <tr><td class="memItemLeft rightAlign topAlign"> Header:</td><td class="memItemRight bottomAlign">  <span class="preprocessor">#include &lt;Journal&gt;</span>
 </td></tr></table></div><ul>
@@ -58,6 +61,9 @@
 <!-- $$$Journal-description -->
 <div class="descr">
 <h2 id="details">Detailed Description</h2>
+<p>Interface to the systemd Journal.</p>
+<p>Listens on the systemd Journal for certain messages.</p>
+<p>This is done to be able to detect when Lipstick throws an error on start, and a file from a patch caused an error.</p>
 </div>
 <!-- @@@Journal -->
 <div class="func">
@@ -67,15 +73,15 @@
 <p>Default constructs an instance of Journal.</p><!-- @@@Journal -->
 <!-- $$$init[overload1]$$$init -->
 <h3 class="fn" id="init"><a name="init"></a><code>[slot] </code><span class="type">void</span> Journal::<span class="name">init</span>()</h3>
-<p>Attaches itself to the Journal, filetering for <i>Lipstick</i> and <i>jolla-settings</i> executables.</p>
+<p>Attaches itself to the Journal, filtering for <i>Lipstick</i> and <i>jolla-settings</i> executables.</p>
 <!-- @@@init -->
 <!-- $$$matchFound[overload1]$$$matchFound -->
 <h3 class="fn" id="matchFound"><a name="matchFound"></a><code>[signal] </code><span class="type">void</span> Journal::<span class="name">matchFound</span>()</h3>
-<p>Emitted when the fileters found a log entry that matched.</p>
+<p>Emitted when the filters found a log entry that matched.</p>
 <!-- @@@matchFound -->
 <!-- $$$process[overload1]$$$process -->
 <h3 class="fn" id="process"><a name="process"></a><code>[slot] </code><span class="type">void</span> Journal::<span class="name">process</span>()</h3>
-<p>Read the message from the Journal, look got certain strings, and emit the <a href="journal.html#matchFound">matchFound</a> signal if found.</p>
+<p>Read the messages, look for certain strings, and emit the <a href="journal.html#matchFound">matchFound</a> signal if found.</p>
 <p>Strings looked for are:</p>
 <ul>
 <li>&quot;Type X unavailable&quot;</li>

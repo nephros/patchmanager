@@ -34,7 +34,7 @@
                 <parameter left="const QStringList &amp;" right="" name="paths" default=""/>
             </function>
         </class>
-        <class threadsafety="unspecified" name="Journal" href="journal.html" status="active" access="public" location="journal.h" filepath="/home/nemo/devel/git/patchmanager/repo/src/bin/patchmanager-daemon/journal.h" lineno="40" module="PatchManagerDaemon">
+        <class threadsafety="unspecified" name="Journal" href="journal.html" status="active" access="public" location="journal.h" filepath="/home/nemo/devel/git/patchmanager/repo/src/bin/patchmanager-daemon/journal.h" lineno="40" module="PatchManagerDaemon" brief="Interface to the systemd Journal">
             <function threadsafety="unspecified" name="Journal" fullname="Journal::Journal" href="journal.html#Journal" status="active" access="public" location="journal.h" filepath="/home/nemo/devel/git/patchmanager/repo/src/bin/patchmanager-daemon/journal.h" lineno="44" virtual="non" meta="constructor" const="false" static="false" overload="false" delete="false" default="false" final="false" type="" signature="Journal(QObject *parent)">
                 <parameter left="QObject *" right="" name="parent" default="nullptr"/>
             </function>
