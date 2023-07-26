@@ -14,7 +14,7 @@
   <div class="breadcrumb">
     <ul>
       <!--  Breadcrumbs go here -->
-<li>https://github.com/sailfishos-patches/patchmanager/wiki</li>
+<li>https://sailfishos-patches.github.io/patchmanager</li>
 <li><a href="../patchmanager/index.html">Patchmanager Documentation</a></li>
 <li>PatchManagerObject</li>
     </ul>
@@ -234,7 +234,7 @@
 <!-- $$$process[overload1]$$$process -->
 <h3 class="fn" id="process"><a name="process"></a><code>[slot] </code><span class="type">void</span> PatchManagerObject::<span class="name">process</span>()</h3>
 <p>handle command line arguments, and maybe daemonize.</p>
-<p>If called with any other argument other than <code>--daemon</code>, call a method coreesponding to the command line option on the bus and exit.</p>
+<p>If called with any other argument other than <code>--daemon</code>, call a method coresponding to the command line option on the bus and exit.</p>
 <p>Currently supported command line options are:</p>
 <div class="table"><table class="generic">
  <thead><tr class="qt-style"><th >Argument</th><th >Options</th><th >Description</th></tr></thead>
@@ -242,7 +242,7 @@
 <tr valign="top" class="even"><td ><code>-u</code></td><td >a patch internal name</td><td >calls the &quot;unapply&quot; action for the patch</td></tr>
 <tr valign="top" class="odd"><td ><code>--unapply-all</code></td><td ><i>none</i></td><td >calls the &quot;unapply&quot; action for all patches</td></tr>
 </table></div>
-<!-- @@@process -->
+<p><b>Note: </b>this is called from <code>main()</code> via <a href="https://doc.qt.io/archives/qt-5.6/qtimer.html#singleShot-prop">QTimer::singleShot</a></p><!-- @@@process -->
 <!-- $$$putSettings[overload1]$$$putSettingsconstQString&constQDBusVariant& -->
 <h3 class="fn" id="putSettings"><a name="putSettings"></a><code>[slot] </code><span class="type">bool</span> PatchManagerObject::<span class="name">putSettings</span>(const <span class="type">QString</span> &amp;<i>name</i>, const <span class="type">QDBusVariant</span> &amp;<i>value</i>)</h3>
 <p>Store setting called <i>name</i> to the persistent config, <code>s_newConfigLocation</code>, and give it value <i>value</i></p>
