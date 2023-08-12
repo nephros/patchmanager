@@ -1166,9 +1166,9 @@ void PatchManagerObject::process()
         } else if (args[1] == QStringLiteral("--unapply-all")) {
             method = QStringLiteral("unapplyAllPatches");
         } else if (args[1] == QStringLiteral("--save-as-good")) {
-            method = QStringLiteral("setKnownGood");
+            method = QStringLiteral("backupWorkingPatchList");
         } else if (args[1] == QStringLiteral("--load-known-good")) {
-            method = QStringLiteral("revertToLastGood");
+            method = QStringLiteral("restorePatchList");
         } else {
             return;
         }
@@ -1628,9 +1628,9 @@ bool PatchManagerObject::getLoaded() const
 }
 
 /*! Loads the list of "Last Known Good" patches if available, and applies them. */
-void PatchManagerObject::revertToLastGood()
+void PatchManagerObject::restorePatchList()
 {
-    QSet<QString> patches = getLastGoodPatches();
+    QSet<QString> patches = getWorkingPatches();
     if (!patches.empty()) {
         m_appliedPatches = patches;
         setAppliedPatches(patches);
