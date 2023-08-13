@@ -378,7 +378,7 @@ void PatchManagerObject::setWorkingPatches(const QSet<QString> &patches)
 }
 
 /*!
-    Stores a list of currently applied \a Patches as "last-known-good" / working via \c setWorkingPatches().
+    Stores a list of currently applied \a patches as "last-known-good" / working via \c setWorkingPatches().
     \sa getSettings(), getWorkingPatches()
 */
 void PatchManagerObject::setWorking()
