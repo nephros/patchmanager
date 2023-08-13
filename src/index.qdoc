@@ -121,7 +121,7 @@
 
   \section2 Manual installation
 
-  Patch developers or users may want to quickly place a Patch under PM's supervision without the effort of packaging and installing the Patch properly.  This can be easily done, as long the aforementioned requirements are obeyed.
+  Patch developers or users may want to quickly place a Patch under PM's supervision without the effort of packaging and installing this Patch properly.  This can be easily done, as long the aforementioned requirements are obeyed.
 
   \e{to be continued...}
 
@@ -132,7 +132,7 @@
 
   \page pmwc.html
 
-  The Web Catalog is currently not maintained by the Patchmanager project proper and hence is only briefly documented here.
+  The Web Catalog is currently not maintained by the Patchmanager project proper and hence is only tersely documented here.
 
   \e{to be continued...}
 
