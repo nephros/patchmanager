@@ -230,7 +230,7 @@
 
   Additionally a shell script called \c patchmanager-tool exists, which builds upon the capabilities of \c patchmanager to provide more sophisticated and generic functions.
 
-  \note At the time of compliling this documentation, \c patchmanager-tool is not yet distributed as part of the regular packages.  It can be obtained from the source code repository, in the directory \c src/tools/.
+  \note At the time of compiling this documentation, \c patchmanager-tool is not yet distributed as part of the regular RPM packages.  It can be obtained from the directory \c src/tools/ in Patchmanager's source code repository.
 
   \section1 Logging and Debugging
 
@@ -286,7 +286,7 @@
     \li developerMode
     \li Boolean
     \li \c false
-    \li \warning \b deprecated.  Before Patchmanager 3.2.7, this was used to store the settings for "Developer Mode".  This has now been split into \c patchDevelMode and \c sfosVersionCheck
+    \li \warning \b deprecated.  Before Patchmanager 3.2.7, this was used to store the settings for the "Developer Mode".  This mode has been split into \c patchDevelMode and \c sfosVersionCheck
     \row
     \li notifyOnSuccess
     \li Boolean
@@ -306,7 +306,7 @@
     \li sfosVersionCheck
     \li Integer (Enum)
     \li 0 (strict)
-    \li Whether to relax the version checking in the Patchmanager GUI.  The default setting will only allow Patches to be downloaded or activated, of which an entry in compatibility field exactly matches the currently installed OS version.
+    \li Whether to relax the version checking in the Patchmanager GUI.  The default setting will only allow Patches to be downloaded or activated, of which an entry in their compatibility field exactly matches the currently installed OS version.
   \endtable
 
   \section3 \c [votes]
