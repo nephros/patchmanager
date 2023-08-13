@@ -226,7 +226,7 @@
 
   \section1 Manual Invocation
 
-  Apart from using the appropriate tools manipulating tools like \c systemctl, \c busctl, or \c dbus-send, the patchmanager binary can also serve as CLI, if called from command line.  See the output of \c{patchmanager --help} and PatchManagerObject::process() for more information.
+  Aside of using appropriate tools as \c systemctl, \c busctl, or \c dbus-send to invoke Patchmanager's functions, the patchmanager binary can also serve as CLI, if called from command line.  See the output of \c{patchmanager --help} and PatchManagerObject::process() for more information.
 
   Additionally a shell script called \c patchmanager-tool exists, which builds upon the capabilities of \c patchmanager to provide more sophisticated and generic functions.
 
