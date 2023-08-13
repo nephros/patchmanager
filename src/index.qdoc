@@ -69,14 +69,14 @@
   \list
   \li Intercepts calls to \l {https://www.man7.org/linux/man-pages/man2/open.2.html}{\c{open()} (or \c{open64()})},
   \li analyses which files the call was meant to open
-  \li asks the Patchmanager daemon (via socket) whether it knows of a patched version of any of these files.
+  \li asks the Patchmanager daemon (via socket) if it is aware of a patched version of any of these files.
   \endlist
 
   If so, the daemon will return a path to its cache directory, and the library redirects the call to that file instead of the original.  Otherwise, the \c{open()} call is executed on the original file.
 
-  Certain paths are blacklisted for these operations to reduce the risk of critical services, or Patchmanager binaries proper, choking on these redirections.
+  Certain paths are blacklisted for these operations to reduce the risk of critical services, or the Patchmanager binaries proper, stumbling over these redirections.
 
-  \note After activating a Patch, the daemon may also inform the GUI that some apps or services need restart.  The GUI client is expected to issue the command to restart these soon.  As long as the corresponding processes are not restarted, the applied Patch will not at all or only partially be in effect, depending on the "patch history" of the respective process.
+  \note After activating a Patch, the Patchmanager daemon may inform the Patchmanager GUI that some apps or services need to be restarted.  As long as the corresponding processes are not restarted, the applied Patch will be not at all or only partially in effect, depending on the "patch history" of the respective process.
 
   \section1 Patch Installation
   There are four ways a Patch can be deployed:
@@ -106,7 +106,7 @@
 
   \section2 Web Catalog
 
-  Installation via the Patchmanager Web Catalog is the most common and recommended way of deploying Patches.
+  Installation via Patchmanager's Web Catalog is the most common and recommended way of deploying Patches.
   This is carried out in the Patchmanager GUI by selecting \uicontrol install on the \l {WebPatchPage}{Patch Page}.
 
   PM will download metadata and a tar archive from the Web Catalog, extract the archive into the Patch storage location, and generate the necessary JSON file from the metadata.
