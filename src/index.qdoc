@@ -117,7 +117,7 @@
 
   \section2 TAR package
 
-  Patch developers may offer a Patch as a "naked" \c tar archive.  Although it should contain all necessary files, in contrast to tar archives uploaded to the Web Catalog, all checks to assure the layout and content of the files in the archive are correct must be carried out by the user.
+  Patch developers may offer a Patch as a "naked" \c tar archive.  Although it should contain all necessary files, all checks to assure that the layout and content of the files in the archive are correct must be carried out by the user, in contrast to tar archives uploaded to the Web Catalog.
 
   \section2 Manual installation
 
