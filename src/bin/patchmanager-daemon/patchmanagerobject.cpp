@@ -361,25 +361,25 @@ void PatchManagerObject::setAppliedPatches(const QSet<QString> &patches)
 
 /*!
     Returns the list of successfully automatically applied \a patches via \c getSettings().
-    \sa putSettings(), setLastKnownGood()
+    \sa putSettings(), setWorkingPatches()
 */
 QSet<QString> PatchManagerObject::getLastGoodPatches() const
 {
-    return getSettings(QStringLiteral("lastknowngood"), QStringList()).toStringList().toSet();
+    return getSettings(QStringLiteral("workingPatches"), QStringList()).toStringList().toSet();
 }
 
 /*!
-    Saves the list of successfully automatically applied \a patches via \c putSettings().
-    \sa getSettings(), getSettings(), getLastKnownGood()
+    Saves a list of successfully auto-applied \a Patches via \c putSettings().
+    \sa getSettings(), getSettings(), getWorkingPatches()
 */
 void PatchManagerObject::setLastGoodPatches(const QSet<QString> &patches)
 {
-    putSettings(QStringLiteral("lastknowngood"), QStringList(patches.toList()));
+    putSettings(QStringLiteral("workingPatches"), QStringList(patches.toList()));
 }
 
 /*!
-    Saves the list of currently applied \a patches as "Last Known Good" via \c  getLastKnownGood().
-    \sa getSettings(), getSettings(), getLastKnownGood()
+    Saves the list of currently applied \a patches as "Last Known Good" via \c getWorkingPatches().
+    \sa getSettings(), getSettings(), getWorkingPatches()
 */
 void PatchManagerObject::setKnownGood()
 {
