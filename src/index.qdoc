@@ -230,7 +230,7 @@
 
   Additionally a shell script called \c patchmanager-tool exists, which builds upon the capabilities of \c patchmanager to provide more sophisticated and generic functions.
 
-  \note At the time of compliling this documenattion, \c patchmanager-tool is not yet distributed withing the regular packages.  It can be obtained from the source code repository, in the directory \c src/tools/.
+  \note At the time of compliling this documentation, \c patchmanager-tool is not yet distributed as part of the regular packages.  It can be obtained from the source code repository, in the directory \c src/tools/.
 
   \section1 Logging and Debugging
 
@@ -271,7 +271,7 @@
     \li workingPatches
     \li list of strings, comma-separated
     \li empty
-    \li Stores a list of Patches, which represent a "last-known-good" / working set of enabled Patches.  This list is automatically copied from \c applied after each successful run of autoapply.
+    \li Stores a list of Patches, which represent a "last-known-good" / working set of enabled Patches.  This list is automatically copied from \c applied after each successful run of auto-apply.
     \row
     \li applyOnBoot
     \li Boolean
@@ -281,7 +281,7 @@
     \li bitnessMangle
     \li Boolean
     \li \c false
-    \li Convert Patch contents so they are applicable on the local architecture (e.g. \c lib vs. \c lib64 path segments).
+    \li Convert Patch contents so they are applicable to the local architecture (e.g., \c lib versus \c lib64 path elements).
     \row
     \li developerMode
     \li Boolean
