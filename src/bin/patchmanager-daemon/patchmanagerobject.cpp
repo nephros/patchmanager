@@ -342,7 +342,7 @@ void PatchManagerObject::notify(const QString &patch, NotifyAction action)
 }
 
 /*!
-    Returns the list of applied patches via getSettings().
+    Returns the list of applied \a Patches via \c getSettings().
     \sa putSettings(), setAppliedPatches()
 */
 QSet<QString> PatchManagerObject::getAppliedPatches() const
@@ -351,7 +351,7 @@ QSet<QString> PatchManagerObject::getAppliedPatches() const
 }
 
 /*!
-    Saves the list of applied \a patches via \c putSettings().
+    Stores a list of applied \a Patches via \c putSettings().
     \sa getSettings(), getAppliedPatches()
 */
 void PatchManagerObject::setAppliedPatches(const QSet<QString> &patches)
@@ -360,30 +360,30 @@ void PatchManagerObject::setAppliedPatches(const QSet<QString> &patches)
 }
 
 /*!
-    Returns the list of successfully automatically applied \a patches via \c getSettings().
+    Returns the list of successfully auto-applied \a Patches via \c getSettings().
     \sa putSettings(), setWorkingPatches()
 */
-QSet<QString> PatchManagerObject::getLastGoodPatches() const
+QSet<QString> PatchManagerObject::getWorkingPatches() const
 {
     return getSettings(QStringLiteral("workingPatches"), QStringList()).toStringList().toSet();
 }
 
 /*!
-    Saves a list of successfully auto-applied \a Patches via \c putSettings().
-    \sa getSettings(), getSettings(), getWorkingPatches()
+    Stores a list of successfully auto-applied \a Patches via \c putSettings().
+    \sa getSettings(), getWorkingPatches()
 */
-void PatchManagerObject::setLastGoodPatches(const QSet<QString> &patches)
+void PatchManagerObject::setWorkingPatches(const QSet<QString> &patches)
 {
     putSettings(QStringLiteral("workingPatches"), QStringList(patches.toList()));
 }
 
 /*!
-    Saves the list of currently applied \a patches as "Last Known Good" via \c getWorkingPatches().
-    \sa getSettings(), getSettings(), getWorkingPatches()
+    Stores a list of currently applied \a Patches as "last-known-good" / working via \c setWorkingPatches().
+    \sa getSettings(), getWorkingPatches()
 */
-void PatchManagerObject::setKnownGood()
+void PatchManagerObject::setWorking()
 {
-    setLastGoodPatches(getAppliedPatches());
+    setWorkingPatches(getAppliedPatches());
 }
 
 QStringList PatchManagerObject::getMangleCandidates()
@@ -581,13 +581,13 @@ void PatchManagerObject::doRegisterDBus()
     \li first, apply all enabled patches which are listend in the \l{order}{inifile} settings key.
     \li second, apply all enabled patches which remain (if any).
     \li if applying any patch fails, the local \c success variable will be set to \c false, but the applying will continue.
-    \li at the end of the process, if \c success is \c true, calls setLastGoodPatches()
+    \li at the end of the process, if \c success is \c true, calls setWorkingPatches()
     \li at the end of the process, if \c success is \c false, calls refreshPatchList()
     \endlist
 ()
     Emits signals \c autoApplyingStarted(), \c autoApplyingPatch(), \c autoApplyingFailed(), autoApplyingFinished(), depending on state.
 
-    \sa PatchManagerObject::doPrepareCache(), {Patchmanager Configuration Files}, inifile, refreshPatchList(), setLastGoodPatches()
+    \sa PatchManagerObject::doPrepareCache(), {Patchmanager Configuration Files}, inifile, refreshPatchList(), setWorkingPatches()
 */
 void PatchManagerObject::doPrepareCacheRoot()
 {
@@ -638,7 +638,7 @@ void PatchManagerObject::doPrepareCacheRoot()
     }
 
     if (success) {
-        setLastGoodPatches(m_appliedPatches);
+        setWorkingPatches(m_appliedPatches);
     }
 
     if (!success) {
