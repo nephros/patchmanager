@@ -52,7 +52,7 @@
 
   \section2 1. A Patch is "activated"
 
-  When a user activates a patch via the GUI, a signal is sent to the Patchmanager daemon.
+  When a user activates a Patch via the GUI, a signal is sent to the Patchmanager daemon.
 
   The daemon will then:
 
@@ -79,7 +79,7 @@
   \note After activating a Patch, the daemon may also inform the GUI that some apps or services need restart.  The GUI client is expected to issue the command to restart these soon.  As long as the corresponding processes are not restarted, the applied Patch will not at all or only partially be in effect, depending on the "patch history" of the respective process.
 
   \section1 Patch Installation
-  There are four ways a Patch can deployed:
+  There are four ways a Patch can be deployed:
 
   \list
   \li Web Catalog
