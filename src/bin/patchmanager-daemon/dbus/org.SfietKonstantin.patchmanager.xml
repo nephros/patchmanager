@@ -18,6 +18,9 @@
             <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
             <arg name="result" type="a{sv}" direction="out" />
         </method>
+        <method name="toggleFailed">
+            <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
+        </method>
         <method name="unapplyPatch">
             <arg name="patch" type="s" direction="in" />
             <annotation name="org.qtproject.QtDBus.QtTypeName.Out0" value="QVariantMap"/>
