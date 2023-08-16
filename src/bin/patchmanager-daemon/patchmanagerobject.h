@@ -102,6 +102,9 @@ public slots:
     bool uninstallPatch(const QString &patch);
     bool resetPatchState(const QString &patch);
 
+    // for testing/debugging only!
+    bool toggleFailed();
+
     int checkVote(const QString &patch);
     void votePatch(const QString &patch, int action);
 
@@ -127,6 +130,7 @@ public slots:
     bool getToggleServices() const;
     QStringList getToggleServicesList() const;
     bool getFailure() const;
+    void setFailure(bool failure);
     bool getLoaded() const;
     void resolveFailure();
     void restorePatchList();

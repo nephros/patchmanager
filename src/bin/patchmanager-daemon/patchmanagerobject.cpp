@@ -1164,6 +1164,8 @@ void PatchManagerObject::process()
             }
         } else if (args[1] == QStringLiteral("--unapply-all")) {
             method = QStringLiteral("unapplyAllPatches");
+        } else if (args[1] == QStringLiteral("--toggle-failure")) {
+            method = QStringLiteral("toggleFailed");
         } else if (args[1] == QStringLiteral("--backup-working")) {
             method = QStringLiteral("backupWorkingPatchList");
         } else if (args[1] == QStringLiteral("--restore-working")) {
@@ -1259,6 +1261,14 @@ QVariantMap PatchManagerObject::unapplyPatch(const QString &patch)
                               Q_ARG(bool, false));
     return QVariantMap();
 }
+
+bool PatchManagerObject::toggleFailed()
+{
+    qDebug() << Q_FUNC_INFO << "Toggling failure state.";
+    setFailure(!m_failed);
+    return true;
+}
+
 
 /*!
     Calls the corresponding method over D-Bus to deactivate (unapply) all active Patches.
@@ -1622,6 +1632,21 @@ bool PatchManagerObject::getToggleServices() const
 bool PatchManagerObject::getFailure() const
 {
     return m_failed;
+}
+
+
+/*!  Set the internal failure state.
+ \internal
+ For debugging/testing use only
+ */
+void PatchManagerObject::setFailure(bool failure)
+{
+    if (failure != m_failed) {
+        m_failed = failure;
+        if (m_adaptor) {
+            emit m_adaptor->failureChanged(m_failed);
+        }
+    }
 }
 
 /*!  Returns the internal state whether the server thread is running.  */
