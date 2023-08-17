@@ -103,7 +103,7 @@ public slots:
     bool resetPatchState(const QString &patch);
 
     // for testing/debugging only!
-    void toggleFailed();
+    bool toggleFailed();
 
     int checkVote(const QString &patch);
     void votePatch(const QString &patch, int action);

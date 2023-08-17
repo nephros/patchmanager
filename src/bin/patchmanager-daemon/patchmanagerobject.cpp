@@ -1262,11 +1262,11 @@ QVariantMap PatchManagerObject::unapplyPatch(const QString &patch)
     return QVariantMap();
 }
 
-void PatchManagerObject::toggleFailed()
+bool PatchManagerObject::toggleFailed()
 {
-    qDebug() << Q_FUNC_INFO;
-
+    qDebug() << Q_FUNC_INFO << "Toggling failure state.";
     setFailure(!m_failed);
+    return true;
 }
 
 

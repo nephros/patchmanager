@@ -19,7 +19,7 @@
             <arg name="result" type="a{sv}" direction="out" />
         </method>
         <method name="toggleFailed">
-            <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
+            <arg name="ok" type="b" direction="out" />
         </method>
         <method name="unapplyPatch">
             <arg name="patch" type="s" direction="in" />
