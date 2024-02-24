@@ -257,7 +257,8 @@ bool PatchManagerObject::makePatch(const QDir &root, const QString &patchPath, Q
             json[ISCOMPATIBLE_KEY] = true;
         } else if (checkMode == 2) { //relaxed
             QRegExp trim_rx = QRegExp("\\.\\d+$"); // note: need double backslashes because C++ compilers remove them from strings.
-            QString checkRelease = m_osRelease.remove(trim_rx);
+            QString checkRelease = m_osRelease;
+            checkRelease.remove(trim_rx);
             QStringList filteredList = json[COMPATIBLE_KEY].toStringList().replaceInStrings(trim_rx, "");
             filteredList.removeDuplicates();
             json[ISCOMPATIBLE_KEY] = filteredList.contains(checkRelease);
