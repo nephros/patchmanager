@@ -154,6 +154,12 @@ Page {
                     value: modelData.compatible.length > 0 ? modelData.compatible.join(', ') : qsTranslate("", "not available")
                     _valueItem.wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                 }
+                DetailItem {
+                    visible: PatchManager.sfosVersionCheck !== VersionCheck.Strict
+                    label: qsTranslate("", "Compatibility check")
+                    value: (PatchManager.sfosVersionCheck === VersionCheck.NoCheck) ? qsTranslate("", "off") : qsTranslate("", "relaxed")
+                    _valueItem.wrapMode: Text.WrapAtWordBoundaryOrAnywhere
+                }
             }
             Separator {
                     width: parent.width
