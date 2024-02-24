@@ -394,19 +394,25 @@ Page {
                     width: parent.width
                     contentHeight: filesContent.height
                     property bool isInstalled: !!container.versions && container.versions[modelData.project] == modelData.version
-                    property bool isCompatible: (modelData.compatible.indexOf(PatchManager.osVersion) >= 0)
-                    property bool forceCompatible: PatchManager.sfosVersionCheck !== VersionCheck.Strict
-                    property bool isInstallable: isCompatible || forceCompatible
+                    property bool isInstallable: isCompatible
                     property bool isReinstallable: isInstalled && isInstallable
-                    //property bool isCompatible: modelData.compatible.indexOf(PatchManager.osVersion) >= 0
                     property bool isCompatible: {
-                        const relaxedness = 3; // accept three points; FIXME: we should use VersionCheck here...
-                        const osv = PatchManager.osVersion.split(".");
-                        //const checkVersion = osv.substr(osv.length - 3, osv.length ) // Allow any patch with compatible major.minor.micro release version, regardless of the point release version. Assumes vX.Y.Z.P, with P comprising two digits, which is PLAINLY WRONG (see 3.0.0.9)! The dots are intended as separators, hence shall be used as such.
-                        //const compatVersions = modelData.compatible.map(function(v) { return v.substr(v.length -3, v.length) }) // reduce list of versions to X.Y.Z "compatible"
-                        const checkVersion = osv.slice(0,relaxedness).join();
-                        const compatVersions = modelData.compatible.map(function(v) { return v.split(".").slice(0,relaxedness).join() }) // reduce list of versions to X.Y.Z "compatible"
-                        return compatVersions.indexOf(checkVersion) >= 0; //one in the list should match...
+                        const compat = false
+                        if (PatchManager.sfosVersionCheck === VersionCheck.Strict) {
+                            compat = (modelData.compatible.indexOf(PatchManager.osVersion) >= 0)
+                        } else if (PatchManager.sfosVersionCheck === VersionCheck.Relaxed) {
+                            const relaxedness = 3; // accept three points;
+                            const osv = PatchManager.osVersion.split(".");
+                            const checkVersion = osv.slice(0,relaxedness).join();
+                            const compatVersions = modelData.compatible.map(function(v) { return v.split(".").slice(0,relaxedness).join() }) // reduce list of versions to X.Y.Z "compatible"
+                            compat = compatVersions.indexOf(checkVersion) >= 0; //one in the list should match...
+                        } else if (PatchManager.sfosVersionCheck === VersionCheck.NoCheck) {
+                            compat = true
+                        } else {
+                            // should not be reached!
+                            console.log("BUG: unhandled compat check")
+                        }
+                        return compat
                     }
 
                     onClicked: {
