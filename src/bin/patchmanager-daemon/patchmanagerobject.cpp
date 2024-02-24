@@ -261,6 +261,7 @@ bool PatchManagerObject::makePatch(const QDir &root, const QString &patchPath, Q
             checkRelease.remove(trim_rx);
             QStringList filteredList = json[COMPATIBLE_KEY].toStringList().replaceInStrings(trim_rx, "");
             filteredList.removeDuplicates();
+            qDebug() << Q_FUNC_INFO << "relaxed check:" << checkRelease << "vs." << filteredList;
             json[ISCOMPATIBLE_KEY] = filteredList.contains(checkRelease);
         } else {
             qWarning() << Q_FUNC_INFO << "unsupported compat check mode";
