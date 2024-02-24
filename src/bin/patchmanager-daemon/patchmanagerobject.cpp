@@ -514,11 +514,6 @@ void PatchManagerObject::registerDBus()
     QMetaObject::invokeMethod(this, NAME(doRegisterDBus), Qt::QueuedConnection);
 }
 
-void PatchManagerObject::waitForLipstick()
-{
-    qDebug() << Q_FUNC_INFO;
-}
-
 void PatchManagerObject::startLocalServer()
 {
     qDebug() << Q_FUNC_INFO;

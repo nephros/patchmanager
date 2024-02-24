@@ -191,7 +191,6 @@ private:
     void clearFakeroot();
 
     void registerDBus();
-    void waitForLipstick();
 
     void startLocalServer();
     void initialize();
