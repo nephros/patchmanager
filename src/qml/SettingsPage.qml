@@ -119,14 +119,18 @@ Page {
                     left: parent.left
                 }
                 label: qsTranslate("", "Version Check") + ":"
-                description: qsTranslate("", "Allow to enable Patches, which are not marked as compatible with the installed SailfishOS version. Note that Patches, which are actually incompatible, will not work.")
+                description: qsTranslate("", "Allow to enable Patches, which are not marked as compatible with the installed SailfishOS version.")
+                           + qsTranslate("", "Relaxed check will ignore the last part of the version, e.g. accept all 4.5.0.X versions.")
+                           + qsTranslate("", "Note that Patches, which are actually incompatible, will not work.")
                 currentIndex: PatchManager.sfosVersionCheck
-                onCurrentIndexChanged: PatchManager.sfosVersionCheck = currentIndex
+                onCurrentIndexChanged: PatchManager.sfosVersionCheck = (currentIndex >= 0) ? currentIndex : 0
                 menu: ContextMenu {
-                        // FIXME: Use the PatchManager::VersionCheck enum, however, how to map enum to text?
+                        // FIXME: Use the PatchManager::VersionCheck enum,
+                        // however, how to map enum to text?
+                        // for now, make sure the order here matches the enum!
                         MenuItem { text: qsTranslate("", "Strict") }
                         MenuItem { text: qsTranslate("", "No check") }
-                        //MenuItem { text: qsTranslate("", "Relaxed") } // TODO, see `src/qml/patchmanager.h`, line 68
+                        MenuItem { text: qsTranslate("", "Relaxed check") }
                 }
             }
 
