@@ -252,8 +252,10 @@ bool PatchManagerObject::makePatch(const QDir &root, const QString &patchPath, Q
     } else {
         int checkMode = getSettings(QStringLiteral("sfosVersionCheck"), 0).toInt();
         if (checkMode == 0) { //strict
+            qDebug() << Q_FUNC_INFO << "strict check";
             json[ISCOMPATIBLE_KEY] = json[COMPATIBLE_KEY].toStringList().contains(m_osRelease);
         } else if (checkMode == 1) { //no check
+            qDebug() << Q_FUNC_INFO << "no check";
             json[ISCOMPATIBLE_KEY] = true;
         } else if (checkMode == 2) { //relaxed
             QRegExp trim_rx = QRegExp("\\.\\d+$"); // note: need double backslashes because C++ compilers remove them from strings.
@@ -1411,6 +1413,10 @@ bool PatchManagerObject::putSettings(const QString &name, const QVariant &value)
         m_settings->setValue(key ,value);
         if (name == QStringLiteral("bitnessMangle")) {
             qDebug() << Q_FUNC_INFO << "Changing bitness mangle refreshes patch list";
+            refreshPatchList();
+        }
+        if (name == QStringLiteral("sfosVersionCheck")) {
+            qDebug() << Q_FUNC_INFO << "Changing check mode refreshes patch list";
             refreshPatchList();
         }
         return true;
