@@ -120,8 +120,8 @@ Page {
                 }
                 label: qsTranslate("", "Version Check") + ":"
                 description: qsTranslate("", "Allow to enable Patches, which are not marked as compatible with the installed SailfishOS version.")
-                           + qsTranslate("", "Relaxed check will ignore the last part of the version, e.g. accept all 4.5.0.X versions.")
-                           + qsTranslate("", "Note that Patches, which are actually incompatible, will not work.")
+                           + " "  + qsTranslate("", "Relaxed check will ignore the last part of the version, e.g. accept all 4.5.0.X versions.")
+                           + "\n" + qsTranslate("", "Note that Patches, which are actually incompatible, will not work.")
                 currentIndex: PatchManager.sfosVersionCheck
                 onCurrentIndexChanged: PatchManager.sfosVersionCheck = (currentIndex >= 0) ? currentIndex : 0
                 menu: ContextMenu {
