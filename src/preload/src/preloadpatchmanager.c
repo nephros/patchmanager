@@ -33,8 +33,17 @@ static orig_open_f_type orig_open64 = NULL;
 #define SERVER_PATH "/tmp/patchmanager-socket"
 #define ENV_NO_PRELOAD "NO_PM_PRELOAD"
 #define ENV_DEBUG "PM_PRELOAD_DEBUG"
+#define ENV_BLACKLIST_EXTENDED "PM_PRELOAD_BLACKLIST_EXTENDED"
 
 static const char *blacklist_paths_startswith[] = {
+    "/dev",
+    "/sys",
+    "/proc",
+    "/run",
+    "/tmp",
+};
+
+static const char *blacklist_paths_startswith_extended[] = {
     "/dev",
     "/sys",
     "/proc",
@@ -62,6 +71,10 @@ static const char *blacklist_paths_startswith[] = {
 };
 
 static const char *blacklist_paths_equal[] = {
+    "/",
+};
+
+static const char *blacklist_paths_equal_extended[] = {
     "/",
     // ourselves
     "/usr/lib/libpreloadpatchmanager.so",
@@ -308,23 +321,55 @@ static int pm_validate_flags(int flags)
     return (flags & (O_APPEND | O_WRONLY | O_RDWR | O_TRUNC | O_CREAT | O_NOCTTY | O_TMPFILE | O_SYNC | O_DSYNC | O_DIRECTORY | O_DIRECT)) == 0;
 }
 
+static int extend_blacklists() {
+    static int pm_xbl_read = 0;
+    static int pm_xbl = 0;
+
+    if (!pm_xbl_read) {
+        pm_xbl = getenv(ENV_BLACKLIST_EXTENDED) ? 1 : 0;
+        pm_xbl_read = 1;
+    }
+
+    return pm_xbl;
+}
+
 static int pm_validate_name(const char *name)
 {
     char dir_name[PATH_MAX];
     strcpy(dir_name, name);
     dirname(dir_name);
 
-    for (unsigned int i = 0; i < sizeof(blacklist_paths_equal) / sizeof(*blacklist_paths_equal); i++) {
-        const char *blacklisted = blacklist_paths_equal[i];
-        if (strcmp(blacklisted, dir_name) == 0) {
-            return 0;
+    const int d_extend_blacklists = extend_blacklists();
+
+    if (d_extend_blacklists) {
+        for (unsigned int i = 0; i < sizeof(blacklist_paths_equal_extended) / sizeof(*blacklist_paths_equal_extended); i++) {
+            const char *blacklisted = blacklist_paths_equal_extended[i];
+            if (strcmp(blacklisted, dir_name) == 0) {
+                return 0;
+            }
+        }
+    } else {
+        for (unsigned int i = 0; i < sizeof(blacklist_paths_equal) / sizeof(*blacklist_paths_equal); i++) {
+            const char *blacklisted = blacklist_paths_equal[i];
+            if (strcmp(blacklisted, dir_name) == 0) {
+                return 0;
+            }
         }
     }
 
-    for (unsigned int i = 0; i < sizeof(blacklist_paths_startswith) / sizeof(*blacklist_paths_startswith); i++) {
-        const char *blacklisted = blacklist_paths_startswith[i];
-        if (strncmp(blacklisted, name, strlen(blacklisted)) == 0) {
-            return 0;
+    if (d_extend_blacklists) {
+        for (unsigned int i = 0; i < sizeof(blacklist_paths_startswith_extended) / sizeof(*blacklist_paths_startswith_extended); i++) {
+            const char *blacklisted = blacklist_paths_startswith_extended[i];
+            if (strncmp(blacklisted, name, strlen(blacklisted)) == 0) {
+                return 0;
+            }
+        }
+    } else {
+        for (unsigned int i = 0; i < sizeof(blacklist_paths_startswith) / sizeof(*blacklist_paths_startswith); i++) {
+            const char *blacklisted = blacklist_paths_startswith[i];
+            if (strncmp(blacklisted, name, strlen(blacklisted)) == 0) {
+                return 0;
+            }
         }
     }
     return 1;
