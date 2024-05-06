@@ -39,19 +39,103 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.SfietKonstantin.patchmanager 2.0
 
+/*! \qmltype WebPatchPage
+
+    \ingroup qml-plugin-components
+    \inherits Page
+    \brief Shows details about a Patch from the Web Catalog
+
+    \sa {Patchmanager Web Catalog}{Web Catalog}, {https://github.com/sailfishos-patches/patchmanager/blob/master/README.md#the-json-metadata-file}{Patch JSON metadata file}
+*/
+
+
 Page {
     id: container
     objectName: "WebPatchPage"
+    /*!    \qmlproperty var modelData
+           This property holds the metadata from the model
+
+           \sa PatchManagerModel, PatchObject
+    */
     property var modelData
 
+    /*!    \qmlproperty var versions
+           This property holds a map of patch \c{[name, [versions]]}
+    */
     property var versions
 
+
+    /*! \qmlproperty int voteAction
+        State of the like/dislike voting action
+
+        \table
+        \header
+          \li Meaning
+          \li Value
+        \row
+          \li Like
+          \li 2
+        \row
+          \li Dislike
+          \li 1
+        \row
+          \li Not Voted
+          \li 0
+        \endtable
+
+        \sa PatchManager::checkVote
+    */
     property int voteAction
 
+    /*! \qmlproperty bool isInstalled
+        \c true if a version of the patch is currently installed
+    */
     property bool isInstalled: !!container.versions && typeof(container.versions[modelData.name]) != "undefined"
 
+    /*! \qmlproperty var patchData
+        This property holds the metadata downloaded from the Web Catalog
+
+        \sa modelData
+    */
     property var patchData
+
+    /*! \qmlproperty bool fetching
+
+        Indicates whether data is currently being downloaded. The WebPatchPage will show a ViewPlaceholder if true.
+
+        Default \c true
+    */
     property bool fetching: true
+
+    onPatchDataChanged: linksmodel.populate()
+    ListModel {
+        id: linksmodel
+        // simply defining the ListItems does not work, errors with "cannot assign a script item"
+        // so we append them when we're ready
+        function populate() {
+            if (patchData.discussion) {
+                linksmodel.append({
+                    "link": patchData.discussion,
+                    "linktext": qsTranslate("", "Discussion"),
+                    "iconname": "icon-s-chat"
+                })
+            }
+            if (patchData.sources) {
+                linksmodel.append({
+                    "link": patchData.sources,
+                    "linktext": qsTranslate("", "Sources"),
+                    "iconname": "icon-s-developer"
+                })
+            }
+            if (patchData.donations) {
+                linksmodel.append({
+                    "link": patchData.donations,
+                    "linktext": qsTranslate("", "Donations"),
+                    "iconname": "icon-s-invitation"
+                })
+            }
+        }
+    }
 
     onStatusChanged: {
         if (status == PageStatus.Active) {
@@ -203,8 +287,12 @@ Page {
                 }
             }
 
+            SectionHeader {
+                text: qsTranslate("", "Description")
+            }
+
             Label {
-                color: Theme.highlightColor
+                color: Theme.secondaryHighlightColor
                 anchors {
                     left: parent.left
                     right: parent.right
@@ -216,69 +304,40 @@ Page {
 
             SectionHeader {
                 text: qsTranslate("", "Links")
-                visible: !!patchData && (!!patchData.discussion || !!patchData.donations || !!patchData.sources)
+                visible: (linksmodel.count > 0)
             }
 
-            BackgroundItem {
-                width: parent.width
-                height: Theme.itemSizeExtraSmall
-                visible: !!patchData && !!patchData.discussion
-
-                onClicked: {
-                    Qt.openUrlExternally(patchData.discussion)
-                }
-
-                Label {
-                    color: Theme.highlightColor
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                        margins: Theme.horizontalPageMargin
-                        verticalCenter: parent.verticalCenter
+            Column {
+                id: links
+                visible: linksmodel.count > 0
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.margins: Theme.horizontalPageMargin
+                spacing: Theme.paddingSmall
+                Repeater {
+                    model: linksmodel
+                    delegate: Component {
+                        ListItem {
+                            contentHeight: Theme.itemSizeExtraSmall
+                            width: parent.width
+                            Row {
+                                width: parent.width
+                                anchors.verticalCenter: parent.verticalCenter
+                                spacing: Theme.paddingMedium
+                                Icon {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    source: "image://theme/" + iconname
+                                    sourceSize.width: Theme.iconSizeMedium
+                                    sourceSize.height: sourceSize.width
+                                }
+                                Label {
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    text: linktext
+                                }
+                            }
+                            onClicked: Qt.openUrlExternally(link)
+                        }
                     }
-                    text: !!patchData && patchData.discussion ? qsTranslate("", "Open discussion link") : ""
-                }
-            }
-
-            BackgroundItem {
-                width: parent.width
-                height: Theme.itemSizeExtraSmall
-                visible: !!patchData && !!patchData.donations
-
-                onClicked: {
-                    Qt.openUrlExternally(patchData.donations)
-                }
-
-                Label {
-                    color: Theme.highlightColor
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                        margins: Theme.horizontalPageMargin
-                        verticalCenter: parent.verticalCenter
-                    }
-                    text: !!patchData && patchData.donations ? qsTranslate("", "Donate") : ""
-                }
-            }
-
-            BackgroundItem {
-                width: parent.width
-                height: Theme.itemSizeExtraSmall
-                visible: !!patchData && patchData.sources
-
-                onClicked: {
-                    Qt.openUrlExternally(patchData.value.sources)
-                }
-
-                Label {
-                    color: Theme.highlightColor
-                    anchors {
-                        left: parent.left
-                        right: parent.right
-                        margins: Theme.horizontalPageMargin
-                        verticalCenter: parent.verticalCenter
-                    }
-                    text: !!patchData && patchData.sources ? qsTranslate("", "Sources") : ""
                 }
             }
 

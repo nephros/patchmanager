@@ -40,11 +40,34 @@ import Sailfish.Silica 1.0
 import Nemo.Notifications 1.0
 import org.SfietKonstantin.patchmanager 2.0
 
+/*! \qmltype UnifiedPatchPage
+
+    \ingroup qml-plugin-components
+    \inherits Page
+    \brief Shows details about an installed Patch.
+*/
 Page {
     id: container
+    /*!  \qmlproperty var modelData
+         The model date whose contents are to be displayed.
+    */
     property var modelData
+
+    /*! \qmlproperty var delegate
+        The delegate Component to use to display modelData
+     */
     property var delegate
+
+    /*! \qmlproperty bool legacyPatch
+        \c true if the Patch uses the legacy metadata format
+
+        Legacy Patches have less and different properties to display.
+     */
     property bool legacyPatch: !modelData.isNewPatch
+
+    /*! \qmlsignal doPatch
+        This signal is emitted when the user chooses to activate the Patch.
+     */
     signal doPatch
 
     Notification {
@@ -181,7 +204,6 @@ Page {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.margins: Theme.horizontalPageMargin
-                horizontalAlignment: Text.AlignJustify
                 wrapMode: Text.WordWrap
                 text: modelData.description
             }
@@ -243,8 +265,6 @@ Page {
                                 }
                                 Label {
                                     anchors.verticalCenter: parent.verticalCenter
-                                    color: Theme.secondaryHighlightColor
-                                    linkColor: Theme.highlightColor
                                     text: linktext
                                 }
                             }
