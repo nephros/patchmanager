@@ -125,8 +125,8 @@ Page {
 
     /*! \qmlmethod function showUpdates(manual)
 
-        Flashes the Pulley Menu if updates are available and \a manual is  \c false.
-        Does nothing if \a manual is \c true.
+        Signal handler. Flashes the Pulley Menu if updates are available.
+        If \a manual is \c false, disconnects from its signal.
 
      */
     function showUpdates(manual) {
@@ -142,9 +142,8 @@ Page {
 
     /*! \qmlproperty real PatchManagerPage::pullDownDistance
         \internal
-        Amount of space the pulley "pops down" when it's showing a hint, e.g the result of showUpdates().
-
-        \warning This is probably broken in recent SFOS versions (?).
+        Amount of space the pulley "pops down" when it's showing a hint, e.g
+        the result of showUpdates().
     */
     property real pullDownDistance: Theme.itemSizeLarge
 
