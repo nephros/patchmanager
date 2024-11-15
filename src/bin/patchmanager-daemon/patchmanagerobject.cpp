@@ -1928,6 +1928,7 @@ void PatchManagerObject::doRefreshPatchList()
                     }
                 }
 
+                qDebug() << Q_FUNC_INFO << "Path after mangle" << path;
                 while (!QFileInfo::exists(path) && path.count('/') > 1) {
                     path = path.mid(path.indexOf('/', 1));
                 }
@@ -1948,12 +1949,14 @@ void PatchManagerObject::doRefreshPatchList()
                     patchFiles.append(path);
                 }
                 m_patchFiles[patchFolder] = patchFiles;
+                qDebug() << Q_FUNC_INFO << "Path appended: " << path;
 
                 QStringList fileToPatch = m_fileToPatch[path];
                 if (!fileToPatch.contains(patchFolder)) {
                     fileToPatch.append(patchFolder);
                 }
                 m_fileToPatch[path] = fileToPatch;
+                qDebug() << Q_FUNC_INFO << "File-To-Patch: " << fileToPatch;
             }
         }
 
