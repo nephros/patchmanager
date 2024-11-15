@@ -33,6 +33,8 @@ static orig_open_f_type orig_open64 = NULL;
 #define ENV_NO_PRELOAD "NO_PM_PRELOAD"
 #define ENV_DEBUG "PM_PRELOAD_DEBUG"
 
+#define OSUPGRADE_MARKER_PATH "/tmp/os-update-running"
+
 static const char *blacklist_paths_startswith[] = {
     "/dev",
     "/sys",
@@ -146,6 +148,12 @@ static int no_preload() {
     return no_pm_preload;
 }
 
+static int os_updating() {
+    static int marker_exists = 0;
+    marker_exists = (access(OSUPGRADE_MARKER_PATH, F_OK) == 0) ? 1 : 0;
+    return marker_exists;
+}
+
 #endif // #ifndef NO_INTERCEPT
 
 int open64(const char *pathname, int flags, ...)
@@ -166,6 +174,7 @@ int open64(const char *pathname, int flags, ...)
     (void) !realpath(pathname, new_name);
 
     const int d_no_preload = no_preload();
+    const int d_os_updating = os_updating();
     const int d_pm_validate_uid = pm_validate_uid(getuid());
     const int d_pm_validate_flags = pm_validate_flags(flags);
     const int d_pm_validate_name = pm_validate_name(new_name);
@@ -179,7 +188,7 @@ int open64(const char *pathname, int flags, ...)
                 getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
     }
 
-    if (!d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
+    if (!d_os_updating && !d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
         pm_name(new_name);
         if (debug_output()) {
             fprintf(stderr, "[open64] new_name: %s\n", new_name);
