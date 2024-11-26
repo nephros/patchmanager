@@ -1880,10 +1880,8 @@ void PatchManagerObject::onFailureOccured()
     restartLipstick();
 }
 
-void PatchManagerObject::doRefreshPatchList()
+QString PatchManagerObject::pathToMangledPath(const QString &path)
 {
-    qDebug() << Q_FUNC_INFO;
-
     // Create mangling replacement tokens.
     QStringList toManglePaths{}, mangledPaths{};
     if(getSettings(QStringLiteral("bitnessMangle"), false).toBool()) {
@@ -1895,6 +1893,24 @@ void PatchManagerObject::doRefreshPatchList()
     }
     qDebug() << Q_FUNC_INFO << "toManglePaths" << toManglePaths;
     qDebug() << Q_FUNC_INFO << "mangledPaths" << mangledPaths;
+
+    QString newpath = path;
+
+    for (int i = 0; i < toManglePaths.size(); i++) {
+        // we need to deal with either absolute, or "git-style" beginnings, see #426:
+        QString checkpath = path.mid(path.indexOf('/', 0));
+        if (checkpath.startsWith(toManglePaths[i])) {
+            qDebug() << Q_FUNC_INFO << "Mangle: Editing path: " << path;
+            newpath.replace(toManglePaths[i], mangledPaths[i]);
+            qDebug() << Q_FUNC_INFO << "Mangle: Edited path: " << path;
+        }
+    }
+    return newpath;
+}
+
+void PatchManagerObject::doRefreshPatchList()
+{
+    qDebug() << Q_FUNC_INFO;
 
     // load applied patches
 
@@ -1920,15 +1936,7 @@ void PatchManagerObject::doRefreshPatchList()
                 const QString toPatch = QString::fromLatin1(line.split(' ')[1].split('\t')[0].split('\n')[0]);
                 QString path = toPatch;
 
-                for (int i = 0; i < toManglePaths.size(); i++) {
-                    // we need to deal with either absolute, or "git-style" beginnings, see #426:
-                    QString checkpath = path.mid(path.indexOf('/', 0));
-                    if (checkpath.startsWith(toManglePaths[i])) {
-                        qDebug() << Q_FUNC_INFO << "Mangle: Editing path: " << path;
-                        path.replace(toManglePaths[i], mangledPaths[i]);
-                        qDebug() << Q_FUNC_INFO << "Mangle: Edited path: " << path;
-                    }
-                }
+                path = pathToMangledPath(path);
 
                 qDebug() << Q_FUNC_INFO << "Path after mangle" << path;
                 while (!QFileInfo::exists(path) && path.count('/') > 1) {
