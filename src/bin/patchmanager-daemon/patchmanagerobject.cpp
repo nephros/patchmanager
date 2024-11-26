@@ -2103,6 +2103,7 @@ bool PatchManagerObject::doPatch(const QString &patchName, bool apply, QString *
     qDebug() << Q_FUNC_INFO << patchName << apply;
 
     if (apply) {
+        qDebug() << Q_FUNC_INFO << "Preparing cache for " << patchName;
         doPrepareCache(patchName, apply);
     }
 
@@ -2132,9 +2133,11 @@ bool PatchManagerObject::doPatch(const QString &patchName, bool apply, QString *
     }
 
     if ((!apply && ret) || (apply && !ret)) {
+        qDebug() << Q_FUNC_INFO << "Updating cache for " << patchName << " apply: " << apply << " ret: " << ret;
         doPrepareCache(patchName, false);
     }
 
+    qDebug() << Q_FUNC_INFO << " done: " << ret;
     return ret;
 }
 
