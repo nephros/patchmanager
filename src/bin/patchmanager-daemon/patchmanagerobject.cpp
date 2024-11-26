@@ -1951,10 +1951,8 @@ void PatchManagerObject::doRefreshPatchList()
                 // if the loop finishes with no path/file found, it's likely a new file.
                 // so just accept whatever's in the patch, but do remove things left of the slash:
                 if (!QFileInfo::exists(path)) {
-                    if (toPatch.startsWith(QChar('/'))) {
-                        path = pathToMangledPath(toPatch, m_mangleCandidates);
-                    } else {
-                        path = pathToMangledPath(toPatch, m_mangleCandidates);
+                    path = pathToMangledPath(toPatch, m_mangleCandidates);
+                    if (!toPatch.startsWith(QChar('/'))) {
                         path = path.mid(path.indexOf('/', 1));
                     }
                 }
