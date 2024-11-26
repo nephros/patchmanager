@@ -268,9 +268,13 @@
 
   \section1 Logging and Debugging
 
-  Debug logging of the daemon can be configured using the environment file
-  located in \c /var/lib/environment/patchmanager/10-dbus.conf setting the \c
-  QT_LOGGING_RULES variable to e.g. \c{"*.debug=true"}
+  Debug logging of the daemon can be configured using environment files
+  located in \c /var/lib/environment/patchmanager/. Setting the \c
+  QT_LOGGING_RULES variable to e.g. \c{"*.debug=true"} will enable debugging messages.
+
+  More fine-grained control is possible with e.g.
+  \c{"*.debug=false;patchmanager.daemon.debug=true"}
+  or \c{"*.debug=false;patchmanager.daemon.debug=false;patchmanager.daemon.warn=true"}
 
   After changing this, the system service must be restarted so it can pick up
   the new values.
