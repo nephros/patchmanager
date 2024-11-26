@@ -618,6 +618,8 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
 
     qDebug() << Q_FUNC_INFO << "Patch changes the following files:\n\t" << m_patchFiles.value(patchName).join("\n\t");
     for (const QString &fileName : m_patchFiles.value(patchName)) {
+        fileName = pathToMangledPath(fileName);
+
         qDebug() << Q_FUNC_INFO << "Processing file" << fileName;
         QFileInfo fi(fileName);
 
