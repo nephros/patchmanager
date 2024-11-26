@@ -257,7 +257,7 @@ Page {
 //        }
 //        section.property: "section"
 
-        property bool busy
+        property bool busy: menuRemorse.active
         signal unapplyAll
         signal unapplyAllFinished
         signal applyPatchFinished(string patchName)
