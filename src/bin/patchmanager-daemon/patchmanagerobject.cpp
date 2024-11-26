@@ -1907,6 +1907,7 @@ QString PatchManagerObject::pathToMangledPath(const QString &path)
             qDebug() << Q_FUNC_INFO << "Mangle: Edited path: " << path;
         }
     }
+    qDebug() << Q_FUNC_INFO << "Path after mangle" << newpath;
     return newpath;
 }
 
@@ -1936,21 +1937,29 @@ void PatchManagerObject::doRefreshPatchList()
             const QByteArray line = patchFile.readLine();
             if (line.startsWith(QByteArrayLiteral("+++ "))) {
                 const QString toPatch = QString::fromLatin1(line.split(' ')[1].split('\t')[0].split('\n')[0]);
-                QString path = toPatch;
 
-                path = pathToMangledPath(path);
+                QString path = pathToMangledPath(toPatch);
 
-                qDebug() << Q_FUNC_INFO << "Path after mangle" << path;
+                // remove anything left of the slash until we find something that exists.
+                // deals with 
+                //   +++ patched/usr/foo/bar/...
+                //   +++ a/usr/share/...
+                // FIXME: what if we find something that exists, but has nothing to do with our patch?
                 while (!QFileInfo::exists(path) && path.count('/') > 1) {
                     path = path.mid(path.indexOf('/', 1));
                 }
+                // if the loop finishes with no path/file found, it's likely a new file.
+                // so just accept whatever's in the patch, but do remove things left of the slash:
                 if (!QFileInfo::exists(path)) {
                     if (toPatch.startsWith(QChar('/'))) {
-                        path = toPatch;
+                        path = pathToMangledPath(toPatch);
                     } else {
-                        path = toPatch.mid(toPatch.indexOf('/', 1));
+                        path = pathToMangledPath(toPatch);
+                        path = path.mid(path.indexOf('/', 1));
                     }
                 }
+
+                // record a list of possible conflicting paths
                 if (!filesConflicts[path].contains(patchFolder)) {
                     qDebug() << Q_FUNC_INFO << "Possible conflict in: " << path;
                     filesConflicts[path].append(patchFolder);
