@@ -1881,14 +1881,14 @@ void PatchManagerObject::onFailureOccured()
     restartLipstick();
 }
 
-QString PatchManagerObject::pathToMangledPath(const QString &path)
+QString PatchManagerObject::pathToMangledPath(const QString &path, const QStringList &candidates) const
 {
     if(!getSettings(QStringLiteral("bitnessMangle"), false).toBool())
         return path;
     // Create mangling replacement tokens.
-    QStringList toManglePaths{}, mangledPaths{};
-    toManglePaths = getMangleCandidates();
-    mangledPaths = getMangleCandidates().replaceInStrings("/usr/lib/", "/usr/lib64/");
+    QStringList toManglePaths = candidates;
+    QStringList mangledPaths = candidates;
+    mangledPaths.replaceInStrings("/usr/lib/", "/usr/lib64/");
     if (Q_PROCESSOR_WORDSIZE == 4) { // 32 bit
         std::swap(toManglePaths, mangledPaths);
     }
@@ -1917,6 +1917,7 @@ void PatchManagerObject::doRefreshPatchList()
     // load applied patches
 
     m_appliedPatches = getAppliedPatches();
+    if (m_mangleCandidates.empty()) getMangleCandidates();
 
     // scan all patches
     // collect conflicts per file
@@ -1937,7 +1938,7 @@ void PatchManagerObject::doRefreshPatchList()
             if (line.startsWith(QByteArrayLiteral("+++ "))) {
                 const QString toPatch = QString::fromLatin1(line.split(' ')[1].split('\t')[0].split('\n')[0]);
 
-                QString path = pathToMangledPath(toPatch);
+                QString path = pathToMangledPath(toPatch, m_mangleCandidates);
 
                 // remove anything left of the slash until we find something that exists.
                 // deals with 
@@ -1951,9 +1952,9 @@ void PatchManagerObject::doRefreshPatchList()
                 // so just accept whatever's in the patch, but do remove things left of the slash:
                 if (!QFileInfo::exists(path)) {
                     if (toPatch.startsWith(QChar('/'))) {
-                        path = pathToMangledPath(toPatch);
+                        path = pathToMangledPath(toPatch, m_mangleCandidates);
                     } else {
-                        path = pathToMangledPath(toPatch);
+                        path = pathToMangledPath(toPatch, m_mangleCandidates);
                         path = path.mid(path.indexOf('/', 1));
                     }
                 }
