@@ -1884,14 +1884,14 @@ void PatchManagerObject::onFailureOccured()
 
 QString PatchManagerObject::pathToMangledPath(const QString &path)
 {
+    if(!getSettings(QStringLiteral("bitnessMangle"), false).toBool())
+        return path;
     // Create mangling replacement tokens.
     QStringList toManglePaths{}, mangledPaths{};
-    if(getSettings(QStringLiteral("bitnessMangle"), false).toBool()) {
-        toManglePaths = getMangleCandidates();
-        mangledPaths = getMangleCandidates().replaceInStrings("/usr/lib/", "/usr/lib64/");
-        if (Q_PROCESSOR_WORDSIZE == 4) { // 32 bit
-            std::swap(toManglePaths, mangledPaths);
-        }
+    toManglePaths = getMangleCandidates();
+    mangledPaths = getMangleCandidates().replaceInStrings("/usr/lib/", "/usr/lib64/");
+    if (Q_PROCESSOR_WORDSIZE == 4) { // 32 bit
+        std::swap(toManglePaths, mangledPaths);
     }
     qDebug() << Q_FUNC_INFO << "toManglePaths" << toManglePaths;
     qDebug() << Q_FUNC_INFO << "mangledPaths" << mangledPaths;
