@@ -616,8 +616,9 @@ void PatchManager::doVote(const QString &patch, int action)
     putSettingsSync(QStringLiteral("votes/%1").arg(patch), action);
 }
 
-/*! lets not spoil the fun (or the eggs!).
-    \internal
+/*!
+   \internal
+   lets not spoil the fun (or the eggs!).
 */
 void PatchManager::checkEaster()
 {
@@ -818,6 +819,22 @@ void PatchManager::onLoadedChanged(bool loaded)
     emit loadedChanged(m_loaded);
 }
 
+/*! Calls the \e restorePatchList method on D-Bus */
+void PatchManager::restorePatchList()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_interface->restorePatchList();
+}
+
+/*! Calls the \e backupWorkingPatchList method on D-Bus */
+void PatchManager::backupWorkingPatchList()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_interface->backupWorkingPatchList();
+}
+
 /*! Calls the \e resolveFailure method on D-Bus */
 void PatchManager::resolveFailure()
 {
@@ -1016,6 +1033,30 @@ bool PatchManagerTranslator::installTranslator(const QString &patch)
     }
     return true;
 }
+
+/*
+    The only purpose of the following two dummy methods is to document
+    their corresponding definitions in /src/qml/patchmanager.h,
+    because qdoc warns about undocumented classes and functions, but
+    does not allow for qdoc source documentation in header files.
+*/
+
+/*! \fn void PatchManager::activation(const QString & patch, const QString & version);
+    \internal
+    using \a patch and \a version
+    \warning This seems to be dead code as nothing seems to attach to this slot, need to investigate removal
+*/
+
+/*! \fn void PatchManager::easterReceived(const QString &easterText);
+    \internal
+
+    This signal is emitted when checkEaster() has determined there is an easter
+    egg to display, and contains \a easterText as a string parameter.
+
+    Used in AboutPage to display an easter egg.
+
+    \sa AboutPage
+*/
 
 /*!
     Returns \e true if \a filename exists, \e false otherwise.

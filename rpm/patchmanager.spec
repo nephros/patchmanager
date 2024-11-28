@@ -1,5 +1,3 @@
-%global theme sailfish-default
-
 # These macros should already be defined in the RPMbuild environment, see: rpm --showrc
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
@@ -291,7 +289,13 @@ exit 0
 %{_datadir}/jolla-settings/entries/%{name}.json
 %{_datadir}/%{name}/icons/icon-m-patchmanager.png
 
-%{_datadir}/themes/%{theme}/meegotouch/*/icons/*.png
+# On SailfishOS < 4.6:
+# /usr/share/themes/sailfish-default/meegotouch/zX.Y/icons/*.png
+# On SailfishOS >= 4.6:
+# /usr/share/themes/sailfish-default/silica/zX.Y/icons/*.png
+# /usr/share/themes/sailfish-default/silica/zX.Y/icons-monochrome/*.png
+%{_datadir}/themes/sailfish-default/*/z*/icons*/*.png
+%{_datadir}/icons/hicolor/scalable/apps/*.svg
 
 %changelog
 * Thu Sep  9 1999 SailfishOS Patches <sailfishos-patches@users.noreply.github.com> - 99.99.99
