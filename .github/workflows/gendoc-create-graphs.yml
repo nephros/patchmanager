@@ -83,6 +83,7 @@ jobs:
         mkdir -p doc/doxygen/html
         mkdir -p doc/doxygen/xml
         mkdir -p doc/doxygen/dot
+        doxygen --version
         doxygen doc/doxygen/config
         git clone --depth 1 https://github.com/jitsuCM/doxygraph doc/doxygraph
         pushd doc/doxygraph/doxygraph
