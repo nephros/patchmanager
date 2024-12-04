@@ -50,6 +50,7 @@
 #include <QFileSystemWatcher>
 
 #include <systemd/sd-journal.h>
+#include "bloom_filter.hpp"
 
 #ifndef SERVER_URL
 #define SERVER_URL          "https://coderus.openrepos.net"
@@ -267,6 +268,8 @@ private:
 
     QTimer *m_sessionBusConnector = nullptr;
     QDBusConnection m_sbus;
+
+    bloom_filter *m_filter = nullptr;
 };
 
 #endif // PATCHMANAGEROBJECT_H
