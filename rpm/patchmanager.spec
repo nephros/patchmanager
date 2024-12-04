@@ -26,7 +26,7 @@ Release:    1
 # The Group tag should comprise one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
 Group:      System/System Control
-License:    BSD-3-Clause
+License:    BSD-3-Clause and MIT
 URL:        https://github.com/sailfishos-patches/%{name}
 Vendor:     chum
 Source0:    %{url}/archive/%{version}/%{name}-%{version}.tar.gz
