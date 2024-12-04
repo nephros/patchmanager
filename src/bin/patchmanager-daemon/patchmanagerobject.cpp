@@ -1882,13 +1882,33 @@ void PatchManagerObject::startReadingLocalServer()
         const QByteArray request = clientConnection->readAll();
         QByteArray payload;
         const QString fakePath = QStringLiteral("%1%2").arg(s_patchmanagerCacheRoot, QString::fromLatin1(request));
-        if (!m_failed && QFileInfo::exists(fakePath)) {
-            payload = fakePath.toLatin1();
-            if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
-                qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
+        /* check bloom filter for previously determined unpatched
+           Bloomfilters return either "possibly in set" or "definitely not in set" 
+           We record unpatched files, in order to return early without checking
+           the (fake) file system all the time.
+        */
+        payload = request;
+        if (!m_failed) { // we return unaltered in failed state
+            if (m_filter->contains(request)) {
+                if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                    qInfo() << Q_FUNC_INFO << "Bloom Filter: no patched file for " << request;
+                }
+            } else { // filter said no, lets check for file existence, update payload
+                if (QFileInfo::exists(fakePath)) {
+                    payload = fakePath.toLatin1();
+                    if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                        qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
+                    }
+                } else { // unpatched, update bloom filter, payload unaltered
+                    m_filter->insert(request);
+                    qDebug() << Q_FUNC_INFO << "Bloom Filter: inserted" << request;
+                    if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                        qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
+                    }
+                    qDebug() << Q_FUNC_INFO << "Bloom Filter now has" << m_filter->element_count() << "entries.";
+                }
             }
         } else {
-            payload = request;
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
             }
