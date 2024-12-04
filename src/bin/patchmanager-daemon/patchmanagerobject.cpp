@@ -515,15 +515,6 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
     , m_sbus(s_sessionBusConnection)
 {
 
-    // set up filter
-    bloom_parameters parameters;
-    parameters.projected_element_count = BLOOM_ELEMENTS;
-    parameters.false_positive_probability = BLOOM_FPP;
-    parameters.compute_optimal_parameters();
-    m_filter = new bloom_filter(parameters);
-    qDebug() << Q_FUNC_INFO << "Bloom Filter: set up filter with size" << m_filter->size();
-
-
 }
 
 PatchManagerObject::~PatchManagerObject()
@@ -855,6 +846,14 @@ void PatchManagerObject::initialize()
         qDebug() << Q_FUNC_INFO << "Injecting DBUS_SESSION_BUS_ADDRESS...";
         qputenv("DBUS_SESSION_BUS_ADDRESS", QByteArrayLiteral("unix:path=/run/user/100000/dbus/user_bus_socket"));
     }
+
+    // set up filter
+    bloom_parameters parameters;
+    parameters.projected_element_count = BLOOM_ELEMENTS;
+    parameters.false_positive_probability = BLOOM_FPP;
+    parameters.compute_optimal_parameters();
+    m_filter = new bloom_filter(parameters);
+    qDebug() << Q_FUNC_INFO << "Bloom Filter: set up filter with size" << m_filter->size();
 
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &PatchManagerObject::onTimerAction);
