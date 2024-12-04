@@ -147,6 +147,13 @@ static const QString SILICA_CODE      = QStringLiteral("silica");
 static const QString SETTINGS_CODE    = QStringLiteral("settings");
 static const QString KEYBOARD_CODE    = QStringLiteral("keyboard");
 
+// How many elements roughly do we expect to insert?
+// $ find /usr/ -type f |wc -l
+// 79316
+static const int BLOOM_ELEMENTS = 100000;
+// Maximum tolerable false positive probability? (0,1)
+//static const float BLOOM_FPP = 0.0001; // 1 in 10000
+static const float BLOOM_FPP = 0.001; // we do not really care about FP
 /*!
   \class PatchManagerObject
   \inmodule PatchManagerDaemon
@@ -507,6 +514,16 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
     : QObject(parent)
     , m_sbus(s_sessionBusConnection)
 {
+
+    // set up filter
+    bloom_parameters parameters;
+    parameters.projected_element_count = BLOOM_ELEMENTS;
+    parameters.false_positive_probability = BLOOM_FPP;
+    parameters.compute_optimal_parameters();
+    m_filter = new bloom_filter(parameters);
+    qDebug() << Q_FUNC_INFO << "Bloom Filter: set up filter with size" << m_filter->size();
+
+
 }
 
 PatchManagerObject::~PatchManagerObject()
@@ -515,6 +532,9 @@ PatchManagerObject::~PatchManagerObject()
         QDBusConnection connection = QDBusConnection::systemBus();
         connection.unregisterService(DBUS_SERVICE_NAME);
         connection.unregisterObject(DBUS_PATH_NAME);
+    }
+    if(m_filter) {
+        qDebug() << Q_FUNC_INFO << "Bloom Filter had:" << m_filter->element_count() << "entries.";
     }
 }
 
