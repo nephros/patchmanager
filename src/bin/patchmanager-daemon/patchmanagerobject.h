@@ -269,6 +269,9 @@ private:
     Journal *m_journal = nullptr;
     bool m_failed = false;
 
+    quint64 m_filter_hit = 0;
+    quint64 m_filter_miss  = 0;
+    quint64 m_filter_fp  = 0;
     quint64 m_sockrq_patched = 0;
     quint64 m_sockrq_passed  = 0;
     QDateTime m_startuptime;

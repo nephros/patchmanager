@@ -407,12 +407,23 @@ QStringList PatchManagerObject::getMangleCandidates()
 void PatchManagerObject::printStats()
 {
     qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
+    int filtercount = -1;
+    float filterfpp = 0.0;
+    if(m_filter) {
+        filtercount = m_filter->element_count();
+        filterfpp = m_filter->effective_fpp();
+    }
     qInfo().noquote() << "Patchmanager Daemon runtime stats:"
             << "\n  Daemon life-time: ..............." << uptime << "seconds"
             << "\n  Currently active patches: ......." << m_appliedPatches.count()
             << "\n  File accesses redirected: ......." << m_sockrq_patched
             << "\n  File accesses passed as-is: ....." << m_sockrq_passed
             << "\n  Known patched files: ............" << m_originalWatcher->files().count()
+            << "\n  Bloom Filter entries: ..........." << filtercount
+            << "\n  Bloom Filter eff. false pos.: ..." << filterfpp
+            << "\n  Bloom Filter hits: .............." << m_filter_hit
+            << "\n  Bloom Filter misses: ............" << m_filter_miss
+            << "\n  Bloom Filter false positives: ..." << m_filter_fp
             << "\n===========================";
 }
 
@@ -1945,6 +1956,7 @@ void PatchManagerObject::startReadingLocalServer()
                 */
                 if (Q_UNLIKELY(m_filter->contains(fakePath.toStdString()))) { // filter sais maybe exists, so we must check
                     qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
+                    m_filter_hit += 1; // accounting
                     if (QFileInfo::exists(fakePath)) {
                         payload = fakePath.toLatin1();
                         if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
@@ -1952,6 +1964,7 @@ void PatchManagerObject::startReadingLocalServer()
                         }
                     } else { // False positive
                         qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
+                        m_filter_fp += 1; // accounting
                         if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                             qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                         }
@@ -1961,6 +1974,7 @@ void PatchManagerObject::startReadingLocalServer()
                     if (QFileInfo::exists(fakePath)) { // FIXME: <-- remove this in production
                         qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
                     }
+                    m_filter_miss += 1; // accounting
                     if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
