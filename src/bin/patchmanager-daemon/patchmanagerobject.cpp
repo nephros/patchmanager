@@ -848,12 +848,7 @@ void PatchManagerObject::initialize()
     }
 
     // set up filter
-    bloom_parameters parameters;
-    parameters.projected_element_count = BLOOM_ELEMENTS;
-    parameters.false_positive_probability = BLOOM_FPP;
-    parameters.compute_optimal_parameters();
-    m_filter = new bloom_filter(parameters);
-    qDebug() << Q_FUNC_INFO << "Bloom Filter: set up filter with size" << m_filter->size();
+    newFilter(BLOOM_ELEMENTS, BLOOM_FPP);
 
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &PatchManagerObject::onTimerAction);
@@ -1447,6 +1442,24 @@ void PatchManagerObject::checkForUpdates()
     QMetaObject::invokeMethod(this, NAME(requestCheckForUpdates), Qt::QueuedConnection);
 }
 
+void PatchManagerObject::checkFilter() const
+{
+    qDebug() << Q_FUNC_INFO;
+    if (entries > (BLOOM_ELEMENTS * 0.9)) {
+        qWarning() << "Bloom Filter near capacity. Consider increasing BLOOM_ELEMENTS";
+    }
+}
+
+void PatchManagerObject::newFilter(const int &entries, const float &fpp)
+{
+    bloom_parameters parameters;
+    parameters.projected_element_count = entries;
+    parameters.false_positive_probability = fpp;
+    parameters.compute_optimal_parameters();
+    m_filter = new bloom_filter(parameters);
+    qDebug() << Q_FUNC_INFO << "Bloom Filter: set up filter with size" << m_filter->size();
+}
+
 /*!  Returns the list of updated objects from the \l {Patchmanager Web Catalog}{Web Catalog}.  */
 QVariantMap PatchManagerObject::getUpdates() const
 {
@@ -1840,6 +1853,7 @@ void PatchManagerObject::onTimerAction()
 {
     qDebug() << Q_FUNC_INFO;
     checkForUpdates();
+    checkFilter();
 }
 
 void PatchManagerObject::startReadingLocalServer()

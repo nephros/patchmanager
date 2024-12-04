@@ -270,6 +270,9 @@ private:
     QDBusConnection m_sbus;
 
     bloom_filter *m_filter = nullptr;
+    void newFilter(const int &entries, const float &fpp);
+    void checkFilter() const;
+
 };
 
 #endif // PATCHMANAGEROBJECT_H
