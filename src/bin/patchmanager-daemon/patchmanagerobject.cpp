@@ -1452,6 +1452,8 @@ void PatchManagerObject::checkFilter() const
 
 void PatchManagerObject::newFilter(const int &entries, const float &fpp)
 {
+    if (!getSettings(QStringLiteral("enableFSFilter"), false).toBool())
+        return;
     bloom_parameters parameters;
     parameters.projected_element_count = entries;
     parameters.false_positive_probability = fpp;
@@ -1889,7 +1891,8 @@ void PatchManagerObject::startReadingLocalServer()
         */
         payload = request;
         if (!m_failed) { // we return unaltered in failed state
-            if (m_filter->contains(request)) {
+            // FIXME: we ignore mangling here
+            if (m_filter && m_filter->contains(request)) {
                 if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                     qInfo() << Q_FUNC_INFO << "Bloom Filter: no patched file for " << request;
                 }
@@ -1900,12 +1903,15 @@ void PatchManagerObject::startReadingLocalServer()
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
                     }
                 } else { // unpatched, update bloom filter, payload unaltered
-                    m_filter->insert(request);
-                    qDebug() << Q_FUNC_INFO << "Bloom Filter: inserted" << request;
+                    if (m_filter) {
+                        m_filter->insert(request);
+                        qDebug() << Q_FUNC_INFO << "Bloom Filter: inserted" << request;
+                    }
                     if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
-                    qDebug() << Q_FUNC_INFO << "Bloom Filter now has" << m_filter->element_count() << "entries.";
+                    if (m_filter)
+                        qDebug() << Q_FUNC_INFO << "Bloom Filter now has" << m_filter->element_count() << "entries.";
                 }
             }
         } else {
