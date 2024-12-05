@@ -1446,20 +1446,22 @@ void PatchManagerObject::checkFilter() const
 {
     qDebug() << Q_FUNC_INFO;
     if (entries > (BLOOM_ELEMENTS * 0.9)) {
-        qWarning() << "Bloom Filter near capacity. Consider increasing BLOOM_ELEMENTS";
+        qWarning() << "Bloom Filter: near capacity. Consider increasing its size";
     }
 }
 
 void PatchManagerObject::newFilter(const int &entries, const float &fpp)
 {
-    if (!getSettings(QStringLiteral("enableFSFilter"), false).toBool())
+    if (!getSettings(QStringLiteral("enableFSFilter"), false).toBool()) {
+        qInfo() << Q_FUNC_INFO << "Bloom Filter: disabled.";
         return;
+    }
     bloom_parameters parameters;
     parameters.projected_element_count = entries;
     parameters.false_positive_probability = fpp;
     parameters.compute_optimal_parameters();
     m_filter = new bloom_filter(parameters);
-    qDebug() << Q_FUNC_INFO << "Bloom Filter: set up filter with size" << m_filter->size();
+    qInfo() << Q_FUNC_INFO << "Bloom Filter: set up filter with size" << m_filter->size();
 }
 
 /*!  Returns the list of updated objects from the \l {Patchmanager Web Catalog}{Web Catalog}.  */
