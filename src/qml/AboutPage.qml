@@ -115,6 +115,17 @@ Page {
                 }
                 Text {
                         anchors.horizontalCenter: parent.horizontalCenter
+                        text: qsTranslate("", "Contains a bloomfilter implementation licensed under the terms of the<br /><a href=\"%1\">MIT License</a>").arg("https://opensource.org/licenses/MIT")
+                        textFormat: Text.StyledText
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: Theme.fontSizeSmall
+                        color: Theme.secondaryColor
+                        linkColor: Theme.highlightColor
+                        onLinkActivated: Qt.openUrlExternally("https://opensource.org/licenses/BSD-3-Clause")
+                }
+
+                Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
                         text: qsTranslate("", "Sources and Issue Tracker<br /><a href=\"%1\">on GitHub</a>").arg(SOURCE_REPO)
                         textFormat: Text.StyledText
                         horizontalAlignment: Text.AlignHCenter

@@ -129,6 +129,17 @@ Page {
             socialmedianame: ""
             website: "https://github.com/jakibaki"
         }
+        ListElement {
+            icon: ""
+            category: "Thanks to"
+            name: "Arash Partow"
+            nickname: ""
+            description: "Bloom Filter Library developer"
+            socialmedia: ""
+            socialmedianame: ""
+            website: "https://www.partow.net"
+        }
+
         /*
          * TEMPLATE for new entry
          *
