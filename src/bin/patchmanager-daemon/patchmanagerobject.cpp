@@ -1922,6 +1922,10 @@ void PatchManagerObject::startReadingLocalServer()
                  * So, if contains() sais maybe, we check and prossibly find a patched file.
                  * So, if contains() sais no, it's definitely unpatched, so just return the requested path
                  * Thus we should save QFileInfo::exists for the majority of cases.
+                 *
+                 * Note that the filter does not update or remove entries on "unpatching",
+                 * but that should not make a real difference * since we check on hit, not miss.
+                 *
                 */
                 if (m_filter->contains(request)) { // filter sais maybe exists, so we must check
                     qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
