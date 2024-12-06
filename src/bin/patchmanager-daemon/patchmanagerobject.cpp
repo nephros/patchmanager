@@ -1927,7 +1927,7 @@ void PatchManagerObject::startReadingLocalServer()
                  * but that should not make a real difference * since we check on hit, not miss.
                  *
                 */
-                if Q_UNLIKELY(m_filter->contains(request)) { // filter sais maybe exists, so we must check
+                if Q_UNLIKELY(m_filter->contains(fakePath)) { // filter sais maybe exists, so we must check
                     qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
                     if (QFileInfo::exists(fakePath)) {
                         payload = fakePath.toLatin1();
