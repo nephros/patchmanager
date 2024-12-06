@@ -154,6 +154,9 @@ static const int BLOOM_ELEMENTS = 100000;
 // Maximum tolerable false positive probability? (0,1)
 static const float BLOOM_FPP = 0.0001; // 1 in 10000
 //static const float BLOOM_FPP = 0.001; // we do not really care about FP
+
+static const int HOTCACHE_MAXCOST = 5000;
+
 /*!
   \class PatchManagerObject
   \inmodule PatchManagerDaemon
@@ -514,7 +517,7 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
     : QObject(parent)
     , m_sbus(s_sessionBusConnection)
 {
-
+    
 }
 
 PatchManagerObject::~PatchManagerObject()
@@ -857,6 +860,8 @@ void PatchManagerObject::initialize()
 
     // set up filter
     newFilter(BLOOM_ELEMENTS, BLOOM_FPP);
+    // set up cache
+    m_hotcache = QCache(HOTCACHE_MAXCOST);
 
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &PatchManagerObject::onTimerAction);
@@ -1915,6 +1920,10 @@ void PatchManagerObject::startReadingLocalServer()
                     }
                 }
             } else {
+                /* Hot cache: cache the most often-used missed paths, and return early if they are in the cache
+                 */
+                if (!m_hotcache->contains(request)) { // not in the cache. do all the lookups
+                    qDebug() << Q_FUNC_INFO << "Hot cache: miss:" << request;
                 /* Bloom Filter: we rely on the filter having been primed with *all* files from fakeroot.
                  *
                  * Bloomfilters return either "possibly in set" or "definitely not in set"
@@ -1949,6 +1958,8 @@ void PatchManagerObject::startReadingLocalServer()
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
                 }
+            } else { //hotcache hit, i.e. file does not exist
+                    qDebug() << Q_FUNC_INFO << "Hot cache: hit:" << request;
             }
         } else { // always return unaltered in failed state
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
@@ -1958,6 +1969,14 @@ void PatchManagerObject::startReadingLocalServer()
         clientConnection->write(payload);
         clientConnection->flush();
 //        clientConnection->waitForBytesWritten();
+
+//      // do this after writing the data:
+        if (payload == request) { // didn't exist
+            // randomly selected upper limit of 1000. Make a new QString so the
+            // cache can own the object
+            QObject dummy(NULL);
+            m_hotcache.insert(request, dummy);
+        }
     }, Qt::DirectConnection);
 }
 

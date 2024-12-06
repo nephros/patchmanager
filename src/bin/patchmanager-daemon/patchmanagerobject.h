@@ -48,6 +48,7 @@
 #include <QDBusMessage>
 #include <QDBusVariant>
 #include <QFileSystemWatcher>
+#include <QCache>
 
 #include <systemd/sd-journal.h>
 #include "bloom_filter.hpp"
@@ -272,6 +273,7 @@ private:
     bloom_filter *m_filter = nullptr;
     void newFilter(const int &entries, const float &fpp);
     void checkFilter() const;
+    QCache<QString, QObject> m_hotcache;
 
 };
 
