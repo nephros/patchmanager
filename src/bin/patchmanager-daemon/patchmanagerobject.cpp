@@ -1973,10 +1973,8 @@ void PatchManagerObject::startReadingLocalServer()
 
 //      // do this after writing the data:
         if (payload == request) { // didn't exist
-            // randomly selected upper limit of 1000. Make a new QString so the
-            // cache can own the object
-            QObject dummy(NULL);
-            m_hotcache.insert(request, dummy);
+            // Make a new QString so the cache can own the object
+            m_hotcache.insert(request, nullptr);
         }
     }, Qt::DirectConnection);
 }
