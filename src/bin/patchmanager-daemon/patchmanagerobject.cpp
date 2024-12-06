@@ -1445,8 +1445,9 @@ void PatchManagerObject::checkForUpdates()
 void PatchManagerObject::checkFilter() const
 {
     qDebug() << Q_FUNC_INFO;
-    if (entries > (BLOOM_ELEMENTS * 0.9)) {
-        qWarning() << "Bloom Filter: near capacity. Consider increasing its size";
+    if (!m_filter) return;
+    if ( m_filter->element_count() > (BLOOM_ELEMENTS * 0.9)) {
+        qWarning() << "Bloom Filter: near capacity. Consider increasing its size.";
     }
 }
 
