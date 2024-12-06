@@ -1942,6 +1942,9 @@ void PatchManagerObject::startReadingLocalServer()
                     }
                 } else { // filter said definitely no -> does not exist
                     qDebug() << Q_FUNC_INFO << "Bloom Filter: miss:" << fakePath;
+                    if (QFileInfo::exists(fakePath)) { // FIXME: <-- remove this in production
+                        qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
+                    }
                     if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
