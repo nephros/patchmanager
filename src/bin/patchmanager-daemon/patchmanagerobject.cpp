@@ -1924,42 +1924,43 @@ void PatchManagerObject::startReadingLocalServer()
                  */
                 if (!m_hotcache.contains(request)) { // not in the cache. do all the lookups
                     qDebug() << Q_FUNC_INFO << "Hot cache: miss:" << request;
-                /* Bloom Filter: we rely on the filter having been primed with *all* files from fakeroot.
-                 *
-                 * Bloomfilters return either "possibly in set" or "definitely not in set"
-                 *
-                 * So, if contains() sais maybe, we check and prossibly find a patched file.
-                 * So, if contains() sais no, it's definitely unpatched, so just return the requested path
-                 * Thus we should save QFileInfo::exists for the majority of cases.
-                 *
-                 * Note that the filter does not update or remove entries on "unpatching",
-                 * but that should not make a real difference * since we check on hit, not miss.
-                 *
-                */
-                if (Q_UNLIKELY(m_filter->contains(fakePath.toStdString()))) { // filter sais maybe exists, so we must check
-                    qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
-                    if (QFileInfo::exists(fakePath)) {
-                        payload = fakePath.toLatin1();
-                        if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
-                            qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
+                    /* Bloom Filter: we rely on the filter having been primed with *all* files from fakeroot.
+                     *
+                     * Bloomfilters return either "possibly in set" or "definitely not in set"
+                     *
+                     * So, if contains() sais maybe, we check and prossibly find a patched file.
+                     * So, if contains() sais no, it's definitely unpatched, so just return the requested path
+                     * Thus we should save QFileInfo::exists for the majority of cases.
+                     *
+                     * Note that the filter does not update or remove entries on "unpatching",
+                     * but that should not make a real difference * since we check on hit, not miss.
+                     *
+                    */
+                    if (Q_UNLIKELY(m_filter->contains(fakePath.toStdString()))) { // filter sais maybe exists, so we must check
+                        qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
+                        if (QFileInfo::exists(fakePath)) {
+                            payload = fakePath.toLatin1();
+                            if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
+                                qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
+                            }
+                        } else { // False positive
+                            qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
+                            if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
+                                qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
+                            }
                         }
-                    } else { // False positive
-                        qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
+                    } else { // filter said definitely no -> does not exist
+                        qDebug() << Q_FUNC_INFO << "Bloom Filter: miss:" << fakePath << "vs" << request;
+                        if (QFileInfo::exists(fakePath)) { // FIXME: <-- remove this in production
+                            qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
+                        }
                         if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
                             qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                         }
                     }
-                } else { // filter said definitely no -> does not exist
-                    qDebug() << Q_FUNC_INFO << "Bloom Filter: miss:" << fakePath << "vs" << request;
-                    if (QFileInfo::exists(fakePath)) { // FIXME: <-- remove this in production
-                        qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
-                    }
-                    if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
-                        qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
-                    }
-                }
-            } else { //hotcache hit, i.e. file does not exist
+                } else { //hotcache hit, i.e. file does not exist
                     qDebug() << Q_FUNC_INFO << "Hot cache: hit:" << request;
+                }
             }
         } else { // always return unaltered in failed state
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
