@@ -1975,6 +1975,7 @@ void PatchManagerObject::startReadingLocalServer()
                         qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
                     }
                     m_filter_miss += 1; // accounting
+                    if Q_UNLIKELY((m_filter_miss % 1000) >= 0) { printStats(); }
                     if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
