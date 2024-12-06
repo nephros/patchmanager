@@ -1976,7 +1976,7 @@ void PatchManagerObject::startReadingLocalServer()
                     }
                     m_filter_miss += 1; // accounting
                     if (Q_UNLIKELY(m_filter_miss % 1000 == 0)) { printStats(); }
-                    if (Q_UNLIKELY((qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
+                    if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
                 }
