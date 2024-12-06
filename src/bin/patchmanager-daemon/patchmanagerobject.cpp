@@ -861,7 +861,7 @@ void PatchManagerObject::initialize()
     // set up filter
     newFilter(BLOOM_ELEMENTS, BLOOM_FPP);
     // set up cache
-    m_hotcache = QCache(HOTCACHE_MAXCOST);
+    m_hotcache.setMaxCost(HOTCACHE_MAXCOST);
 
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &PatchManagerObject::onTimerAction);
@@ -1922,7 +1922,7 @@ void PatchManagerObject::startReadingLocalServer()
             } else {
                 /* Hot cache: cache the most often-used missed paths, and return early if they are in the cache
                  */
-                if (!m_hotcache->contains(request)) { // not in the cache. do all the lookups
+                if (!m_hotcache.contains(request)) { // not in the cache. do all the lookups
                     qDebug() << Q_FUNC_INFO << "Hot cache: miss:" << request;
                 /* Bloom Filter: we rely on the filter having been primed with *all* files from fakeroot.
                  *
