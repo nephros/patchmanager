@@ -152,8 +152,8 @@ static const QString KEYBOARD_CODE    = QStringLiteral("keyboard");
 // 79316
 static const int BLOOM_ELEMENTS = 100000;
 // Maximum tolerable false positive probability? (0,1)
-//static const float BLOOM_FPP = 0.0001; // 1 in 10000
-static const float BLOOM_FPP = 0.001; // we do not really care about FP
+static const float BLOOM_FPP = 0.0001; // 1 in 10000
+//static const float BLOOM_FPP = 0.001; // we do not really care about FP
 /*!
   \class PatchManagerObject
   \inmodule PatchManagerDaemon
