@@ -714,6 +714,10 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
         if (QFileInfo::exists(fakeFileName)) {
             if (apply) {
                 m_originalWatcher->addPath(fileName);
+                if (m_filter) {
+                    m_filter->insert(fakeFileName);
+                    qDebug() << Q_FUNC_INFO << "Bloom Filter: added " << fakeFileName;
+                }
                 continue;
             }
 
@@ -739,6 +743,10 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
             bool copy_ret = QFile::copy(fileName, fakeFileName);
             qDebug() << Q_FUNC_INFO << "Copying" << fileName << "to" << fakeFileName << copy_ret;
             m_originalWatcher->addPath(fileName);
+            if (m_filter) {
+                m_filter->insert(fakeFileName);
+                qDebug() << Q_FUNC_INFO << "Bloom Filter: added " << fakeFileName;
+            }
 
             chmod(fakeFileName.toLatin1().constData(), fileStat.st_mode);
             int chown_ret = chown(fakeFileName.toLatin1().constData(), fileStat.st_uid, fileStat.st_gid);
@@ -1098,6 +1106,10 @@ void PatchManagerObject::clearFakeroot()
 
     qDebug() << Q_FUNC_INFO << "Creating a clean cache directory (bool):" <<
     QDir::root().mkpath(s_patchmanagerCacheRoot);
+
+    if(m_filter) {
+        m_filter->clear();
+    }
 }
 
 /*! 
