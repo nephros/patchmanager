@@ -715,7 +715,7 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
             if (apply) {
                 m_originalWatcher->addPath(fileName);
                 if (m_filter) {
-                    m_filter->insert(fakeFileName);
+                    m_filter->insert(fakeFileName.toStdString());
                     qDebug() << Q_FUNC_INFO << "Bloom Filter: added " << fakeFileName;
                 }
                 continue;
@@ -744,7 +744,7 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
             qDebug() << Q_FUNC_INFO << "Copying" << fileName << "to" << fakeFileName << copy_ret;
             m_originalWatcher->addPath(fileName);
             if (m_filter) {
-                m_filter->insert(fakeFileName);
+                m_filter->insert(fakeFileName.toStdString());
                 qDebug() << Q_FUNC_INFO << "Bloom Filter: added " << fakeFileName;
             }
 
@@ -1927,7 +1927,7 @@ void PatchManagerObject::startReadingLocalServer()
                  * but that should not make a real difference * since we check on hit, not miss.
                  *
                 */
-                if (Q_UNLIKELY(m_filter->contains(fakePath))) { // filter sais maybe exists, so we must check
+                if (Q_UNLIKELY(m_filter->contains(fakePath.toStdString()))) { // filter sais maybe exists, so we must check
                     qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
                     if (QFileInfo::exists(fakePath)) {
                         payload = fakePath.toLatin1();
