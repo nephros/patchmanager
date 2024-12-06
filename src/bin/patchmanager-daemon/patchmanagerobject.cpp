@@ -1931,12 +1931,12 @@ void PatchManagerObject::startReadingLocalServer()
                     qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
                     if (QFileInfo::exists(fakePath)) {
                         payload = fakePath.toLatin1();
-                        if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                        if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
                             qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
                         }
                     } else { // False positive
                         qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
-                        if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                        if (Q_UNLIKELY((qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
                             qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                         }
                     }
@@ -1945,7 +1945,7 @@ void PatchManagerObject::startReadingLocalServer()
                     if (QFileInfo::exists(fakePath)) { // FIXME: <-- remove this in production
                         qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
                     }
-                    if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                    if (Q_UNLIKELY((qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
                 }
