@@ -1899,37 +1899,51 @@ void PatchManagerObject::startReadingLocalServer()
         const QByteArray request = clientConnection->readAll();
         QByteArray payload;
         const QString fakePath = QStringLiteral("%1%2").arg(s_patchmanagerCacheRoot, QString::fromLatin1(request));
-        /* check bloom filter for previously determined unpatched
-           Bloomfilters return either "possibly in set" or "definitely not in set" 
-           We record unpatched files, in order to return early without checking
-           the (fake) file system all the time.
-        */
         payload = request;
-        if (!m_failed) { // we return unaltered in failed state
-            // FIXME: we ignore mangling here
-            if (m_filter && m_filter->contains(request)) {
-                if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
-                    qInfo() << Q_FUNC_INFO << "Bloom Filter: no patched file for " << request;
-                }
-            } else { // filter said no, lets check for file existence, update payload
+        if (!m_failed) {
+            if(!m_filter) {
+                // unaltered method without bloom filter
                 if (QFileInfo::exists(fakePath)) {
                     payload = fakePath.toLatin1();
                     if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
                     }
-                } else { // unpatched, update bloom filter, payload unaltered
-                    if (m_filter) {
-                        m_filter->insert(request);
-                        qDebug() << Q_FUNC_INFO << "Bloom Filter: inserted" << request;
-                    }
+                } else {
+                    payload = request;
                     if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                         qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                     }
-                    if (m_filter)
-                        qDebug() << Q_FUNC_INFO << "Bloom Filter now has" << m_filter->element_count() << "entries.";
+                }
+            } else {
+                /* Bloom Filter: we rely on the filter having been primed with *all* files from fakeroot.
+                 *
+                 * Bloomfilters return either "possibly in set" or "definitely not in set"
+                 *
+                 * So, if contains() sais maybe, we check and prossibly find a patched file.
+                 * So, if contains() sais no, it's definitely unpatched, so just return the requested path
+                 * Thus we should save QFileInfo::exists for the majority of cases.
+                */
+                if (m_filter->contains(request)) { // filter sais maybe exists, so we must check
+                    qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
+                    if (QFileInfo::exists(fakePath)) {
+                        payload = fakePath.toLatin1();
+                        if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                            qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
+                        }
+                    } else { // False positive
+                        qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
+                        if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                            qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
+                        }
+                    }
+                } else { // filter said definitely no -> does not exist
+                    qDebug() << Q_FUNC_INFO << "Bloom Filter: miss:" << fakePath;
+                    if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
+                        qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
+                    }
                 }
             }
-        } else {
+        } else { // always return unaltered in failed state
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
             }
