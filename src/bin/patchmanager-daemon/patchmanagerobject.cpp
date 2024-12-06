@@ -154,6 +154,9 @@ static const int BLOOM_ELEMENTS = 100000;
 // Maximum tolerable false positive probability? (0,1)
 static const float BLOOM_FPP = 0.0001; // 1 in 10000
 //static const float BLOOM_FPP = 0.001; // we do not really care about FP
+
+static const int HOTCACHE_MAXCOST = 5000;
+
 /*!
   \class PatchManagerObject
   \inmodule PatchManagerDaemon
@@ -514,7 +517,7 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
     : QObject(parent)
     , m_sbus(s_sessionBusConnection)
 {
-
+    
 }
 
 PatchManagerObject::~PatchManagerObject()
@@ -857,6 +860,8 @@ void PatchManagerObject::initialize()
 
     // set up filter
     newFilter(BLOOM_ELEMENTS, BLOOM_FPP);
+    // set up cache
+    m_hotcache.setMaxCost(HOTCACHE_MAXCOST);
 
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &PatchManagerObject::onTimerAction);
@@ -1915,39 +1920,46 @@ void PatchManagerObject::startReadingLocalServer()
                     }
                 }
             } else {
-                /* Bloom Filter: we rely on the filter having been primed with *all* files from fakeroot.
-                 *
-                 * Bloomfilters return either "possibly in set" or "definitely not in set"
-                 *
-                 * So, if contains() sais maybe, we check and prossibly find a patched file.
-                 * So, if contains() sais no, it's definitely unpatched, so just return the requested path
-                 * Thus we should save QFileInfo::exists for the majority of cases.
-                 *
-                 * Note that the filter does not update or remove entries on "unpatching",
-                 * but that should not make a real difference * since we check on hit, not miss.
-                 *
-                */
-                if (Q_UNLIKELY(m_filter->contains(fakePath.toStdString()))) { // filter sais maybe exists, so we must check
-                    qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
-                    if (QFileInfo::exists(fakePath)) {
-                        payload = fakePath.toLatin1();
-                        if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
-                            qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
+                /* Hot cache: cache the most often-used missed paths, and return early if they are in the cache
+                 */
+                if (!m_hotcache.contains(request)) { // not in the cache. do all the lookups
+                    qDebug() << Q_FUNC_INFO << "Hot cache: miss:" << request;
+                    /* Bloom Filter: we rely on the filter having been primed with *all* files from fakeroot.
+                     *
+                     * Bloomfilters return either "possibly in set" or "definitely not in set"
+                     *
+                     * So, if contains() sais maybe, we check and prossibly find a patched file.
+                     * So, if contains() sais no, it's definitely unpatched, so just return the requested path
+                     * Thus we should save QFileInfo::exists for the majority of cases.
+                     *
+                     * Note that the filter does not update or remove entries on "unpatching",
+                     * but that should not make a real difference * since we check on hit, not miss.
+                     *
+                    */
+                    if (Q_UNLIKELY(m_filter->contains(fakePath.toStdString()))) { // filter sais maybe exists, so we must check
+                        qDebug() << Q_FUNC_INFO << "Bloom Filter: hit:" << fakePath;
+                        if (QFileInfo::exists(fakePath)) {
+                            payload = fakePath.toLatin1();
+                            if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
+                                qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
+                            }
+                        } else { // False positive
+                            qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
+                            if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
+                                qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
+                            }
                         }
-                    } else { // False positive
-                        qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
+                    } else { // filter said definitely no -> does not exist
+                        qDebug() << Q_FUNC_INFO << "Bloom Filter: miss:" << fakePath << "vs" << request;
+                        if (QFileInfo::exists(fakePath)) { // FIXME: <-- remove this in production
+                            qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
+                        }
                         if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
                             qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                         }
                     }
-                } else { // filter said definitely no -> does not exist
-                    qDebug() << Q_FUNC_INFO << "Bloom Filter: miss:" << fakePath << "vs" << request;
-                    if (QFileInfo::exists(fakePath)) { // FIXME: <-- remove this in production
-                        qWarning() << Q_FUNC_INFO << "Bloom Filter: Boo: miss while file exists:" << fakePath;
-                    }
-                    if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
-                        qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
-                    }
+                } else { //hotcache hit, i.e. file does not exist
+                    qDebug() << Q_FUNC_INFO << "Hot cache: hit:" << request;
                 }
             }
         } else { // always return unaltered in failed state
@@ -1958,6 +1970,12 @@ void PatchManagerObject::startReadingLocalServer()
         clientConnection->write(payload);
         clientConnection->flush();
 //        clientConnection->waitForBytesWritten();
+
+//      // do this after writing the data:
+        if (payload == request) { // didn't exist
+            // Make a new QString so the cache can own the object
+            m_hotcache.insert(request, nullptr);
+        }
     }, Qt::DirectConnection);
 }
 
