@@ -1936,7 +1936,7 @@ void PatchManagerObject::startReadingLocalServer()
                         }
                     } else { // False positive
                         qWarning() << Q_FUNC_INFO << "Bloom Filter: False positive for" << fakePath;
-                        if (Q_UNLIKELY((qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
+                        if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_SOCKET"))) {
                             qDebug() << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
                         }
                     }
