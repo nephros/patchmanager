@@ -402,12 +402,20 @@ QStringList PatchManagerObject::getMangleCandidates()
 void PatchManagerObject::printStats()
 {
     qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
+    /*
+    QString cachecont:
+    if (!m_hotcache.isEmpty() {
+      cachecont = QStringList(m_hotcache.keys()).join(",\n");
+    }
+    */
     qInfo().noquote() << "Patchmanager Daemon runtime stats:"
             << "\n  Daemon life-time: ..............." << uptime << "seconds"
             << "\n  Currently active patches: ......." << m_appliedPatches.count()
             << "\n  File accesses redirected: ......." << m_sockrq_patched
             << "\n  File accesses passed as-is: ....." << m_sockrq_passed
             << "\n  Known patched files: ............" << m_originalWatcher->files().count()
+            << "\n  Hotcache entries:: .............." << m_hotcache.size()
+            << "\n  Hotcache cost: .................." << m_hotcache.totalCost() << "/" << m_hotcache.maxCost()
             << "\n===========================";
 }
 
