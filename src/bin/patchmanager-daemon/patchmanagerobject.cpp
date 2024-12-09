@@ -419,7 +419,7 @@ void PatchManagerObject::printStats()
             << "\n  Known patched files: ............" << m_originalWatcher->files().count()
             << "\n  Hotcache entries:: .............." << m_hotcache.size()
             << "\n  Hotcache cost: .................." << m_hotcache.totalCost() << "/" << m_hotcache.maxCost()
-            << "\n  Hotcache top entries: ..........." << topTen.join("\n")
+            << "\n  Hotcache top entries: ..........." << "\n    " << topTen.join("\n    ")
             << "\n===========================";
 }
 
