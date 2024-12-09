@@ -402,12 +402,15 @@ QStringList PatchManagerObject::getMangleCandidates()
 void PatchManagerObject::printStats()
 {
     qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
-    /*
-    QString cachecont:
-    if (!m_hotcache.isEmpty() {
-      cachecont = QStringList(m_hotcache.keys()).join(",\n");
+
+    QStringList topTen;
+    const int ttmax = qEnvironmentVariableIsSet("PM_DEBUG_HOTCACHE") ? m_hotcache.size() : 10;
+    foreach(const QString &key, m_hotcache.keys() ) {
+        topTen << key;
+        if (topTen.size() >= ttmax)
+            break;
     }
-    */
+
     qInfo().noquote() << "Patchmanager Daemon runtime stats:"
             << "\n  Daemon life-time: ..............." << uptime << "seconds"
             << "\n  Currently active patches: ......." << m_appliedPatches.count()
@@ -416,6 +419,7 @@ void PatchManagerObject::printStats()
             << "\n  Known patched files: ............" << m_originalWatcher->files().count()
             << "\n  Hotcache entries:: .............." << m_hotcache.size()
             << "\n  Hotcache cost: .................." << m_hotcache.totalCost() << "/" << m_hotcache.maxCost()
+            << "\n  Hotcache top entries: ..........." << topTen.join("\n")
             << "\n===========================";
 }
 
