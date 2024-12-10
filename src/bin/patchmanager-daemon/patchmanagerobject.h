@@ -118,7 +118,6 @@ private:
     bool m_active;
     unsigned int m_hits = 0;
     unsigned int m_misses = 0;
-
 };
 
 class PatchManagerObject : public QObject, public QDBusContext
