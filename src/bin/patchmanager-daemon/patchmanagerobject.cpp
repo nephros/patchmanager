@@ -411,6 +411,8 @@ void PatchManagerObject::printStats()
             << "\n  File accesses redirected: ......." << m_sockrq_patched
             << "\n  File accesses passed as-is: ....." << m_sockrq_passed
             << "\n  Known patched files: ............" << m_originalWatcher->files().count()
+            << "\n==========================="
+            << m_filter.stats()
             << "\n===========================";
 }
 
