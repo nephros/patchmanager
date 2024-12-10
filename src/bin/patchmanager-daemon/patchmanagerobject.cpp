@@ -3112,7 +3112,7 @@ QString PatchManagerFilter::stats() const
     }
 
     //QList<QPair<QString, QVariant>> list;
-    QTextStream list(QString());
+    QTextStream list;
     list << "Filter Stats:"
          << "\n==========================="
          << "\n  Hotcache entries:: .............." << size()
