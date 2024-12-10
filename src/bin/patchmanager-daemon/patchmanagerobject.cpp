@@ -3081,7 +3081,7 @@ void PatchManagerFilter::setup()
 
     // use a cost of 1 here so they have less chance to be evicted
     foreach(const QString &entry, etcList) {
-        if (QFileInfo::exists(entry))
+        if (QFileInfo::exists(entry)) {
             insert(entry, new QObject(), HOTCACHE_COST_STRONG);
         }
     }
