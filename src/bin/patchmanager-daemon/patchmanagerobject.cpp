@@ -3112,12 +3112,12 @@ QString PatchManagerFilter::stats() const
     }
 
     //QList<QPair<QString, QVariant>> list;
-    QTextStream list;
-    list << "Filter Stats:"
-         << "\n==========================="
-         << "\n  Hotcache entries:: .............." << size()
-         << "\n  Hotcache cost: .................." << totalCost() << "/" << maxCost()
-         << "\n  Hotcache top entries: ..........." << "\n    " << topTen.join("\n    ")
-         << "\n===========================";
-    return list.readAll();
+    QString list;
+    list + "Filter Stats:"
+         + "\n==========================="
+         + "\n  Hotcache entries:: .............." + size()
+         + "\n  Hotcache cost: .................." + totalCost() + "/" + maxCost()
+         + "\n  Hotcache top entries: ..........." + "\n    " + topTen.join("\n    ")
+         + "\n===========================";
+    return list;
 }
