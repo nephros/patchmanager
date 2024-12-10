@@ -3050,7 +3050,7 @@ PatchManagerFilter::PatchManagerFilter(QObject *parent, int maxCost )
 }
 
 /* only use relatively stable sonames here. No symlinks! */
-const PatchManagerFilter::libList = QStringList({
+const QStringList PatchManagerFilter::libList = QStringList({
         "/usr/lib64/libtls-padding.so",
         "/usr/lib64/libpreloadpatchmanager.so",
         "/lib64/libc.so.6",
@@ -3064,7 +3064,7 @@ const PatchManagerFilter::libList = QStringList({
         "/usr/lib64/libblkid.so.1",
         "/usr/lib64/libgpg-error.so.0"
 });
-const PatchManagerFilter::etcList = QStringList({
+const QStringList PatchManagerFilter::etcList = QStringList({
     "/etc/passwd",
     "/etc/group",
     "/etc/shadow",

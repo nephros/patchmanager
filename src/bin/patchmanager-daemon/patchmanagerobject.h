@@ -108,6 +108,9 @@ public:
     //QList<QPair<QString, QVariant>> stats() const;
     QString stats() const;
 
+    static const QStringList etcList;
+    static const QStringList libList;
+
 signals:
     void activeChanged(bool);
 
@@ -116,8 +119,6 @@ private:
     unsigned int m_hits = 0;
     unsigned int m_misses = 0;
 
-    static const QStringList etcList;
-    static const QStringList libList;
 };
 
 class PatchManagerObject : public QObject, public QDBusContext
