@@ -105,7 +105,8 @@ public:
     unsigned int hits()   const { return m_hits; };
     unsigned int misses() const { return m_misses; };
 
-    QList<QPair<QString, QVariant>> stats() const;
+    //QList<QPair<QString, QVariant>> stats() const;
+    QString stats() const;
 
 signals:
     void activeChanged(bool);

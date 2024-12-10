@@ -3097,6 +3097,24 @@ void PatchManagerFilter::setup()
     }
 }
 
-QList<QPair<QString, QVariant>> PatchManagerFilter::stats() const
+//QList<QPair<QString, QVariant>> PatchManagerFilter::stats() const
+QString PatchManagerFilter::stats() const
 {
+    QStringList topTen;
+    const int ttmax = qEnvironmentVariableIsSet("PM_DEBUG_HOTCACHE") ? size() : 10;
+    foreach(const QString &key, keys() ) {
+        topTen << key;
+        if (topTen.size() >= ttmax)
+            break;
+    }
+
+    //QList<QPair<QString, QVariant>> list;
+    QTextStream list;
+    list << "Filter Stats:"
+         << "\n==========================="
+         << "\n  Hotcache entries:: .............." << size()
+         << "\n  Hotcache cost: .................." << totalCost() << "/" << maxCost()
+         << "\n  Hotcache top entries: ..........." << "\n    " << topTen.join("\n    ")
+         << "\n===========================";
+    return list.readAll();
 }
