@@ -905,7 +905,6 @@ void PatchManagerObject::initialize()
 
     m_serverThread = new QThread(this);
     connect(m_serverThread, &QThread::finished, this, [this](){
-        qInfo() << "Thread finished."; printStats();
         m_localServer->close();
     });
     connect(m_localServer, &QLocalServer::newConnection, this, &PatchManagerObject::startReadingLocalServer, Qt::DirectConnection);
