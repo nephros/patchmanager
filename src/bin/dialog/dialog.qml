@@ -43,7 +43,7 @@ ApplicationWindow {
     id: appWindow
     property var remorseItem: null
 
-    readonly property bool needsPin: needsPin1 || needsPin2
+    readonly property bool needsPin: modemManager.valid && (needsPin1 || needsPin2)
 
     readonly property bool needsPin1: ofonoSimManager1.simPresent && (
                                        ofonoSimManager1.pinRequired === OfonoSimManager.SimPin
@@ -76,11 +76,11 @@ ApplicationWindow {
         onValidChanged: {
             if ( valid && modemManager.presentSimCount > 0) {
                 ofonoSimManager1.modemPath = modemManager.enabledModems[0]
-                console.debug("Patchmanager Dialog: detected one SIM")
+                console.debug("Patchmanager Dialog: detected one SIM.")
             }
             if ( valid && modemManager.presentSimCount == 2) {
                 ofonoSimManager2.modemPath = modemManager.enabledModems[1]
-                console.debug("Patchmanager Dialog: detected two SIMs")
+                console.debug("Patchmanager Dialog: detected two SIMs.")
             }
         }
     }
@@ -98,10 +98,16 @@ ApplicationWindow {
     initialPage: Component { id: waitPage
         Page {
             allowedOrientations: Orientation.All
-            Label {
+            Label { id: waitLabel
                 anchors.centerIn: parent
                 font.pixelSize: Theme.fontSizeHuge
                 text: qsTranslate("", "waiting…")
+            }
+            Button {
+                anchors.top: waitLabel.bottom
+                anchors.horizontalCenter: waitLabel.horizontalCenter
+                text: qsTranslate("", "Go!")
+                onClicked: go()
             }
             Timer {
                 interval: 500
@@ -109,13 +115,16 @@ ApplicationWindow {
                 repeat: true
                 triggeredOnStart: true
                 onTriggered: {
-                    if (appWindow.needsPin) {
-                        console.info("Patchmanager Dialog: waiting for PIN entry...")
-                    } else {
+                    if (!appWindow.needsPin) {
                         console.info("Patchmanager Dialog: no PIN needed, activaing.")
-                        pageStack.replace(dialogPage, {}, PageStackAction.Immediate)
+                        go()
+                    } else {
+                        console.info("Patchmanager Dialog: waiting for PIN entry...")
                     }
                 }
+            }
+            function go() {
+                pageStack.replace(dialogPage, {}, PageStackAction.Immediate)
             }
         }
     }
