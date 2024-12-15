@@ -207,10 +207,11 @@ ApplicationWindow {
                 wrapMode: Text.Wrap
                 fontSizeMode: Text.Fit
                 text: qsTranslate("", "Patchmanager")
+                    + appWindow.needsPin ? ("\n" + qsTranslate("", "waiting…")) : ""
             }
 
             CoverActionList {
-                enabled: appWindow.remorseItem.pending
+                enabled: !!appWindow.remorseItem && appWindow.remorseItem.pending
                 CoverAction {
                     iconSource: "image://theme/icon-cover-cancel"
                     onTriggered: {
