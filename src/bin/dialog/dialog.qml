@@ -58,6 +58,7 @@ ApplicationWindow {
     }
     initialPage: Component {
         Page {
+            allowedOrientations: Orientation.All
             onStatusChanged: {
                 if (status == PageStatus.Active && !appWindow.remorseItem) {
                     remorse.execute(button, qsTranslate("", "Activate all enabled Patches"), function() {
