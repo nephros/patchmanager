@@ -36,10 +36,24 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
 import Nemo.DBus 2.0
+import QOfono 0.2
+import org.nemomobile.ofono 1.0
 
 ApplicationWindow {
     id: appWindow
     property var remorseItem: null
+
+    readonly property bool needsPin: needsPin1 || needsPin2
+
+    readonly property bool needsPin1: ofonoSimManager1.simPresent && (
+                                       ofonoSimManager1.pinRequired === OfonoSimManager.SimPin
+                                       || ofonoSimManager1.pinRequired === OfonoSimManager.SimPuk
+                                     )
+
+    readonly property bool needsPin2: ofonoSimManager2.simPresent && (
+                                       ofonoSimManager2.pinRequired === OfonoSimManager.SimPin
+                                       || ofonoSimManager2.pinRequired === OfonoSimManager.SimPuk
+                                     )
 
     DBusAdaptor {
         service: 'org.SfietKonstantin.patchmanager'
@@ -56,7 +70,56 @@ ApplicationWindow {
             console.warn("Function show is called.");
         }
     }
-    initialPage: Component {
+
+    OfonoModemManager {
+        id: modemManager
+        onValidChanged: {
+            if ( valid && modemManager.presentSimCount > 0) {
+                ofonoSimManager1.modemPath = modemManager.enabledModems[0]
+                console.debug("Patchmanager Dialog: detected one SIM")
+            }
+            if ( valid && modemManager.presentSimCount == 2) {
+                ofonoSimManager2.modemPath = modemManager.enabledModems[1]
+                console.debug("Patchmanager Dialog: detected two SIMs")
+            }
+        }
+    }
+
+    OfonoSimManager {
+        id: ofonoSimManager1
+        readonly property bool simPresent: valid && present
+    }
+
+    OfonoSimManager {
+        id: ofonoSimManager2
+        readonly property bool simPresent: valid && present
+    }
+
+    initialPage: Component { id: waitPage
+        Page {
+            allowedOrientations: Orientation.All
+            Label {
+                anchors.centerIn: parent
+                font.pixelSize: Theme.fontSizeHuge
+                text: qsTranslate("", "waiting…")
+            }
+            Timer {
+                interval: 500
+                running: true
+                repeat: true
+                triggeredOnStart: true
+                onTriggered: {
+                    if (appWindow.needsPin) {
+                        console.info("Patchmanager Dialog: waiting for PIN entry...")
+                    } else {
+                        console.info("Patchmanager Dialog: no PIN needed, activaing.")
+                        pageStack.replace(dialogPage, {}, PageStackAction.Immediate)
+                    }
+                }
+            }
+        }
+    }
+    Component { id: dialogPage
         Page {
             allowedOrientations: Orientation.All
             onStatusChanged: {
