@@ -400,18 +400,16 @@ QStringList PatchManagerObject::getMangleCandidates()
 void PatchManagerObject::printStats()
 {
     qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
-    QString apc = "?";
-    if (m_appliedPatches)
-        pfc = m_appliedPatches.count();
-    QString pfc = "?";
-    if (m_originalWatcher)
-        pfc = m_originalWatcher->files().count();
+    QString appliedcount = "?";
+    QString filescount = "?";
+    if (m_appliedPatches) appliedcount = m_appliedPatches.count();
+    if (m_originalWatcher) filescount  = m_originalWatcher->files().count();
     qInfo().noquote() << "Patchmanager Daemon runtime stats:"
             << "\n  Daemon life-time: ..............." << uptime << "seconds"
-            << "\n  Currently active patches: ......." << apc
+            << "\n  Currently active patches: ......." << appliedcount
             << "\n  File accesses redirected: ......." << m_sockrq_patched
             << "\n  File accesses passed as-is: ....." << m_sockrq_passed
-            << "\n  Known patched files: ............" << pfc
+            << "\n  Known patched files: ............" << filescount
             << "\n===========================";
 }
 
