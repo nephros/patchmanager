@@ -71,6 +71,7 @@ ApplicationWindow {
                 }
             }
 
+            property var serviceList: ({})
             ConfigurationValue {
                 id:  dialogConf
                 key: "/org/SfietKonstantin/patchmanager/dialog/timeout"
@@ -143,6 +144,21 @@ ApplicationWindow {
                         wrapMode: Text.WrapAtWordBoundaryOrAnywhere
                         visible: text.length > 0
                     }
+
+                    SilicaListView {
+                        id: servicesView
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        anchors.margins: Theme.horizontalPageMargin
+                        visible: false
+                        header: SectionHeader { text: qsTranslate("", "Will restart services:") }
+                        model: serviceList.length
+                        delegate: Label {
+                            width: ListView.view.width
+                            text: serviceList[index]
+                            font.pixelSize: Theme.fontSizeSmall
+                        }
+                    }
                 }
             }
 
@@ -171,6 +187,10 @@ ApplicationWindow {
                     console.info(patch);
                     progress.value += 1;
                     progress.label = patch;
+                    call("getToggleServicesList", [], function(lst) {
+                         console.info("Services to restart:", lst);
+                         serviceList = lst
+                    })
                 }
 
                 function autoApplyingFailed(patch) {
@@ -179,6 +199,10 @@ ApplicationWindow {
                 }
 
                 function autoApplyingFinished(success) {
+                    call("getToggleServicesList", [], function(lst) {
+                         console.info("Services to restart:", lst);
+                         serviceList = lst
+                    })
                     console.info(success);
                     console.timeEnd("autoApplyingRuntime"); // this string is an ID, use the same in time();
                     var t = new Date().getTime();
@@ -187,6 +211,10 @@ ApplicationWindow {
                     button.enabled = true;
                     progress.label = success ? qsTranslate("", "Successfully activated all enabled Patches.")
                                              : qsTranslate("", "Failed to activate all enabled Patches!")
+                }
+
+                function toggleServicesChanged(toggle) {
+                    servicesView.visible = toggle
                 }
             }
         }
