@@ -64,6 +64,9 @@ static const int HOTCACHE_COST_STRONG  = 1;
 static const int HOTCACHE_COST_DEFAULT = 2;
 static const int HOTCACHE_COST_WEAK    = 3;
 
+static const int HOTCACHE_COST_GROWSTEP   = 1000;
+static const int HOTCACHE_COST_SHRINKSTEP = 500;
+
 // output will be a dbus message. Don't make it too long.
 static const int HOTCACHE_LOG_MAX = 4096;
 
@@ -101,6 +104,11 @@ public:
     //QList<QPair<QString, QVariant>> stats() const;
     QString stats(bool verbose) const;
 
+public slots:
+    void optimize() {
+        selfOptimize();
+    };
+
 signals:
     void activeChanged(bool);
 
@@ -110,6 +118,9 @@ private:
     // need to be mutable so we can count from const method.
     mutable unsigned int m_hits = 0;
     mutable unsigned int m_misses = 0;
+
+    void selfOptimize();
+
 };
 
 #endif // PATCHMANAGERFILTER_H

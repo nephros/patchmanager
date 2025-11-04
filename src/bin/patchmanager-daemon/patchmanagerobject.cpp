@@ -1850,6 +1850,9 @@ void PatchManagerObject::onTimerAction()
     qDebug() << Q_FUNC_INFO;
     checkForUpdates();
     statistics(false);
+    if (m_filter.active()) {
+        m_filter.optimize();
+    }
 }
 
 void PatchManagerObject::startReadingLocalServer()

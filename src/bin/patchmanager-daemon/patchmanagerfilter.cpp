@@ -143,6 +143,36 @@ bool PatchManagerFilter::contains(const QString &key) const
    return ret;
 };
 
+void PatchManagerFilter::selfOptimize()
+{
+    // nothing to optimize
+    //if (totalCost()*2 < maxCost()) return;
+
+    // 1. evict entries from /home.
+    QString key;
+    foreach (key, keys()) {
+        if (key.startsWith(QStringLiteral("/home")) && (key.lastIndexOf("/") > 2)) {
+             remove(key);
+        }
+    }
+
+    /*
+    // TODO: some heuristics ideas:
+
+    // automatically increase cache if full and some condition matches
+    if ((m_misses*10 > m_hits) && (maxCost() < (HOTCACHE_COST_MAX * 5))) {
+        setMaxCost(maxCost() + HOTCACHE_COST_GROWSTEP);
+        qDebug() << "Hotcache: auto-increased cache size";
+    }
+    */
+
+    // automatically shrink the cache if not full and in use for a while
+    if ((totalCost()*2 < maxCost()) && (m_hits > 100000)) {
+        setMaxCost((int) maxCost()*0.8);
+        qDebug() << "Hotcache: auto-decreased cache size";
+    }
+
+}
 
 QString PatchManagerFilter::stats(bool verbose) const
 {
