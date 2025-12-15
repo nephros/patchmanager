@@ -87,12 +87,8 @@ public:
     // override QCache::contains()
     bool contains(const QString &key) const;
 
-    void setActive(bool active) {
-        if (m_active != active) {
-            m_active = active;
-            emit activeChanged(active);
-        }
-    };
+    void setActive(bool active);
+
     bool active() const { return m_active; };
 
     unsigned int hits()   const { return m_hits; };

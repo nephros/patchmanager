@@ -134,6 +134,17 @@ bool PatchManagerFilter::contains(const QString &key) const
    return ret;
 };
 
+void PatchManagerFilter::setActive(bool active) {
+    if (!m_active && active) {
+        setup();
+    } else if (m_active && !active) {
+        clear();
+    }
+    if (m_active != active) {
+        m_active = active;
+        emit activeChanged(m_active);
+    }
+};
 
 QString PatchManagerFilter::stats(bool verbose) const
 {
