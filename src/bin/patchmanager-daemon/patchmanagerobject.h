@@ -273,8 +273,9 @@ private:
     QTimer *m_sessionBusConnector = nullptr;
     QDBusConnection m_sbus;
 
-    PatchManagerFilter m_filter;
-    void setupFilter();
+    PatchManagerFilter *m_filter = nullptr;
+    void disableFilter();
+    void enableFilter();
 };
 
 #endif // PATCHMANAGEROBJECT_H
