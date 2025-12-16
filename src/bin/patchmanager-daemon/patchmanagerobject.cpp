@@ -148,6 +148,7 @@ static const QString SILICA_CODE      = QStringLiteral("silica");
 static const QString SETTINGS_CODE    = QStringLiteral("settings");
 static const QString KEYBOARD_CODE    = QStringLiteral("keyboard");
 
+
 /*!
   \class PatchManagerObject
   \inmodule PatchManagerDaemon
@@ -777,7 +778,7 @@ void PatchManagerObject::doStartLocalServer()
 */
 void PatchManagerObject::initialize()
 {
-    qInfo() << "Patchmanager: Initialized version " << qApp->applicationVersion();
+    qInfo() << "Patchmanager: Initializing version " << qApp->applicationVersion();
 
     QTranslator *translator = new QTranslator(this);
     bool success = translator->load(QLocale(getLang()),
@@ -811,9 +812,6 @@ void PatchManagerObject::initialize()
         qWarning() << Q_FUNC_INFO << "Failed to find ld.so.preload!";
     }
 
-    // prepare the hotcache
-    setupFilter();
-
     qDebug() << Q_FUNC_INFO << PM_APPLY;
     QFileInfo pa(PM_APPLY);
     if (pa.exists()) {
@@ -842,6 +840,11 @@ void PatchManagerObject::initialize()
         qCritical() << Q_FUNC_INFO << "D-Bus session address is not set!  Please check the environment configuration.";
         qDebug() << Q_FUNC_INFO << "Injecting DBUS_SESSION_BUS_ADDRESS...";
         qputenv("DBUS_SESSION_BUS_ADDRESS", QByteArrayLiteral("unix:path=/run/user/100000/dbus/user_bus_socket"));
+    }
+
+    if (!getSettings(QStringLiteral("enableFSFilter"), false).toBool()) {
+        enableFilter();
+        qInfo() << Q_FUNC_INFO << "Patchmanager: Enabled Advanced filtering.";
     }
 
     m_timer = new QTimer(this);
@@ -1850,6 +1853,9 @@ void PatchManagerObject::onTimerAction()
     qDebug() << Q_FUNC_INFO;
     checkForUpdates();
     statistics(false);
+    if (m_filter) {
+        m_filter->optimize();
+    }
 }
 
 void PatchManagerObject::startReadingLocalServer()
@@ -1878,9 +1884,9 @@ void PatchManagerObject::startReadingLocalServer()
         const QByteArray request = clientConnection->readAll();
         const QString fakePath = QStringLiteral("%1%2").arg(s_patchmanagerCacheRoot, QString::fromLatin1(request));
         bool passAsIs = true;
-        if (
-             (!m_failed) // return unaltered for failed
-             && (!m_filter.active() || !m_filter.contains(request)) // filter inactive or not in the list of unpatched files
+        if ( // check whether we should return a "patched" path
+             (!m_failed) // return unaltered when we are in "failed" state
+             && (!m_filter || (m_filter && !m_filter->contains(request))) // filter inactive or request not in the list of unpatched files
              && (Q_UNLIKELY(QFileInfo::exists(fakePath))) // file is patched
            )
         {
@@ -1900,21 +1906,21 @@ void PatchManagerObject::startReadingLocalServer()
 
         /* print debug and manage the cache after writing the data:
          * if the file didn't exist, we add it to the cache.
-         * otherwise, we so nothing, but check that it wasn't wrongly in the
+         * otherwise, we do nothing, but check that it wasn't wrongly in the
          * cache, which shouldn't happen.
-         * Note that we don't actually store anything in the cache, we're only
+         * Note that we don't actually store any data in the cache, we're only
          * interested in the key and the cost management.
          */
         if (passAsIs) { // file didn't exist
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "was sent unaltered.";
             }
-            m_filter.insert(request);
+            m_filter->insert(request);
         } else {
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qDebug() << Q_FUNC_INFO << "Requested:" << request << "Sent:" << fakePath;
             }
-            if (m_filter.remove(request)) {
+            if (m_filter->remove(request)) {
                 qWarning() << Q_FUNC_INFO << "Hot cache: contained a patched file:" << request << "/" << fakePath;
             }
         }
@@ -2194,8 +2200,8 @@ void PatchManagerObject::doStatistics(const QVariantMap &params, const QDBusMess
     if (m_originalWatcher)
       result << QStringLiteral("Watched files: %1").arg(m_originalWatcher->files().count());
 
-    if (m_filter.active()) {
-        result << m_filter.stats(verbose);
+    if (m_filter) {
+        result << m_filter->stats(verbose);
     } else {
         result << QStringLiteral("Advanced filtering is not active.");
     }
@@ -3044,18 +3050,18 @@ QString PatchManagerObject::pathToMangledPath(const QString &path, const QString
     return newpath;
 }
 
-/*! Set up the filter parameters and fill it with some initial contents.
- *
- *  \sa PatchManagerFilter::setup()
-*/
-void PatchManagerObject::setupFilter()
+void PatchManagerObject::disableFilter()
 {
-    if (!getSettings(QStringLiteral("enableFSFilter"), false).toBool()) {
-        m_filter.setActive(false);
-        return;
-    } else {
-        m_filter.setup();
-        m_filter.setActive(true);
+    qDebug() << Q_FUNC_INFO << "Disabling Filtering";
+    m_filter->deleteLater();
+    m_filter = nullptr;
+}
+
+void PatchManagerObject::enableFilter()
+{
+    if(!m_filter) {
+        qDebug() << Q_FUNC_INFO << "Enabling Filtering";
+        m_filter = new PatchManagerFilter(this);
     }
 }
 

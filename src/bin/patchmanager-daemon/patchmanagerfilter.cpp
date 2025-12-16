@@ -85,11 +85,6 @@ PatchManagerFilter::PatchManagerFilter(QObject *parent, int maxCost)
     : QObject(parent)
     , QCache(maxCost)
 {
-}
-
-void PatchManagerFilter::setup()
-{
-    qDebug() << Q_FUNC_INFO;
     // set up cache
     setMaxCost(HOTCACHE_COST_MAX);
 
@@ -123,27 +118,12 @@ bool PatchManagerFilter::insert(const QString &key, int cost)
 // override QCache::contains()
 bool PatchManagerFilter::contains(const QString &key) const
 {
-   if (!m_active)
-       return false;
-
    // we do not use QCache::contains here, because ::object() will make the cache notice usage of the object
    bool ret = (QCache::object(key) != 0); // NB: returns 0 in Qt < 5.13, nullptr in later versions
 
    if(ret) { m_hits+=1; } else { m_misses+=1; }
 
    return ret;
-};
-
-void PatchManagerFilter::setActive(bool active) {
-    if (!m_active && active) {
-        setup();
-    } else if (m_active && !active) {
-        clear();
-    }
-    if (m_active != active) {
-        m_active = active;
-        emit activeChanged(m_active);
-    }
 };
 
 QString PatchManagerFilter::stats(bool verbose) const
@@ -179,3 +159,35 @@ QString PatchManagerFilter::stats(bool verbose) const
 
     return stats.join("\n");
 }
+
+void PatchManagerFilter::selfOptimize()
+{
+    // nothing to optimize
+    //if (totalCost()*2 < maxCost()) return;
+
+    // 1. evict entries from /home.
+    QString key;
+    foreach (key, keys()) {
+        if (key.startsWith(QStringLiteral("/home")) && (key.lastIndexOf("/") > 2)) {
+             remove(key);
+        }
+    }
+
+    /*
+    // TODO: some heuristics ideas:
+
+    // automatically increase cache if full and some condition matches
+    if ((m_misses*10 > m_hits) && (maxCost() < (HOTCACHE_COST_MAX * 5))) {
+        setMaxCost(maxCost() + HOTCACHE_COST_GROWSTEP);
+        qDebug() << "Hotcache: auto-increased cache size";
+    }
+    */
+
+    // automatically shrink the cache if not full and in use for a while
+    if ((totalCost()*2 < maxCost()) && (m_hits > 100000)) {
+        setMaxCost((int) maxCost()*0.8);
+        qDebug() << "Hotcache: auto-decreased cache size";
+    }
+
+}
+

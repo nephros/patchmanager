@@ -67,19 +67,19 @@ static const int HOTCACHE_COST_WEAK    = 3;
 // output will be a dbus message. Don't make it too long.
 static const int HOTCACHE_LOG_MAX = 4096;
 
+static const int HOTCACHE_COST_GROWSTEP   = 1000;
+static const int HOTCACHE_COST_SHRINKSTEP = 500;
+
 // As we do not care about the actual cached object, try to use a small one.
 // quint8 should be one byte or so
 class PatchManagerFilter : public QObject, public QCache<QString, quint8>
 {
     Q_OBJECT
-    Q_PROPERTY(bool active READ active WRITE setActive NOTIFY activeChanged)
     Q_PROPERTY(unsigned int hits READ hits)
     Q_PROPERTY(unsigned int misses READ misses)
 public:
     PatchManagerFilter(QObject *parent = nullptr, int maxCost = HOTCACHE_COST_MAX);
     //~PatchManagerFilter();
-
-    void setup();
 
     // override QCache::insert()
     bool insert(const QString &key, int cost = HOTCACHE_COST_DEFAULT);
@@ -87,25 +87,24 @@ public:
     // override QCache::contains()
     bool contains(const QString &key) const;
 
-    void setActive(bool active);
-
-    bool active() const { return m_active; };
-
     unsigned int hits()   const { return m_hits; };
     unsigned int misses() const { return m_misses; };
 
     //QList<QPair<QString, QVariant>> stats() const;
     QString stats(bool verbose) const;
 
-signals:
-    void activeChanged(bool);
+public slots:
+    void optimize() {
+        selfOptimize();
+    };
 
 private:
-    bool m_active;
 
     // need to be mutable so we can count from const method.
     mutable unsigned int m_hits = 0;
     mutable unsigned int m_misses = 0;
+
+    void selfOptimize();
 };
 
 #endif // PATCHMANAGERFILTER_H
