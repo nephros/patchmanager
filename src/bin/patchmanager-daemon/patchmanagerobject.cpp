@@ -842,7 +842,7 @@ void PatchManagerObject::initialize()
         qputenv("DBUS_SESSION_BUS_ADDRESS", QByteArrayLiteral("unix:path=/run/user/100000/dbus/user_bus_socket"));
     }
 
-    if (!getSettings(QStringLiteral("enableFSFilter"), false).toBool()) {
+    if (getSettings(QStringLiteral("enableFSFilter"), false).toBool()) {
         enableFilter();
         qInfo() << Q_FUNC_INFO << "Patchmanager: Enabled Advanced filtering.";
     }
