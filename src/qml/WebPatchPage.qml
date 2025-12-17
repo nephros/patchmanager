@@ -101,7 +101,7 @@ Page {
 
     /*! \qmlproperty bool fetching
 
-        Indicates whether data is currently being downloaded. The WebPatchPage will show a ViewPlaceholder if true.
+        Indicates whether data is currently being downloaded. The WebPatchPage will show a \l{Sailfish.Silica.ViewPlaceholder}{ViewPlaceholder} if true.
 
         Default \c true
     */
@@ -124,7 +124,7 @@ Page {
             if (patchData.sources) {
                 linksmodel.append({
                     "link": patchData.sources,
-                    "linktext": qsTranslate("", "Sources"),
+                    "linktext": qsTranslate("", "Source code repository"),
                     "iconname": "icon-m-developer-mode"
                 })
             }
