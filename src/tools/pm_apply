@@ -222,6 +222,22 @@ create_backup_patch() {
   log
 }
 
+function deviceinfo() {
+  log "----------------------------------"
+  log "Environment info:"
+  log
+  if [-r /etc/ssu/ssu.ini ]; then
+    sed -n '/^arch=/p;/^release=/p;/^domain=/p' /etc/ssu/ssu.ini | sed 's/=/\t/'
+  elif [-r /etc/sailfish-release ]; then
+    sed -n '/^VERSION_ID=/p;/^SAILFISH_FLAVOUR=/p' /etc/sailfish-release | sed 's/=/\t/'
+  elif [-r /etc/os-release ]; then
+    sed -n '/^ID=/p;/^VERSION_ID=/p' /etc/os-release | sed 's/=/\t/'
+  else
+    log "Could not find any info. What OS is this?"
+  fi
+  log "----------------------------------"
+  log
+}
 #
 # Bunch of safety checks and required initializations
 #
@@ -237,6 +253,8 @@ log "----------------------------------"
 log "pm_apply $(date -Iseconds)"
 log "----------------------------------"
 log
+
+deviceinfo()
 
 if [ -z "$PARAMETER" ]; then
   log "ERROR: A parameter must be provided for the pm_apply script!"
