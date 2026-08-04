@@ -95,11 +95,13 @@ static const QString PATCHES_ADDITIONAL_DIR = QStringLiteral("%1/%2").arg(PATCHE
 static const QString PATCH_METADATA_FILE    = QStringLiteral("patch.json");
 static const QString MANGLE_CONFIG_FILE     = QStringLiteral("/etc/patchmanager/manglelist.conf");
 
+#ifdef PM_ENABLE_LEGACY
 static const QString AUSMT_BACKUP_DIR          = QStringLiteral("/var/lib/patchmanager/ausmt/patches");
 static const QString AUSMT_INSTALLED_LIST_FILE = QStringLiteral("/var/lib/patchmanager/ausmt/packages");
 
-static const QString s_newConfigLocation = QStringLiteral("/etc/patchmanager2.conf");
 static const QString s_oldConfigLocation = QStringLiteral("/home/nemo/.config/patchmanager2.conf");
+#endif
+static const QString s_configLocation = QStringLiteral("/etc/patchmanager2.conf");
 
 static const QString s_patchmanagerSocket    = QStringLiteral("/tmp/patchmanager-socket");
 static const QString s_patchmanagerCacheRoot = QStringLiteral("/tmp/patchmanager");
@@ -418,6 +420,7 @@ void PatchManagerObject::lateInitialize()
 {
     qDebug() << Q_FUNC_INFO;
 
+#ifdef PM_ENABLE_LEGACY
     QFile file (AUSMT_INSTALLED_LIST_FILE);
     if (file.exists()) {
         qWarning() << Q_FUNC_INFO << "Found extant AUSMT package list, importing list as enabled Patches.";
@@ -457,12 +460,14 @@ void PatchManagerObject::lateInitialize()
     if (needClear) {
         clearFakeroot();
     }
+#endif
+
     refreshPatchList();
 
     QDir cache(PATCHES_ADDITIONAL_DIR);
     if ((cache.exists() && cache.entryList(QDir::NoDotAndDotDot | QDir::Dirs).count() > 0)
             || getSettings(QStringLiteral("applyOnBoot"), false).toBool()) {
-        prepareCacheRoot();
+        applyAllPatches();
         startLocalServer();
     }
 
@@ -575,24 +580,23 @@ void PatchManagerObject::doRegisterDBus()
 }
 
 /*!
-    \fn void PatchManagerObject::prepareCacheRoot()
+    \fn void PatchManagerObject::applyAllPatches()
 
-    Despite its name, it does not actually prepare the cache root!
-    Instead, this is the main "auto-apply" function.
+    This is the main "auto-apply" function.
 
     \list
-    \li First, apply all enabled Patches which are listend in the \l{order}{inifile} settings key.
+    \li First, apply all enabled Patches which are listed in the \l{order}{inifile} settings key.
     \li Second, apply all enabled Patches which remain (if any).
     \li If applying any Patch fails, the local \c success variable will be set to \c false, but the applying run will continue.
     \li At the end of the process, if \c success is \c true, calls setWorkingPatches()
     \li At the end of the process, if \c success is \c false, calls refreshPatchList()
     \endlist
-()
+
     Emits signals \c autoApplyingStarted(), \c autoApplyingPatch(), \c autoApplyingFailed(), autoApplyingFinished(), depending on state.
 
     \sa PatchManagerObject::doPrepareCache(), {Patchmanager Configuration Files}, refreshPatchList(), setWorkingPatches()
 */
-void PatchManagerObject::doPrepareCacheRoot()
+void PatchManagerObject::doApplyAllPatches()
 {
     qDebug() << Q_FUNC_INFO;
     // TODO: think about security issues here
@@ -661,7 +665,7 @@ void PatchManagerObject::doPrepareCacheRoot()
 
     \a patchName: name of the patch to prepare the cache for.
 
-    \sa PatchManagerObject::prepareCacheRoot()
+    \sa PatchManagerObject::applyAllPatches()
 */
 void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
 {
@@ -792,7 +796,7 @@ void PatchManagerObject::initialize()
     qDebug() << Q_FUNC_INFO << "Translator installed" << success;
 
     m_nam = new QNetworkAccessManager(this);
-    m_settings = new QSettings(s_newConfigLocation, QSettings::IniFormat, this);
+    m_settings = new QSettings(s_configLocation, QSettings::IniFormat, this);
 
     qDebug() << Q_FUNC_INFO << "Environment:";
 
@@ -828,9 +832,11 @@ void PatchManagerObject::initialize()
         qWarning() << Q_FUNC_INFO << "Failed to access pm_unapply!";
     }
 
-    if (!QFileInfo::exists(s_newConfigLocation) && QFileInfo::exists(s_oldConfigLocation)) {
-        QFile::copy(s_oldConfigLocation, s_newConfigLocation);
+#ifdef PM_ENABLE_LEGACY
+    if (!QFileInfo::exists(s_configLocation) && QFileInfo::exists(s_oldConfigLocation)) {
+        QFile::copy(s_oldConfigLocation, s_configLocation);
     }
+#endif
 
     if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_EVENTFILTER"))) {
         installEventFilter(this);
@@ -998,6 +1004,7 @@ void PatchManagerObject::restartService(const QString &serviceName)
     }
 }
 
+#ifdef PM_ENABLE_LEGACY
 void PatchManagerObject::resetSystem()
 {
     qDebug() << Q_FUNC_INFO;
@@ -1081,6 +1088,7 @@ void PatchManagerObject::resetSystem()
 
     QCoreApplication::exit(0);
 }
+#endif
 
 void PatchManagerObject::clearFakeroot()
 {
@@ -1148,10 +1156,12 @@ void PatchManagerObject::process()
             return;  // Also prints help text.
         } else if (args[1] == QStringLiteral("--daemon")) {
             initialize();
+#ifdef PM_ENABLE_LEGACY
         } else if (args[1] == QStringLiteral("--reset-system")) {
             resetSystem();
             QCoreApplication::exit(2);
             return;
+#endif
         }
     } else if (args.count() > 1) {  // Must be "> 1", not "> 2" for "--unapply-all"
         QDBusConnection connection = QDBusConnection::systemBus();
@@ -1710,7 +1720,7 @@ void PatchManagerObject::loadRequest(bool apply)
     }
 
     if (apply) {
-        prepareCacheRoot();
+        applyAllPatches();
     } else {
         unapplyAllPatches();
     }
@@ -1981,7 +1991,7 @@ void PatchManagerObject::onOriginalFileChanged(const QString &path)
 
     if (!success) {
         clearFakeroot();
-        doPrepareCacheRoot();
+        doApplyAllPatches();
     }
 }
 
@@ -2937,10 +2947,10 @@ void PatchManagerObject::refreshPatchList()
     QMetaObject::invokeMethod(this, NAME(doRefreshPatchList), Qt::QueuedConnection);
 }
 
-void PatchManagerObject::prepareCacheRoot()
+void PatchManagerObject::applyAllPatches()
 {
     qDebug() << Q_FUNC_INFO;
-    QMetaObject::invokeMethod(this, NAME(doPrepareCacheRoot), Qt::QueuedConnection);
+    QMetaObject::invokeMethod(this, NAME(doApplyAllPatches), Qt::QueuedConnection);
 }
 
 void PatchManagerObject::eraseRecursively(const QString &path)
