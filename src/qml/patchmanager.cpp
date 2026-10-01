@@ -218,7 +218,7 @@ PatchManager::PatchManager(QObject *parent)
     });
 
     connect(this, &PatchManager::systemSanityChanged,
-                  [this](const QVector<QString>& report) { m_systemSanityReport = report ;});
+                  [this](const QStringList& report) { m_systemSanityReport = report ;});
     QTimer::singleShot(300, this, SLOT(checkSystemSanity()));
 
     m_osVersion  = QSettings("/etc/os-release", QSettings::IniFormat).value("VERSION_ID").toString();
@@ -1087,7 +1087,7 @@ void PatchManager::checkSystemSanity() { // static
     using SanityCheck::Problem;  using SanityCheck::Problems;
     using SanityCheck::Solution; using SanityCheck::Solutions;
 
-    QVector<QString> report;
+    QStringList report;
     QString tofix = Solutions.value(Solution::None);
     if(!QFile::exists(SanityCheck::preloadFile)) {
       report << Problems.value(Problem::PreloadFile);
@@ -1138,7 +1138,7 @@ void PatchManager::checkSystemSanity() { // static
     tofix = Solutions.value(Solution::None);
 #endif
     if (report.count() > 0) {
-        qWarning() << Q_FUNC_INFO << "Found problems:" << report.toList().join("\n\t");
+        qWarning() << Q_FUNC_INFO << "Found problems:" << report.join("\n\t");
         report << tofix;
         // static
         PatchManager::GetInstance()->systemSanityChanged(report);
@@ -1150,7 +1150,7 @@ void PatchManager::checkSystemSanity() { // static
 
     Returns the latest result of checkSystemSanity()
 */
-QVector<QString> PatchManager::getSystemSanityReport() {
+QStringList PatchManager::getSystemSanityReport() {
     return m_systemSanityReport;
 };
 

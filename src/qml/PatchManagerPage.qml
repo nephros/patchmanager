@@ -671,7 +671,7 @@ Page {
         }
 
         ViewPlaceholder { id: sanityProblemInfo
-            enabled: PatchManager.hasSanityProblems
+            enabled:   PatchManager.hasSanityProblems
             text:      qsTranslate("", "Problems with the installation detected.")
             hintText:  qsTranslate("", "Please see the Settings page for details.")
         }

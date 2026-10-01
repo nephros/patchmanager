@@ -190,7 +190,7 @@ public slots:
     void resolveFailure();
 
     static void checkSystemSanity();
-    QVector<QString> getSystemSanityReport();
+    QStringList getSystemSanityReport();
 
 signals:
     void easterReceived(const QString & easterText);
@@ -207,7 +207,7 @@ signals:
     void loadedChanged(bool loaded);
     void patchmanagerVersionChanged(const QString &patchmanagerVersion);
     void toggleServicesListChanged(const QStringList &servicesToBeToggled);
-    void systemSanityChanged(const QVector<QString>& report);
+    void systemSanityChanged(const QStringList& report);
 
 private:
     void successCall(QJSValue callback, const QVariant &value);
@@ -225,7 +225,7 @@ private:
     bool m_failed = false;
     bool m_loaded = false;
 
-    QVector<QString> m_systemSanityReport;
+    QStringList m_systemSanityReport;
 
     QString m_patchmanagerVersion;
     QString m_osVersion;
