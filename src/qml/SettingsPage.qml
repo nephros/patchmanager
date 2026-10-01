@@ -123,8 +123,29 @@ Page {
 
             spacing: Theme.paddingMedium
 
+            Component.onCompleted: {
+                if (PatchManager.hasSanityProblems()) {
+                    var report = PatchManager.getSystemSanityReport()
+                    sanityHeader.visible = true
+                    sanityLabel.text = qsTranslate("", "WARNING: This installation has the following problems:\n%1")
+                                    .arg(report.join("\n"))
+                    sanityLabel.visible = true
+                }
+            }
+
             PageHeader {
                 title: qsTranslate("", "Settings")
+            }
+
+            SectionHeader { id: sanityHeader; text: qsTranslate("", "Sanity Check"); visible: false }
+            Label { id: sanityLabel; visible: false
+                anchors {
+                    leftMargin: Theme.paddingLarge*2 // align to TextSwitch labels
+                    right: parent.right
+                    left: parent.left
+                }
+                color: Theme.secondaryHighlightColor
+                wrapMode: Text.Wrap
             }
 
             SectionHeader { text: qsTranslate("", "General") }

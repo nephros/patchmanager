@@ -77,7 +77,12 @@ Page {
         property bool showUnapplyAll: false
     }
 
-    Component.onCompleted: migrateDevModeSettings()
+    Component.onCompleted: {
+        migrateDevModeSettings()
+        if (PatchManager.hasSanityProblems()) {
+             Remorse.popupAction(container, qsTranslate("", "This Installation has problems. Please check the Settings page for details."))
+        }
+    }
     /*! \qmlmethod migrateDevModeSettings()
         Manages migration from legacy \e developerMode setting to the new \e patchDevelMode and \e sfosVersionCheck settings, then sets \e developerMode to \e false.
         \internal
