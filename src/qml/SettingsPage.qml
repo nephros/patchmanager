@@ -123,22 +123,13 @@ Page {
 
             spacing: Theme.paddingMedium
 
-            Component.onCompleted: {
-                if (PatchManager.hasSanityProblems()) {
-                    var report = PatchManager.getSystemSanityReport()
-                    sanityHeader.visible = true
-                    sanityLabel.text = qsTranslate("", "WARNING: This installation has the following problems:\n%1")
-                                    .arg(report.join("\n"))
-                    sanityLabel.visible = true
-                }
-            }
-
             PageHeader {
                 title: qsTranslate("", "Settings")
             }
 
-            SectionHeader { id: sanityHeader; text: qsTranslate("", "Sanity Check"); visible: false }
-            Label { id: sanityLabel; visible: false
+            SectionHeader { id: sanityHeader; text: qsTranslate("", "Installation Sanity Check"); visible: sanityLabel.visible }
+            Label { id: sanityLabel
+                visible: PatchManager.hasSanityProblems
                 anchors {
                     leftMargin: Theme.paddingLarge*2 // align to TextSwitch labels
                     right: parent.right
@@ -146,6 +137,12 @@ Page {
                 }
                 color: Theme.secondaryHighlightColor
                 wrapMode: Text.Wrap
+                text: qsTranslate("", "All fine, no problems detected.")
+                onVisibleChanged: if (visible) {
+                    var report = PatchManager.getSystemSanityReport()
+                    sanityLabel.text = qsTranslate("", "WARNING: We detected the following problems with this installation:\n%1")
+                                    .arg(report.join("\n"))
+                }
             }
 
             SectionHeader { text: qsTranslate("", "General") }

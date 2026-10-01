@@ -77,12 +77,8 @@ Page {
         property bool showUnapplyAll: false
     }
 
-    Component.onCompleted: {
-        migrateDevModeSettings()
-        if (PatchManager.hasSanityProblems()) {
-             Remorse.popupAction(container, qsTranslate("", "This Installation has problems. Please check the Settings page for details."))
-        }
-    }
+    Component.onCompleted: migrateDevModeSettings()
+
     /*! \qmlmethod migrateDevModeSettings()
         Manages migration from legacy \e developerMode setting to the new \e patchDevelMode and \e sfosVersionCheck settings, then sets \e developerMode to \e false.
         \internal
@@ -674,10 +670,17 @@ Page {
 
         }
 
+        ViewPlaceholder { id: sanityProblemInfo
+            enabled: PatchManager.hasSanityProblems
+            text:      qsTranslate("", "Problems with the installation detected.")
+            hintText:  qsTranslate("", "Please see the Settings page for details.")
+        }
+
         ViewPlaceholder {
             enabled: view.count == 0
             text: qsTranslate("", "No Patches available")
         }
+
         RemorsePopup { id: menuRemorse }
         VerticalScrollDecorator {}
     }
