@@ -40,7 +40,7 @@ void PatchManagerFakeroot::eraseRecursively(const QString &path)
     }
 }
 
-bool PatchManagerFakeroot::checkIsFakeLinked(const QString &path)
+bool PatchManagerFakeroot::checkIsLinked(const QString &path)
 {
     qDebug() << Q_FUNC_INFO << path;
     const QStringList parts = path.split(QDir::separator(), QString::SkipEmptyParts);
@@ -58,7 +58,7 @@ bool PatchManagerFakeroot::checkIsFakeLinked(const QString &path)
     return false;
 }
 
-bool PatchManagerFakeroot::tryToLinkFakeParent(const QString &path)
+bool PatchManagerFakeroot::tryToLinkParent(const QString &path)
 {
     qDebug() << Q_FUNC_INFO << path;
     const QStringList parts = path.split(QDir::separator(), QString::SkipEmptyParts);
@@ -81,7 +81,7 @@ bool PatchManagerFakeroot::tryToLinkFakeParent(const QString &path)
     return false;
 }
 
-bool PatchManagerFakeroot::tryToUnlinkFakeParent(const QString &path)
+bool PatchManagerFakeroot::tryToUnlinkParent(const QString &path)
 {
     qDebug() << Q_FUNC_INFO << path;
     const QStringList parts = path.split(QDir::separator(), QString::SkipEmptyParts);

@@ -40,9 +40,9 @@ public:
     void clear();
     void eraseRecursively(const QString& path);
 
-    bool checkIsFakeLinked(const QString &path);
-    bool tryToLinkFakeParent(const QString &path);
-    bool tryToUnlinkFakeParent(const QString &path);
+    bool checkIsLinked(const QString &path);
+    bool tryToLinkParent(const QString &path);
+    bool tryToUnlinkParent(const QString &path);
 };
 
 #endif

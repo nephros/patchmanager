@@ -662,12 +662,12 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
         }
 
         if (apply && !fi.absoluteDir().exists()) {
-            if (m_fakeroot.tryToLinkFakeParent(fi.absoluteDir().absolutePath())) {
+            if (m_fakeroot.tryToLinkParent(fi.absoluteDir().absolutePath())) {
                 continue;
             }
         }
 
-        if (apply && m_fakeroot.checkIsFakeLinked(fi.absoluteDir().absolutePath())) {
+        if (apply && m_fakeroot.checkIsLinked(fi.absoluteDir().absolutePath())) {
             continue;
         }
 
@@ -699,7 +699,7 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
             qDebug() << Q_FUNC_INFO << "Removing" << fakeFileName << remove_ret;
         } else {
             if (!apply) {
-                m_fakeroot.tryToUnlinkFakeParent(fi.absoluteDir().absolutePath());
+                m_fakeroot.tryToUnlinkParent(fi.absoluteDir().absolutePath());
                 continue;
             }
 
