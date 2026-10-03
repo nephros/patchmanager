@@ -34,6 +34,7 @@
 #define PATCHMANAGEROBJECT_H
 
 #include "journal.h"
+#include "fakeroot.h"
 
 #include <QtCore/QObject>
 #include <QtCore/QSet>
@@ -154,7 +155,7 @@ private slots:
 
     void doRegisterDBus();
     void doApplyAllPatches();
-    void doPrepareCache(const QString &patchName, bool apply = true);
+    void doPrepareFakeRoot(const QString &patchName, bool apply = true);
     void doStartLocalServer();
 
     void doRefreshPatchList();
@@ -192,7 +193,6 @@ private:
 #ifdef PM_ENABLE_LEGACY
     void resetSystem();
 #endif
-    void clearFakeroot();
 
     void registerDBus();
     void waitForLipstick();
@@ -230,12 +230,6 @@ private:
     void refreshPatchList();
     void applyAllPatches();
 
-    void eraseRecursively(const QString &path);
-
-    bool checkIsFakeLinked(const QString &path);
-    bool tryToLinkFakeParent(const QString &path);
-    bool tryToUnlinkFakeParent(const QString &path);
-
     bool m_dbusRegistered = false;
     QSet<QString> m_appliedPatches;
     QMap<QString, QVariantMap> m_metadata;
@@ -255,6 +249,8 @@ private:
 
     PatchManagerAdaptor *m_adaptor = nullptr;
     QNetworkAccessManager *m_nam = nullptr;
+
+    PatchManagerFakeroot m_fakeroot;
 
     QFileSystemWatcher *m_originalWatcher = nullptr;
 

@@ -37,6 +37,7 @@
 
 #include "patchmanagerobject.h"
 #include "patchmanager_adaptor.h"
+#include "locations.h"
 
 #include <QLocalSocket>
 #include <QLocalServer>
@@ -90,37 +91,12 @@ if (!calledFromDBus()) {\
     return x;\
 }
 
-// locations
-static const QString PATCHES_DIR            = QStringLiteral("/usr/share/patchmanager/patches");
-static const QString PATCHES_WORK_DIR_PREFIX= QStringLiteral("/tmp/patchmanager3");
-static const QString PATCHES_WORK_DIR       = QStringLiteral("%1/%2").arg(PATCHES_WORK_DIR_PREFIX, "work");
-static const QString PATCHES_ADDITIONAL_DIR = QStringLiteral("%1/%2").arg(PATCHES_WORK_DIR_PREFIX, "patches");
-static const QString PATCH_METADATA_FILE    = QStringLiteral("patch.json");
-static const QString MANGLE_CONFIG_FILE     = QStringLiteral("/etc/patchmanager/manglelist.conf");
-
 #ifdef PM_ENABLE_LEGACY
 static const QString AUSMT_BACKUP_DIR          = QStringLiteral("/var/lib/patchmanager/ausmt/patches");
 static const QString AUSMT_INSTALLED_LIST_FILE = QStringLiteral("/var/lib/patchmanager/ausmt/packages");
 
 static const QString s_oldConfigLocation = QStringLiteral("/home/nemo/.config/patchmanager2.conf");
 #endif
-static const QString s_configLocation = QStringLiteral("/etc/patchmanager2.conf");
-
-static const QString s_patchmanagerSocket    = QStringLiteral("/tmp/patchmanager-socket");
-static const QString s_patchmanagerCacheRoot = QStringLiteral("/tmp/patchmanager");
-
-static const QString s_sessionBusConnection = QStringLiteral("pm3connection");
-
-// helpers
-static const QString PM_APPLY   = QStringLiteral("/usr/libexec/pm_apply");
-static const QString PM_UNAPPLY = QStringLiteral("/usr/libexec/pm_unapply");
-
-// external binaries
-static const QString BIN_UNZIP        = QStringLiteral("/usr/bin/unzip");
-static const QString BIN_TAR          = QStringLiteral("/bin/tar");
-static const QString BIN_PKCON        = QStringLiteral("/usr/bin/pkcon");
-static const QString BIN_SYSTEMCTL_U  = QStringLiteral("/usr/bin/systemctl-user");
-static const QString BIN_RPM          = QStringLiteral("/bin/rpm");
 
 // map key constants: states
 static const QString NAME_KEY         = QStringLiteral("name");
@@ -474,7 +450,7 @@ void PatchManagerObject::lateInitialize()
     }
 
     if (needClear) {
-        clearFakeroot();
+        m_fakeroot.clear();
     }
 #endif
 
@@ -610,7 +586,7 @@ void PatchManagerObject::doRegisterDBus()
 
     Emits signals \c autoApplyingStarted(), \c autoApplyingPatch(), \c autoApplyingFailed(), autoApplyingFinished(), depending on state.
 
-    \sa PatchManagerObject::doPrepareCache(), {Patchmanager Configuration Files}, refreshPatchList(), setWorkingPatches()
+    \sa PatchManagerObject::doPrepareFakeRoot(), {Patchmanager Configuration Files}, refreshPatchList(), setWorkingPatches()
 */
 void PatchManagerObject::doApplyAllPatches()
 {
@@ -671,7 +647,7 @@ void PatchManagerObject::doApplyAllPatches()
 }
 
 /*!
-    \fn void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply = true)
+    \fn void PatchManagerObject::doPrepareFakeRoot(const QString &patchName, bool apply = true)
 
     Creates the cache directory where patched files will be stored
     and read from when passed to the preload library.
@@ -683,7 +659,7 @@ void PatchManagerObject::doApplyAllPatches()
 
     \sa PatchManagerObject::applyAllPatches()
 */
-void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
+void PatchManagerObject::doPrepareFakeRoot(const QString &patchName, bool apply)
 {
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << patchName << apply;
 
@@ -697,19 +673,19 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
         qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Processing file" << fileName;
         QFileInfo fi(fileName);
 
-        QDir fakeDir(QStringLiteral("%1%2").arg(s_patchmanagerCacheRoot, fi.absoluteDir().absolutePath()));
+        QDir fakeDir(QStringLiteral("%1%2").arg(m_fakeroot.rootDir(), fi.absoluteDir().absolutePath()));
         if (apply && !fakeDir.exists()) {
             qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Creating faking directory" << fakeDir.absolutePath();
             QDir::root().mkpath(fakeDir.absolutePath());
         }
 
         if (apply && !fi.absoluteDir().exists()) {
-            if (tryToLinkFakeParent(fi.absoluteDir().absolutePath())) {
+            if (m_fakeroot.tryToLinkParent(fi.absoluteDir().absolutePath())) {
                 continue;
             }
         }
 
-        if (apply && checkIsFakeLinked(fi.absoluteDir().absolutePath())) {
+        if (apply && m_fakeroot.checkIsLinked(fi.absoluteDir().absolutePath())) {
             continue;
         }
 
@@ -741,7 +717,7 @@ void PatchManagerObject::doPrepareCache(const QString &patchName, bool apply)
             qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Removing" << fakeFileName << remove_ret;
         } else {
             if (!apply) {
-                tryToUnlinkFakeParent(fi.absoluteDir().absolutePath());
+                m_fakeroot.tryToUnlinkParent(fi.absoluteDir().absolutePath());
                 continue;
             }
 
@@ -1101,21 +1077,6 @@ void PatchManagerObject::resetSystem()
 }
 #endif
 
-void PatchManagerObject::clearFakeroot()
-{
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
-
-    eraseRecursively(s_patchmanagerCacheRoot);
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Directory" << s_patchmanagerCacheRoot << "is cleansed (bool):" <<
-    QDir::root().rmpath(s_patchmanagerCacheRoot);
-
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Directory" << PATCHES_ADDITIONAL_DIR << "is cleansed (bool):" <<
-    QDir(PATCHES_ADDITIONAL_DIR).removeRecursively();
-
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Creating a clean cache directory (bool):" <<
-    QDir::root().mkpath(s_patchmanagerCacheRoot);
-}
-
 /*! 
     Retrieve the RPM name from a full package string.
 */
@@ -1303,7 +1264,7 @@ bool PatchManagerObject::unapplyAllPatches()
 {
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
 
-    clearFakeroot();
+    m_fakeroot.clear();
 
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Triggering service restart.";
     for (const QString &appliedPatch : m_appliedPatches) {
@@ -1862,7 +1823,7 @@ void PatchManagerObject::startReadingLocalServer()
         }
         const QByteArray request = clientConnection->readAll();
         QByteArray payload;
-        const QString fakePath = QStringLiteral("%1%2").arg(s_patchmanagerCacheRoot, QString::fromLatin1(request));
+        const QString fakePath = QStringLiteral("%1%2").arg(m_fakeroot.rootDir(), QString::fromLatin1(request));
         if (!m_failed && QFileInfo::exists(fakePath)) {
             payload = fakePath.toLatin1();
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
@@ -1933,7 +1894,7 @@ void PatchManagerObject::onOriginalFileChanged(const QString &path)
     }
 
     if (!success) {
-        clearFakeroot();
+        m_fakeroot.clear();
         doApplyAllPatches();
     }
 }
@@ -2168,7 +2129,7 @@ bool PatchManagerObject::doPatch(const QString &patchName, bool apply, QString *
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << patchName << apply;
 
     if (apply) {
-        doPrepareCache(patchName, apply);
+        doPrepareFakeRoot(patchName, apply);
     }
 
     QProcess process;
@@ -2199,7 +2160,7 @@ bool PatchManagerObject::doPatch(const QString &patchName, bool apply, QString *
     }
 
     if ((!apply && ret) || (apply && !ret)) {
-        doPrepareCache(patchName, false);
+        doPrepareFakeRoot(patchName, false);
     }
 
     return ret;
@@ -2864,84 +2825,6 @@ void PatchManagerObject::applyAllPatches()
 {
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
     QMetaObject::invokeMethod(this, NAME(doApplyAllPatches), Qt::QueuedConnection);
-}
-
-void PatchManagerObject::eraseRecursively(const QString &path)
-{
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << path;
-
-    QDir cacheDir(path);
-    for (const QFileInfo &info : cacheDir.entryInfoList(QDir::Dirs | QDir::Files | QDir::NoDotAndDotDot, QDir::DirsLast)) {
-        if (info.isDir() && !info.isSymLink()) {
-            eraseRecursively(info.absoluteFilePath());
-            qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Directory" << info.absoluteFilePath() << "is empty" <<
-            QDir::root().rmpath(info.absoluteFilePath());
-        } else if (info.isFile() || info.isSymLink()) {
-            QFile::remove(info.absoluteFilePath());
-        }
-    }
-
-}
-
-bool PatchManagerObject::checkIsFakeLinked(const QString &path)
-{
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << path;
-    const QStringList parts = path.split(QDir::separator(), QString::SkipEmptyParts);
-    QDir trial = QDir::root();
-    for (const QString &part : parts) {
-        if (trial.cd(part)) {
-            const QFileInfo fi(trial.absolutePath());
-            if (fi.isSymLink() && fi.symLinkTarget().startsWith(s_patchmanagerCacheRoot)) {
-                qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << path << "already has a faking symlink" << trial.absolutePath();
-                return true;
-            }
-            continue;
-        }
-    }
-    return false;
-}
-
-bool PatchManagerObject::tryToLinkFakeParent(const QString &path)
-{
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << path;
-    const QStringList parts = path.split(QDir::separator(), QString::SkipEmptyParts);
-    QDir trial = QDir::root();
-    for (const QString &part : parts) {
-        if (trial.cd(part)) {
-            const QFileInfo fi(trial.absolutePath());
-            if (fi.isSymLink() && fi.symLinkTarget().startsWith(s_patchmanagerCacheRoot)) {
-                qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << path << "already has a faking symlink" << trial.absolutePath();
-                return true;
-            }
-            continue;
-        }
-        const QString realPath = QStringLiteral("%1/%2").arg(trial.absolutePath(), part);
-        const QString fakePath = QStringLiteral("%1%2").arg(s_patchmanagerCacheRoot, realPath);
-        bool link_ret = QFile::link(fakePath, realPath);
-        qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Symlinking" << realPath << "to" << fakePath << link_ret;
-        return true;
-    }
-    return false;
-}
-
-bool PatchManagerObject::tryToUnlinkFakeParent(const QString &path)
-{
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << path;
-    const QStringList parts = path.split(QDir::separator(), QString::SkipEmptyParts);
-    QDir trial = QDir::root();
-    for (const QString &part : parts) {
-        if (!trial.cd(part)) {
-            qCWarning(patchmanagerDaemonLog) << Q_FUNC_INFO << "Failed when trying to change (cd) from directory" << trial.absolutePath() << "to" << part;
-            return false;
-        }
-        const QFileInfo fi(trial.absolutePath());
-        if (fi.isSymLink() && fi.symLinkTarget().startsWith(s_patchmanagerCacheRoot)) {
-            bool remove_ret = QFile::remove(trial.absolutePath());
-            qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Removing" << trial.absolutePath() << remove_ret;
-            return true;
-        }
-    }
-    return false;
 }
 
 QString PatchManagerObject::pathToMangledPath(const QString &path, const QStringList &candidates) const
