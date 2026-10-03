@@ -377,20 +377,6 @@ QStringList PatchManagerObject::getMangleCandidates()
     return m_mangleCandidates;
 }
 
-/*!
-    Reads operating system (\c{VERSION_ID}) version from \c /etc/os-release and sets \c m_osRelease to its value.
-    Calls lateInitialize() afterwards.
-
-    \sa lateInitialize()
-*/
-void PatchManagerObject::getVersion()
-{
-    qDebug() << Q_FUNC_INFO;
-    m_osRelease = QSettings("/etc/os-release", QSettings::IniFormat).value("VERSION_ID").toString();
-    qDebug() << "Installed SailfishOS release is" << m_osRelease;
-    lateInitialize();
-}
-
 void PatchManagerObject::lateInitialize()
 {
     qDebug() << Q_FUNC_INFO;
@@ -773,6 +759,8 @@ void PatchManagerObject::initialize()
     m_nam = new QNetworkAccessManager(this);
     m_settings = new QSettings(s_configLocation, QSettings::IniFormat, this);
 
+    m_osRelease = QSettings("/etc/os-release", QSettings::IniFormat).value("VERSION_ID").toString();
+
     qDebug() << Q_FUNC_INFO << "Environment:";
 
     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
@@ -788,7 +776,7 @@ void PatchManagerObject::initialize()
         }
         qDebug().noquote() << Q_FUNC_INFO << preload.readAll();
     } else {
-        qWarning() << Q_FUNC_INFO << "Failed to find ld.so.preload!";
+        qCritical() << Q_FUNC_INFO << "Failed to find ld.so.preload!";
     }
 
     qDebug() << Q_FUNC_INFO << PM_APPLY;
@@ -796,7 +784,7 @@ void PatchManagerObject::initialize()
     if (pa.exists()) {
         qDebug() << Q_FUNC_INFO << pa.permissions();
     } else {
-        qWarning() << Q_FUNC_INFO << "Failed to access pm_apply!";
+        qCritical() << Q_FUNC_INFO << "Failed to access pm_apply!";
     }
 
     qDebug() << Q_FUNC_INFO << PM_UNAPPLY;
@@ -804,7 +792,7 @@ void PatchManagerObject::initialize()
     if (pu.exists()) {
         qDebug() << Q_FUNC_INFO << pu.permissions();
     } else {
-        qWarning() << Q_FUNC_INFO << "Failed to access pm_unapply!";
+        qCritical() << Q_FUNC_INFO << "Failed to access pm_unapply!";
     }
 
 #ifdef PM_ENABLE_LEGACY
@@ -894,7 +882,7 @@ void PatchManagerObject::initialize()
         rpmConfigRead = true;
     }
 
-    getVersion();
+    lateInitialize();
 }
 
 /*!  Returns a pretty name (the \c display_name field) from the metadata of \a patch.  */
