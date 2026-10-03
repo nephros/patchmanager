@@ -38,6 +38,7 @@
 #include "patchmanagerobject.h"
 #include "patchmanager_adaptor.h"
 #include "locations.h"
+#include "util.h"
 
 #include <QLocalSocket>
 #include <QLocalServer>
@@ -1467,45 +1468,6 @@ QVariant PatchManagerObject::getSettings(const QString &name, const QVariant &de
     qDebug() << Q_FUNC_INFO << name << def << value;
     return value;
 }
-
-/*!
-    Compares two dot-separated version strings \a version1 and \a version2, and
-    returns the semantically higher one.
-*/
-QString PatchManagerObject::maxVersion(const QString &version1, const QString &version2)
-{
-    const QStringList vnums1 = version1.split(QChar('.'));
-    const QStringList vnums2 = version2.split(QChar('.'));
-
-    if (vnums1.count() < 3 || vnums2.count() < 3) {
-        return version1;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        const QString vnum1 = vnums1.at(i);
-        const QString vnum2 = vnums2.at(i);
-
-        bool ok = false;
-        const int num1 = vnum1.toInt(&ok);
-        if (!ok) {
-            continue;
-        }
-        const int num2 = vnum2.toInt(&ok);
-        if (!ok) {
-            continue;
-        }
-        if (num1 == num2) {
-            continue;
-        }
-        if (num1 > num2) {
-            return version1;
-        }
-        return version2;
-    }
-
-    return version1;
-}
-
 /*!
     Stops, restarts, or kills running processes belonging to a category which
     has been marked as to-be-restarted.
@@ -2788,7 +2750,7 @@ void PatchManagerObject::requestCheckForUpdates()
                         continue;
                     }
                     const QString version = file.value("version").toString();
-                    latestVersion = PatchManagerObject::maxVersion(latestVersion, version);
+                    latestVersion = maxVersion(latestVersion, version);
                 }
 
                 if (latestVersion == patchVersion) {

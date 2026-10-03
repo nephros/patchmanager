@@ -110,8 +110,8 @@ public slots:
 
     QVariantList downloadCatalog(const QVariantMap &params);
     QVariantMap downloadPatchInfo(const QString &name);
-    void checkForUpdates();
 
+    void checkForUpdates();
     QVariantMap getUpdates() const;
 
     bool putSettings(const QString & name, const QDBusVariant & value);
@@ -120,7 +120,6 @@ public slots:
     QVariant getSettings(const QString & name, const QVariant & def) const;
     QDBusVariant getSettings(const QString & name, const QDBusVariant & def);
 
-    static QString maxVersion(const QString &version1, const QString &version2);
 
     void restartServices();
     void patchToggleService(const QString &patch);
