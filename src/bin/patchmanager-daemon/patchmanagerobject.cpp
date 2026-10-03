@@ -38,6 +38,7 @@
 #include "patchmanagerobject.h"
 #include "patchmanager_adaptor.h"
 #include "locations.h"
+#include "util.h"
 
 #include <QLocalSocket>
 #include <QLocalServer>
@@ -1487,17 +1488,6 @@ QVariant PatchManagerObject::getSettings(const QString &name, const QVariant &de
 }
 
 /*!
-    Compares two dot-separated version strings \a version1 and \a version2, and
-    returns the semantically higher one.
-*/
-QString PatchManagerObject::maxVersion(const QString &version1, const QString &version2)
-{
-    const auto v1 = QVersionNumber::fromString(version1);
-    const auto v2 = QVersionNumber::fromString(version2);
-    return (v2 > v1) ? version2 : version1;
-}
-
-/*!
     Stops, restarts, or kills running processes belonging to a category which
     has been marked as to-be-restarted.
 
@@ -2779,7 +2769,7 @@ void PatchManagerObject::requestCheckForUpdates()
                         continue;
                     }
                     const QString version = file.value("version").toString();
-                    latestVersion = PatchManagerObject::maxVersion(latestVersion, version);
+                    latestVersion = maxVersion(latestVersion, version);
                 }
 
                 if (latestVersion == patchVersion) {
