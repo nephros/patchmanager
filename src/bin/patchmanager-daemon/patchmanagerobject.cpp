@@ -1248,7 +1248,7 @@ bool PatchManagerObject::unapplyAllPatches()
 
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Triggering service restart.";
     for (const QString &appliedPatch : m_appliedPatches) {
-        patchToggleService(appliedPatch);
+        applyServiceToggleForPatch(appliedPatch);
     }
 
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Resetting variables.";
@@ -1528,7 +1528,7 @@ void PatchManagerObject::restartServices()
     Checks the category of \a patch for membership in a category.
     If found, append its service toggles to the service toggle list.
 */
-void PatchManagerObject::patchToggleService(const QString &patch)
+void PatchManagerObject::applyServiceToggleForPatch(const QString &patch)
 {
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << patch;
 
@@ -2169,7 +2169,7 @@ void PatchManagerObject::doPatch(const QVariantMap &params, const QDBusMessage &
         setAppliedPatches(m_appliedPatches);
         refreshPatchList();
         if (!at_init) {
-            patchToggleService(patch);
+            applyServiceToggleForPatch(patch);
         }
     } else {
         qCInfo(patchmanagerDaemonLog) << "Applying patch failed" ;
