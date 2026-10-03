@@ -91,7 +91,7 @@
         <method name="restartServices">
             <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
         </method>
-        <method name="patchToggleService">
+        <method name="applyServiceToggleForPatch">
             <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
             <arg name="patch" type="s" direction="in" />
             <arg name="activate" type="b" direction="in" />

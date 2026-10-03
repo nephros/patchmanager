@@ -123,7 +123,7 @@ public slots:
 
 
     void restartServices();
-    void patchToggleService(const QString &patch);
+    void applyServiceToggleForPatch(const QString &patch);
 
     bool getToggleServices() const;
     QStringList getToggleServicesList() const;
