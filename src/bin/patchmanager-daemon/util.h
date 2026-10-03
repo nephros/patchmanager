@@ -33,6 +33,8 @@
 #ifndef PATCHMANAGER_UTIL_H
 #define PATCHMANAGER_UTIL_H
 
+#include "common/loggingcategory.h"
+
 namespace Util {
 /*!
     Compares two dot-separated version strings \a version1 and \a version2, and
@@ -81,8 +83,8 @@ static QString pathToMangledPath(const QString &path, const QStringList &candida
     if (Q_PROCESSOR_WORDSIZE == 4) { // 32 bit
         std::swap(toManglePaths, mangledPaths);
     }
-    qDebug() << Q_FUNC_INFO << "toManglePaths" << toManglePaths;
-    qDebug() << Q_FUNC_INFO << "mangledPaths" << mangledPaths;
+    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "toManglePaths" << toManglePaths;
+    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "mangledPaths" << mangledPaths;
 
     QString newpath = path;
 
@@ -90,13 +92,20 @@ static QString pathToMangledPath(const QString &path, const QStringList &candida
         // we need to deal with either absolute, or "git-style" beginnings, see #426:
         QString checkpath = path.mid(path.indexOf('/', 0));
         if (checkpath.startsWith(toManglePaths[i])) {
-            qDebug() << Q_FUNC_INFO << "Mangle: Editing path: " << path;
+            qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Mangle: Editing path: " << path;
             newpath.replace(toManglePaths[i], mangledPaths[i]);
-            qDebug() << Q_FUNC_INFO << "Mangle: Edited path: " << path;
+            qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Mangle: Edited path: " << path;
         }
     }
-    qDebug() << Q_FUNC_INFO << "Path after mangle" << newpath;
+    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Path after mangle" << newpath;
     return newpath;
+}
+
+static inline QString getRpmName(const QString &rpm)
+{
+    const QString info = rpm.section('-', -2);
+    const QString name = rpm.left(rpm.length() - info.length() - 1);
+    return name;
 }
 
 } // namespace
