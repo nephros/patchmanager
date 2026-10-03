@@ -329,7 +329,7 @@ void PatchManagerObject::notify(const QString &patch, NotifyAction action)
     qCDebug(patchmanagerDaemon) << Q_FUNC_INFO << summary << body;
 
     notification.setAppName(qApp->translate("", "Patchmanager"));
-    notification.setHintValue("app_icon", "icon-m-patchmanager2");
+    notification.setHintValue("app_icon", "icon-m-patchmanager");
     notification.setTimestamp(QDateTime::currentDateTime());
 
     if (!remoteActions.isEmpty()) {
