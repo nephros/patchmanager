@@ -97,6 +97,7 @@ static const QString s_oldConfigLocation = QStringLiteral("/home/nemo/.config/pa
 
 // map key constants: states
 static const QString NAME_KEY         = QStringLiteral("name");
+static const QString DISPLAYNAME_KEY  = QStringLiteral("display_name");
 static const QString DESCRIPTION_KEY  = QStringLiteral("description");
 static const QString CATEGORY_KEY     = QStringLiteral("category");
 static const QString INFOS_KEY        = QStringLiteral("infos");
@@ -893,7 +894,7 @@ QString PatchManagerObject::getPatchName(const QString patch) const
     }
 
     const QVariantMap patchData = m_metadata[patch];
-    return (patchData.contains("display_name") ? patchData["display_name"] : patchData[NAME_KEY]).toString();
+    return (patchData.contains(DISPLAYNAME_KEY) ? patchData[DISPLAYNAME_KEY] : patchData[NAME_KEY]).toString();
 }
 
 /*!
@@ -2129,7 +2130,7 @@ void PatchManagerObject::doPatch(const QVariantMap &params, const QDBusMessage &
 
 
     QVariantMap patchData = m_metadata[patch];
-    QVariant displayName = patchData.contains("display_name") ? patchData["display_name"] : patchData[NAME_KEY];
+    QVariant displayName = patchData.contains(DISPLAYNAME_KEY) ? patchData[DISPLAYNAME_KEY] : patchData[NAME_KEY];
 
     qInfo() << "Patchmanager: Applying patch " << displayName;
 
