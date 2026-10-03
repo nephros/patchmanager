@@ -59,7 +59,7 @@ public slots:
     void apply(QJSValue callback = QJSValue::UndefinedValue);
     void unapply(QJSValue callback = QJSValue::UndefinedValue);
     void uninstall();
-    void resetState();
+    //void resetState();
 
 private:
     void setBusy(bool busy);

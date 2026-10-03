@@ -1304,6 +1304,7 @@ bool PatchManagerObject::uninstallPatch(const QString &patch)
 
     \sa doResetPatchState
 */
+/*
 bool PatchManagerObject::resetPatchState(const QString &patch)
 {
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << patch;
@@ -1319,6 +1320,7 @@ bool PatchManagerObject::resetPatchState(const QString &patch)
                               Q_ARG(QDBusMessage, message()));
     return true;
 }
+*/
 
 /*!
     Calls the corresponding method over D-Bus to retrieve a vote for Patch \a patch
@@ -2198,6 +2200,7 @@ void PatchManagerObject::doPatch(const QVariantMap &params, const QDBusMessage &
 
     \target doResetPatchState
 */
+/*
 void PatchManagerObject::doResetPatchState(const QString &patch, const QDBusMessage &message)
 {
     bool success = m_appliedPatches.remove(patch);
@@ -2206,6 +2209,7 @@ void PatchManagerObject::doResetPatchState(const QString &patch, const QDBusMess
     }
     sendMessageReply(message, success);
 }
+*/
 
 void PatchManagerObject::doInstallPatch(const QVariantMap &params, const QDBusMessage &message)
 {

@@ -299,6 +299,7 @@ void PatchObject::uninstall()
 }
 
 /*!  Calls PatchManager::resetState with the patch name. */
+/*
 void PatchObject::resetState()
 {
     qCDebug(patchmanagerPatchLog) << Q_FUNC_INFO;
@@ -319,6 +320,7 @@ void PatchObject::resetState()
         watcher->deleteLater();
     });
 }
+*/
 
 void PatchObject::setBusy(bool busy)
 {
