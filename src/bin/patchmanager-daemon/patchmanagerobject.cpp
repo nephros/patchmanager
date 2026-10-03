@@ -120,6 +120,16 @@ static const QString SILICA_CODE      = QStringLiteral("silica");
 static const QString SETTINGS_CODE    = QStringLiteral("settings");
 static const QString KEYBOARD_CODE    = QStringLiteral("keyboard");
 
+static const QMap<QString, QString> CATEGORY_BOOSTER_MAP = {
+    { SILICA_CODE,      QStringLiteral("booster-silica-qt5.service") }
+  , { HOMESCREEN_CODE,  QStringLiteral("booster-silica-qt5.service") }
+  , { MEDIA_CODE,       QStringLiteral("booster-silica-media.service") }
+  , { EMAIL_CODE,       QStringLiteral("booster-browser@jolla-email.service") }
+  , { BROWSER_CODE,     QStringLiteral("booster-browser@sailfish-browser.service") }
+//  , { CAMERA_CODE,    QStringLiteral("booster-silica-media@jolla-camera-lockscreen.service") }
+  , { CAMERA_CODE,      QStringLiteral("booster-silica-media@jolla-camera.service") }
+};
+
 /*!
   \class PatchManagerObject
   \inmodule PatchManagerDaemon
@@ -1164,7 +1174,7 @@ QVariantMap PatchManagerObject::unapplyPatch(const QString &patch)
 
 /*!
     Calls the corresponding method over D-Bus to deactivate (unapply) all active Patches.
-    
+
     Returns \c true if successful.
 */
 bool PatchManagerObject::unapplyAllPatches()
@@ -1440,6 +1450,9 @@ void PatchManagerObject::restartServices()
             QStringList arguments;
             arguments << categoryToProcess[category];
             QProcess::execute(QStringLiteral("killall"), arguments);
+        }
+        if (CATEGORY_BOOSTER_MAP.contains(category)) {
+            restartService(CATEGORY_BOOSTER_MAP.value(category));
         }
     }
 
