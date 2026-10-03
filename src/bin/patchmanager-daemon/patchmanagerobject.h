@@ -200,8 +200,6 @@ private:
 
     QString getPatchName(const QString patch) const;
 
-    QString getRpmName(const QString &rpm) const;
-
     int getVote(const QString &patch);
 
     void sendActivation(const QString & patch, const QString & version);

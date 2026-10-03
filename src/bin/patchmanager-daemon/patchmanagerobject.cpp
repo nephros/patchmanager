@@ -1048,16 +1048,6 @@ void PatchManagerObject::resetSystem()
 }
 #endif
 
-/*! 
-    Retrieve the RPM name from a full package string.
-*/
-QString PatchManagerObject::getRpmName(const QString &rpm) const
-{
-    const QString info = rpm.section('-', -2);
-    const QString name = rpm.left(rpm.length() - info.length() - 1);
-    return name;
-}
-
 /*!
     Handle command line arguments, and may daemonise.
 
@@ -2391,7 +2381,7 @@ void PatchManagerObject::doUninstallPatch(const QString &patch, const QDBusMessa
     } else {
         qDebug() << Q_FUNC_INFO << "Removing RPM Patch package" << rpmPatch;
 
-        const int ret = QProcess::execute(BIN_PKCON, {QStringLiteral("remove"), QStringLiteral("-y"), getRpmName(rpmPatch)});
+        const int ret = QProcess::execute(BIN_PKCON, {QStringLiteral("remove"), QStringLiteral("-y"), Util::getRpmName(rpmPatch)});
         removeSuccess = ret == 0;
     }
 

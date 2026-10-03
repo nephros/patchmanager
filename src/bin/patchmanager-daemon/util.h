@@ -99,6 +99,13 @@ static QString pathToMangledPath(const QString &path, const QStringList &candida
     return newpath;
 }
 
+static inline QString getRpmName(const QString &rpm)
+{
+    const QString info = rpm.section('-', -2);
+    const QString name = rpm.left(rpm.length() - info.length() - 1);
+    return name;
+}
+
 } // namespace
 
 #endif // PATCHMANAGER_UTIL_H
