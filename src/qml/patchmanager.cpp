@@ -72,6 +72,44 @@ static const char *noop_strings[] = {
     QT_TRANSLATE_NOOP("Sections", "keyboard"),
 };
 
+namespace SanityCheck {
+static const char preloadFile[]           = "/etc/ld.so.preload";
+static const char firejailFile[]          = "/etc/firejail/whitelist-common.local";
+static const char preloadConfigString[]   = "libpreloadpatchmanager.so";
+static const char firejailConfigString[]  = "include whitelist-common-patchmanager.local";
+enum Problem {
+        Unknown
+      , PreloadFile
+      , PreloadConfig
+      , JailFile
+      , JailConfig
+
+      , DebugTest = 99
+};
+static const QMap<Problem, QString> Problems = {
+      { Problem::Unknown       , QCoreApplication::translate("SanityCheck", "Unknown problem") }
+    , { Problem::PreloadFile   , QCoreApplication::translate("SanityCheck", "Preload config does not exist.") }
+    , { Problem::PreloadConfig , QCoreApplication::translate("SanityCheck", "Preload config is not correct.") }
+    , { Problem::JailFile      , QCoreApplication::translate("SanityCheck", "Firejail config does not exist.") }
+    , { Problem::JailConfig    , QCoreApplication::translate("SanityCheck", "Firejail config is not correct.") }
+
+    , { Problem::DebugTest    , QCoreApplication::translate("SanityCheck", "THIS IS A TEST PROBLEM") }
+};
+enum Solution {
+        None
+      , Reinstall
+      , Restart
+      , Reboot
+};
+static const QMap<Solution, QString> Solutions = {
+      { Solution::None      , QCoreApplication::translate("SanityCheck", "Suggested Fix: No known solution") }
+    , { Solution::Reinstall , QCoreApplication::translate("SanityCheck", "Suggested fix: Reinstall Patchmanager.") }
+    , { Solution::Restart   , QCoreApplication::translate("SanityCheck", "Suggested fix: Restart Patchmanager daemon.") }
+    , { Solution::Reboot    , QCoreApplication::translate("SanityCheck", "Suggested fix: Reboot the device.") }
+};
+}
+
+
 /*! \class PatchManager
     \inheaderfile patchmanager.h
     \inmodule org.SfietKonstantin.patchmanager
@@ -181,6 +219,10 @@ PatchManager::PatchManager(QObject *parent)
         emit patchmanagerVersionChanged(m_patchmanagerVersion);
 
     });
+
+    connect(this, &PatchManager::systemSanityChanged,
+                  [this](const QStringList& report) { m_systemSanityReport = report ;});
+    QTimer::singleShot(300, this, SLOT(checkSystemSanity()));
 
     m_osVersion  = QSettings("/etc/os-release", QSettings::IniFormat).value("VERSION_ID").toString();
 }
@@ -1036,6 +1078,84 @@ bool PatchManagerTranslator::installTranslator(const QString &patch)
     }
     return true;
 }
+
+/*! \fn static void PatchManager::checkSystemSanity();
+    \internal
+
+    Performs a series of checks on the current patchmanager setup, and reports errors and solution suggestions via signal.
+
+    \emits systemSanityChanged(const QString& report);
+*/
+void PatchManager::checkSystemSanity() { // static
+    using SanityCheck::Problem;  using SanityCheck::Problems;
+    using SanityCheck::Solution; using SanityCheck::Solutions;
+
+    QStringList report;
+    QString tofix = Solutions.value(Solution::None);
+    if(!QFile::exists(SanityCheck::preloadFile)) {
+      report << Problems.value(Problem::PreloadFile);
+      tofix = Solutions.value(Solution::Reinstall);
+    } else {
+        bool ok = false;
+        QFile file(SanityCheck::preloadFile);
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        QTextStream in (&file);
+        QString line;
+        do {
+            line = in.readLine();
+            if (line.contains(QString::fromLatin1(SanityCheck::preloadConfigString), Qt::CaseSensitive)) {
+                ok = true;
+                file.close();
+                break;
+            }
+        } while (!line.isNull());
+        if(!ok) {
+            report << Problems.value(Problem::PreloadConfig);
+            tofix = Solutions.value(Solution::Reinstall);
+        }
+    }
+    if(!QFile::exists(SanityCheck::firejailFile)) {
+      report << Problems.value( Problem::JailFile);
+      tofix = Solutions.value(Solution::Reinstall);
+    } else {
+        bool ok = false;
+        QFile file(SanityCheck::firejailFile);
+        file.open(QIODevice::ReadOnly | QIODevice::Text);
+        QTextStream in (&file);
+        QString line;
+        do {
+            line = in.readLine();
+            if (line.contains(QString::fromLatin1(SanityCheck::firejailConfigString), Qt::CaseSensitive)) {
+                ok = true;
+                file.close();
+                break;
+            }
+        } while (!line.isNull());
+        if(!ok) {
+            report << Problems.value(Problem::JailConfig);
+            tofix = Solutions.value(Solution::Reinstall);
+        }
+    }
+#ifdef DEBUG_SANITYCHECK
+    report << Problems.value(Problem::DebugTest);
+    tofix = Solutions.value(Solution::None);
+#endif
+    if (report.count() > 0) {
+        qWarning() << Q_FUNC_INFO << "Found problems:" << report.join("\n\t");
+        report << tofix;
+        // static
+        PatchManager::GetInstance()->systemSanityChanged(report);
+    }
+}
+
+
+/*! \fn PatchManager::getSystemSanityReport()
+
+    Returns the latest result of checkSystemSanity()
+*/
+QStringList PatchManager::getSystemSanityReport() {
+    return m_systemSanityReport;
+};
 
 /*
     The only purpose of the following two dummy methods is to document

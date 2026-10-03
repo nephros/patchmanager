@@ -6,6 +6,9 @@ QT = core qml network dbus gui
 CONFIG += qt plugin hide_symbols
 QMAKE_CXXFLAGS += -Werror
 
+# for testing:
+# DEFINES += DEBUG_SANITYCHECK
+
 HEADERS += \
     patchmanager.h \
     webcatalog.h \
