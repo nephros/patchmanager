@@ -88,13 +88,6 @@ if (!calledFromDBus()) {\
     return x;\
 }
 
-#ifdef PM_ENABLE_LEGACY
-static const QString AUSMT_BACKUP_DIR          = QStringLiteral("/var/lib/patchmanager/ausmt/patches");
-static const QString AUSMT_INSTALLED_LIST_FILE = QStringLiteral("/var/lib/patchmanager/ausmt/packages");
-
-static const QString s_oldConfigLocation = QStringLiteral("/home/nemo/.config/patchmanager2.conf");
-#endif
-
 // map key constants: states
 static const QString NAME_KEY         = QStringLiteral("name");
 static const QString DISPLAYNAME_KEY  = QStringLiteral("display_name");
@@ -381,48 +374,6 @@ QStringList PatchManagerObject::getMangleCandidates()
 void PatchManagerObject::lateInitialize()
 {
     qDebug() << Q_FUNC_INFO;
-
-#ifdef PM_ENABLE_LEGACY
-    QFile file (AUSMT_INSTALLED_LIST_FILE);
-    if (file.exists()) {
-        qWarning() << Q_FUNC_INFO << "Found extant AUSMT package list, importing list as enabled Patches.";
-        if (file.open(QFile::ReadOnly)) {
-            while (!file.atEnd()) {
-                const QString line = QString::fromLatin1(file.readLine());
-                const QStringList splitted = line.split(QChar(' '));
-                if (splitted.count() == 2) {
-                    m_appliedPatches.insert(splitted.first());
-                    qDebug() << Q_FUNC_INFO << splitted.first();
-                }
-            }
-            file.close();
-        }
-        qWarning() << Q_FUNC_INFO << "Removing AUSMT package list." <<
-        file.remove();
-        setAppliedPatches(m_appliedPatches);
-    }
-
-    bool needClear = false;
-    QDir ausmtBackup(AUSMT_BACKUP_DIR);
-    QDir oldpm3cache(QStringLiteral("/var/lib/patchmanager3/patches"));
-    if (ausmtBackup.exists()) {
-        qWarning() << Q_FUNC_INFO << "Found AUSMT backup directory, hence cleansing fakeroot.";
-
-        ausmtBackup.removeRecursively();
-        needClear = true;
-    }
-
-    if (oldpm3cache.exists()) {
-        qWarning() << Q_FUNC_INFO << "Found old backup directory, hence cleansing fakeroot.";
-
-        oldpm3cache.removeRecursively();
-        needClear = true;
-    }
-
-    if (needClear) {
-        m_fakeroot.clear();
-    }
-#endif
 
     refreshPatchList();
 
@@ -795,12 +746,6 @@ void PatchManagerObject::initialize()
     } else {
         qCritical() << Q_FUNC_INFO << "Failed to access pm_unapply!";
     }
-
-#ifdef PM_ENABLE_LEGACY
-    if (!QFileInfo::exists(s_configLocation) && QFileInfo::exists(s_oldConfigLocation)) {
-        QFile::copy(s_oldConfigLocation, s_configLocation);
-    }
-#endif
 
     if (Q_UNLIKELY(qEnvironmentVariableIsSet("PM_DEBUG_EVENTFILTER"))) {
         installEventFilter(this);
