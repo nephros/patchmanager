@@ -29,12 +29,14 @@ DEFINES += BUILD_VERSION=\\\"$$BUILD_VERSION\\\"
 HEADERS += \
     patchmanagerobject.h \
     patchmanager_include.h \
+    fakeroot.h \
     inotifywatcher.h \
     journal.h
 
 SOURCES += \
     main.cpp \
     patchmanagerobject.cpp \
+    fakeroot.cpp \
     inotifywatcher.cpp \
     journal.cpp
 
