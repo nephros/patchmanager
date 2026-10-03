@@ -223,8 +223,6 @@ private:
     void setWorkingPatches(const QSet<QString> &patches);
     void backupWorkingPatchList();
 
-    void getVersion();
-
     void lateInitialize();
     void refreshPatchList();
     void applyAllPatches();
