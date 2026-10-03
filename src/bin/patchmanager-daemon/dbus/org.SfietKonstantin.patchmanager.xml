@@ -33,10 +33,12 @@
             <arg name="patch" type="s" direction="in" />
             <arg name="ok" type="b" direction="out" />
         </method>
+        <!--
         <method name="resetState">
             <arg name="patch" type="s" direction="in" />
             <arg name="ok" type="b" direction="out" />
         </method>
+        -->
         <method name="unapplyAllPatches">
             <arg name="ok" type="b" direction="out" />
         </method>

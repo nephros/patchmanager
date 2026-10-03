@@ -101,7 +101,8 @@ public slots:
     bool unapplyAllPatches();
     bool installPatch(const QString &patch, const QString &version, const QString &url);
     bool uninstallPatch(const QString &patch);
-    bool resetPatchState(const QString &patch);
+    // unused?
+    //bool resetPatchState(const QString &patch);
 
     int checkVote(const QString &patch);
     void votePatch(const QString &patch, int action);
@@ -161,7 +162,8 @@ private slots:
 
     bool doPatch(const QString &patchName, bool apply, QString *patchLog = nullptr);
     void doPatch(const QVariantMap &params, const QDBusMessage &message, bool apply);
-    void doResetPatchState(const QString &patch, const QDBusMessage &message);
+    // unused?
+    //void doResetPatchState(const QString &patch, const QDBusMessage &message);
 
     void doInstallPatch(const QVariantMap &params, const QDBusMessage &message);
     void downloadPatchArchive(const QVariantMap &params, const QDBusMessage &message);

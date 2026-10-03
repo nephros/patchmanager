@@ -449,12 +449,14 @@ QDBusPendingCallWatcher *PatchManager::uninstallPatch(const QString &patch)
 /*!  Request the daemon to do ... with \a patch
     \warning method not investigated, need documentation
 */
+/*
 QDBusPendingCallWatcher *PatchManager::resetState(const QString &patch)
 {
     qDebug() << Q_FUNC_INFO;
 
     return new QDBusPendingCallWatcher(m_interface->resetState(patch), this);
 }
+*/
 
 /*!
     Request daemon to retrieve the \l {Patchmanager Web Catalog}{Web Catalog}.
