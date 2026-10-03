@@ -33,6 +33,8 @@
 #ifndef PATCHMANAGER_UTIL_H
 #define PATCHMANAGER_UTIL_H
 
+#include <QVersionNumber>
+
 namespace Util {
 /*!
     Compares two dot-separated version strings \a version1 and \a version2, and
@@ -40,36 +42,9 @@ namespace Util {
 */
 static QString maxVersion(const QString &version1, const QString &version2)
 {
-    const QStringList vnums1 = version1.split(QChar('.'));
-    const QStringList vnums2 = version2.split(QChar('.'));
-
-    if (vnums1.count() < 3 || vnums2.count() < 3) {
-        return version1;
-    }
-
-    for (int i = 0; i < 3; i++) {
-        const QString vnum1 = vnums1.at(i);
-        const QString vnum2 = vnums2.at(i);
-
-        bool ok = false;
-        const int num1 = vnum1.toInt(&ok);
-        if (!ok) {
-            continue;
-        }
-        const int num2 = vnum2.toInt(&ok);
-        if (!ok) {
-            continue;
-        }
-        if (num1 == num2) {
-            continue;
-        }
-        if (num1 > num2) {
-            return version1;
-        }
-        return version2;
-    }
-
-    return version1;
+    const auto v1 = QVersionNumber::fromString(version1);
+    const auto v2 = QVersionNumber::fromString(version2);
+    return (v2 > v1) ? v2.toString() : v1.toString();
 }
 
 static QString pathToMangledPath(const QString &path, const QStringList &candidates)
