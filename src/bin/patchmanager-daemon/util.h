@@ -33,6 +33,7 @@
 #ifndef PATCHMANAGER_UTIL_H
 #define PATCHMANAGER_UTIL_H
 
+namespace Util {
 /*!
     Compares two dot-separated version strings \a version1 and \a version2, and
     returns the semantically higher one.
@@ -97,5 +98,7 @@ static QString pathToMangledPath(const QString &path, const QStringList &candida
     qDebug() << Q_FUNC_INFO << "Path after mangle" << newpath;
     return newpath;
 }
+
+} // namespace
 
 #endif // PATCHMANAGER_UTIL_H

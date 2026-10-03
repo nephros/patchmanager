@@ -1923,7 +1923,7 @@ void PatchManagerObject::doRefreshPatchList()
 
                 QString path = toPatch;
                 if(getSettings(QStringLiteral("bitnessMangle"), false).toBool())
-                    path = pathToMangledPath(toPatch, m_mangleCandidates);
+                    path = Util::pathToMangledPath(toPatch, m_mangleCandidates);
 
                 // remove anything left of the slash until we find something that exists.
                 // deals with 
@@ -1937,7 +1937,7 @@ void PatchManagerObject::doRefreshPatchList()
                 // so just accept whatever's in the patch, but do remove things left of the slash:
                 if (!QFileInfo::exists(path)) {
                     if(getSettings(QStringLiteral("bitnessMangle"), false).toBool())
-                        path = pathToMangledPath(toPatch, m_mangleCandidates);
+                        path = Util::pathToMangledPath(toPatch, m_mangleCandidates);
                     if (!toPatch.startsWith(QChar('/'))) {
                         path = path.mid(path.indexOf('/', 1));
                     }
@@ -2342,7 +2342,7 @@ void PatchManagerObject::downloadPatchArchive(const QVariantMap &params, const Q
         if (ret == 0) {
             if (m_updates.contains(patch)) {
                 const QString upVersion = m_updates.value(patch).toString();
-                const QString lastVersion = maxVersion(upVersion, version);
+                const QString lastVersion = Util::maxVersion(upVersion, version);
 
                 if (upVersion == version || lastVersion == version) {
                     m_updates.remove(patch);
@@ -2753,7 +2753,7 @@ void PatchManagerObject::requestCheckForUpdates()
                         continue;
                     }
                     const QString version = file.value("version").toString();
-                    latestVersion = maxVersion(latestVersion, version);
+                    latestVersion = Util::maxVersion(latestVersion, version);
                 }
 
                 if (latestVersion == patchVersion) {
