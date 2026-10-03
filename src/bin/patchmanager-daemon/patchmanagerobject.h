@@ -244,8 +244,6 @@ private:
 
     QStringList m_mangleCandidates;
 
-    QString pathToMangledPath(const QString &path, const QStringList &candidates) const;
-
     PatchManagerAdaptor *m_adaptor = nullptr;
     QNetworkAccessManager *m_nam = nullptr;
 

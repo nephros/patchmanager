@@ -1940,7 +1940,9 @@ void PatchManagerObject::doRefreshPatchList()
             if (line.startsWith(QByteArrayLiteral("+++ "))) {
                 const QString toPatch = QString::fromLatin1(line.split(' ')[1].split('\t')[0].split('\n')[0]);
 
-                QString path = pathToMangledPath(toPatch, m_mangleCandidates);
+                QString path = toPatch;
+                if(getSettings(QStringLiteral("bitnessMangle"), false).toBool())
+                    path = pathToMangledPath(toPatch, m_mangleCandidates);
 
                 // remove anything left of the slash until we find something that exists.
                 // deals with 
@@ -1953,7 +1955,8 @@ void PatchManagerObject::doRefreshPatchList()
                 // if the loop finishes with no path/file found, it's likely a new file.
                 // so just accept whatever's in the patch, but do remove things left of the slash:
                 if (!QFileInfo::exists(path)) {
-                    path = pathToMangledPath(toPatch, m_mangleCandidates);
+                    if(getSettings(QStringLiteral("bitnessMangle"), false).toBool())
+                        path = pathToMangledPath(toPatch, m_mangleCandidates);
                     if (!toPatch.startsWith(QChar('/'))) {
                         path = path.mid(path.indexOf('/', 1));
                     }
@@ -2815,33 +2818,4 @@ void PatchManagerObject::applyAllPatches()
 {
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
     QMetaObject::invokeMethod(this, NAME(doApplyAllPatches), Qt::QueuedConnection);
-}
-
-QString PatchManagerObject::pathToMangledPath(const QString &path, const QStringList &candidates) const
-{
-    if(!getSettings(QStringLiteral("bitnessMangle"), false).toBool())
-        return path;
-    // Create mangling replacement tokens.
-    QStringList toManglePaths = candidates;
-    QStringList mangledPaths = candidates;
-    mangledPaths.replaceInStrings("/usr/lib/", "/usr/lib64/");
-    if (Q_PROCESSOR_WORDSIZE == 4) { // 32 bit
-        std::swap(toManglePaths, mangledPaths);
-    }
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "toManglePaths" << toManglePaths;
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "mangledPaths" << mangledPaths;
-
-    QString newpath = path;
-
-    for (int i = 0; i < toManglePaths.size(); i++) {
-        // we need to deal with either absolute, or "git-style" beginnings, see #426:
-        QString checkpath = path.mid(path.indexOf('/', 0));
-        if (checkpath.startsWith(toManglePaths[i])) {
-            qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Mangle: Editing path: " << path;
-            newpath.replace(toManglePaths[i], mangledPaths[i]);
-            qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Mangle: Edited path: " << path;
-        }
-    }
-    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Path after mangle" << newpath;
-    return newpath;
 }
