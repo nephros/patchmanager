@@ -66,7 +66,7 @@ Page {
 
     /*
      * The usual, system-wide configuration values are set via D-Bus plugin by the
-     * Patchmanager daemon, which stores them in /etc/patchmanager2.conf
+     * Patchmanager Daemon, which stores them in /etc/patchmanager2.conf
      * This configuration group "uisettings" is for settings which *solely* affect
      * the PM GUI application and consequently also are per-user settings.
     */
@@ -188,7 +188,6 @@ Page {
             value: false
         }
     }
-
     SilicaListView {
         id: view
         anchors.fill: parent
@@ -196,9 +195,11 @@ Page {
         readonly property int topmostY: -view.headerItem.height
         readonly property int bottommostY: view.contentHeight - view.height - view.headerItem.height
 
+        Behavior on opacity { FadeAnimation { duration: 800 } }
+
         PullDownMenu {
             busy: view.busy
-            enabled: !busy
+            enabled: !busy && background.drag && (background.drag.target === null)
 
             /*
             Disabled due to discussion at https://github.com/sailfishos-patches/patchmanager/pull/272#issuecomment-1047685536
@@ -236,6 +237,12 @@ Page {
                 text: qsTranslate("", "Restart preloaded services")
                 visible: PatchManager.appsNeedRestart
                 onClicked: pageStack.push(Qt.resolvedUrl("RestartServicesDialog.qml"))
+            }
+
+            MenuItem {
+                text: qsTranslate("", "Restore prior enabled list")
+                visible: PatchManager.failure
+                onClicked: menuRemorse.execute( text, function() { PatchManager.call(PatchManager.restorePatchList()) } )
             }
 
             MenuItem {
@@ -303,7 +310,7 @@ Page {
             /* signals / handlers */
 
             Component.onCompleted: {
-                console.debug("Constructing delegate for:", patchObject.details.patch)
+                //console.debug("Constructing delegate for:", patchObject.details.patch)
                 const qmlFile = "/usr/share/patchmanager/patches/%1/main.qml".arg(patchObject.details.patch)
                 if (PatchManager.fileExists(qmlFile)) {
                     patchSettingsFile = qmlFile
@@ -333,14 +340,14 @@ Page {
                 var deltaX = pressPosition.x - mouse.x
                 if (drag.target) {
                     if (isAboveTop) {
-                        sctollTopTimer.start()
-                        sctollBottomTimer.stop()
+                        scrollToTopTimer.start()
+                        scrollToBottomTimer.stop()
                     } else if (isBelowBottom) {
-                        sctollBottomTimer.start()
-                        sctollTopTimer.stop()
+                        scrollToBottomTimer.start()
+                        scrollToTopTimer.stop()
                     } else {
-                        sctollBottomTimer.stop()
-                        sctollTopTimer.stop()
+                        scrollToBottomTimer.stop()
+                        scrollToTopTimer.stop()
                     }
                 } else {
                     if (deltaX > dragThreshold) {
@@ -381,8 +388,8 @@ Page {
                 } else {
                     view.model.saveLayout()
                 }
-                sctollTopTimer.stop()
-                sctollBottomTimer.stop()
+                scrollToTopTimer.stop()
+                scrollToBottomTimer.stop()
                 drag.target = null
                 var ctod = content.mapToItem(background, content.x, content.y)
                 ctod.x = ctod.x - content.x
@@ -434,6 +441,7 @@ Page {
 
             /* helper components */
 
+            /*
             Connections {
                 target: patchObject.details
                 onPatchedChanged: {
@@ -447,9 +455,10 @@ Page {
                     console.debug("onBusyChanged:", patchObject.details.patch, patchObject.busy)
                 }
             }
+            */
 
             Timer {
-                id: sctollTopTimer
+                id: scrollToTopTimer
                 repeat: true
                 interval: 1
                 onTriggered: {
@@ -464,7 +473,7 @@ Page {
             }
 
             Timer {
-                id: sctollBottomTimer
+                id: scrollToBottomTimer
                 repeat: true
                 interval: 1
                 onTriggered: {
@@ -518,23 +527,79 @@ Page {
                     duration: 200
                 }
 
-                Switch {
+                GlassItem {
+                    id: glass
+                    width: Theme.itemSizeLarge
+                    height: Theme.itemSizeLarge
+                    anchors.horizontalCenter: parent.left
+                    anchors.verticalCenter: nameLabel.verticalCenter
+                    radius: 0.14
+                    falloffRadius: 0.13
+                    visible: (down || busy || patchObject.details.patched)
+                    color: (down || busy || patchObject.details.patched)
+                        ? Theme.rgba(Theme.primaryColor, Theme.opacityLow)
+                        : Theme.rgba(Theme.secondaryColor, Theme.opacityLow)
+                    Behavior on color { FadeAnimation {} }
+                }
+
+                IconButton {
                     id: appliedSwitch
                     anchors.verticalCenter: parent.verticalCenter
-                    automaticCheck: false
-                    checked: patchObject.details.patched
+                    x: Theme.paddingLarge
+                    property string fallbackSource : fallbackIcon[patchObject.details.category]
+                    readonly property var fallbackIcon: {
+                        "browser":      "image://theme/icon-m-website",
+                        "camera":       "image://theme/icon-m-camera",
+                        "calendar":     "image://theme/icon-m-date",
+                        "clock":        "image://theme/icon-m-clock",
+                        "contacts":     "image://theme/icon-m-users",
+                        "email":        "image://theme/icon-m-mail",
+                        "gallery":      "image://theme/icon-m-image",
+                        "homescreen":   "image://theme/icon-m-device",
+                        "media":        "image://theme/icon-m-media-playlists",
+                        "messages":     "image://theme/icon-m-message",
+                        "phone":        "image://theme/icon-m-call",
+                        "silica":       "image://theme/icon-m-sailfish",
+                        "settings":     "image://theme/icon-m-setting",
+                        "keyboard":     "image://theme/icon-m-keyboard",
+                        "other":        "image://theme/icon-m-patchmanager2",
+                    }
+                    icon.source: "image://theme/icon-m-patchmanager2"
+                    Component.onCompleted:{
+                        var patchSource = PatchManager.iconForPatch(patchObject.details.patch, Theme.colorScheme ? (Theme.colorScheme == Theme.LightOnDark) : true)
+                        if (patchSource.length > 0) {
+                            icon.source = patchSource
+                        } else if (fallbackSource) {
+                            icon.source = fallbackSource
+                        }
+                    }
+                    icon.sourceSize.height: Theme.iconSizeSmallPlus
+                    icon.sourceSize.width: Theme.iconSizeSmallPlus
+                    icon.height: Theme.iconSizeSmallPlus
+                    icon.width: Theme.iconSizeSmallPlus
+
+                    palette.primaryColor: Theme.secondaryColor
+                    palette.highlightColor: Theme.primaryColor
+                    highlighted: down || patchObject.details.patched || busy
+
+                    property bool busy: patchObject.busy
+                    enabled: !busy
                     onClicked: background.doPatch()
-                    enabled: !busy && PatchManager.loaded
-                    busy: patchObject.busy
+
+                    Behavior on icon.opacity { PropertyAnimation {
+                        duration: 1200; alwaysRunToEnd : true; easing.type: Easing.OutBack
+                    }}
                 }
 
                 Column {
                     id: nameLabel
                     anchors.left: appliedSwitch.right
-                    anchors.right: patchIcon.status == Image.Ready ? patchIcon.left : parent.right
+                    //anchors.right: patchIcon.status == Image.Ready ? patchIcon.left : parent.right
+                    anchors.right: appliedSwitch.status == Image.Ready ? appliedSwitch.left : parent.right
                     anchors.margins: Theme.paddingMedium
                     anchors.verticalCenter: parent.verticalCenter
                     Label {
+                        width: parent.width
                         text: name
                         color: patchObject.details.isCompatible ? background.down ? Theme.highlightColor : ( patchObject.details.patched ? Theme.primaryColor : Theme.secondaryColor )
                                                                 : background.down ? Theme.highlightBackgroundFromColor(Theme.errorColor, Theme.colorScheme) : ( patchObject.details.patched ? Theme.errorColor : Theme.secondaryHighlightFromColor(Theme.errorColor, Theme.colorScheme) )
@@ -556,16 +621,6 @@ Page {
                             font.pixelSize: Theme.fontSizeTiny
                         }
                     }
-                }
-
-                Image {
-                    id: patchIcon
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: Theme.itemSizeExtraSmall
-                    height: Theme.itemSizeExtraSmall
-                    visible: status == Image.Ready
-                    source: PatchManager.iconForPatch(patchObject.details.patch, Theme.colorScheme ? (Theme.colorScheme == Theme.LightOnDark) : true)
                 }
             }
 
@@ -594,7 +649,7 @@ Page {
                     }
                     MenuItem {
                         id: patchinfoitem
-                        text: qsTranslate("", "Patch details")
+                        text: qsTranslate("", "Details")
                         onClicked: background.openPatchInfo()
                     }
                     MenuItem {

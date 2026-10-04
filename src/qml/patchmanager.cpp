@@ -75,7 +75,10 @@ static const char *noop_strings[] = {
 
     \brief Patchmanager QML Plugin
 */
-
+/*!
+   \typedef VersionCheck
+   \relates PatchManagerVersionCheck
+ */
 PatchManager::PatchManager(QObject *parent)
     : QObject(parent)
     , m_nam(new QNetworkAccessManager(this))
@@ -100,7 +103,7 @@ PatchManager::PatchManager(QObject *parent)
         watcher->deleteLater();
         QDBusPendingReply<QVariantMap> reply = *watcher;
         if (reply.isError()) {
-            qWarning() << Q_FUNC_INFO << reply.error().type() << reply.error().name() << reply.error().message();
+            qWarning() << Q_FUNC_INFO << "DBus error: " << reply.error().type() << reply.error().name() << reply.error().message();
             return;
         }
 
@@ -116,7 +119,7 @@ PatchManager::PatchManager(QObject *parent)
         watcher->deleteLater();
         QDBusPendingReply<bool> reply = *watcher;
         if (reply.isError()) {
-            qWarning() << Q_FUNC_INFO << reply.error().type() << reply.error().name() << reply.error().message();
+            qWarning() << Q_FUNC_INFO << "DBus error: " << reply.error().type() << reply.error().name() << reply.error().message();
             return;
         }
 
@@ -132,7 +135,7 @@ PatchManager::PatchManager(QObject *parent)
         watcher->deleteLater();
         QDBusPendingReply<bool> reply = *watcher;
         if (reply.isError()) {
-            qWarning() << Q_FUNC_INFO << reply.error().type() << reply.error().name() << reply.error().message();
+            qWarning() << Q_FUNC_INFO << "DBus error: " << reply.error().type() << reply.error().name() << reply.error().message();
             return;
         }
 
@@ -148,7 +151,7 @@ PatchManager::PatchManager(QObject *parent)
         watcher->deleteLater();
         QDBusPendingReply<bool> reply = *watcher;
         if (reply.isError()) {
-            qWarning() << Q_FUNC_INFO << reply.error().type() << reply.error().name() << reply.error().message();
+            qWarning() << Q_FUNC_INFO << "DBus error: " << reply.error().type() << reply.error().name() << reply.error().message();
             return;
         }
 
@@ -164,7 +167,7 @@ PatchManager::PatchManager(QObject *parent)
         watcher->deleteLater();
         QDBusPendingReply<QString> reply = *watcher;
         if (reply.isError()) {
-            qWarning() << Q_FUNC_INFO << reply.error().type() << reply.error().name() << reply.error().message();
+            qWarning() << Q_FUNC_INFO << "DBus error: " << reply.error().type() << reply.error().name() << reply.error().message();
             return;
         }
 
@@ -300,7 +303,7 @@ void PatchManager::setNotifyOnSuccess(bool notifyOnSuccess)
 */
 bool PatchManager::bitnessMangle() const
 {
-    return getSettingsSync(QStringLiteral("bitnessMangle"), false).toBool();
+    return getSettingsSync(QStringLiteral("bitnessMangle"), true).toBool();
 }
 
 void PatchManager::setBitnessMangle(bool bitnessMangle)
@@ -316,9 +319,8 @@ PatchManagerModel *PatchManager::installedModel()
 }
 
 /*!
-    Helper for SectionHeader titles. Looks up translations for \a category.
+    Helper for \l{Sailfish.Silica.SectionHeader}{SectionHeader} titles. Looks up translations for \a category.
     Returns the translated string.
-    \sa {https://sailfishos.org/develop/docs/silica/qml-sailfishsilica-sailfish-silica-sectionheader.html/}
 */
 QString PatchManager::trCategory(const QString &category) const
 {
@@ -400,7 +402,7 @@ void PatchManager::requestListPatches(const QString &patch, bool installed)
         watcher->deleteLater();
         QDBusPendingReply<QVariantList> reply = *watcher;
         if (reply.isError()) {
-            qWarning() << reply.error().type() << reply.error().name() << reply.error().message();
+            qWarning() << Q_FUNC_INFO << "DBus error: " << reply.error().type() << reply.error().name() << reply.error().message();
             return;
         }
         const QVariantList data = PatchManager::unwind(reply.value()).toList();
@@ -555,7 +557,7 @@ void PatchManager::watchCall(QDBusPendingCallWatcher *call, QJSValue callback, Q
         watcher->deleteLater();
         QDBusPendingReply<> reply = *watcher;
         if (reply.isError()) {
-            qWarning() << reply.error().type() << reply.error().name() << reply.error().message();
+            qWarning() << Q_FUNC_INFO << "DBus error: " << reply.error().type() << reply.error().name() << reply.error().message();
             if (errorCallback.isCallable()) {
                 QJSValueList callbackArguments;
                 callbackArguments << QJSValue(reply.error().message());
@@ -614,7 +616,10 @@ void PatchManager::doVote(const QString &patch, int action)
     putSettingsSync(QStringLiteral("votes/%1").arg(patch), action);
 }
 
-/*! \internal lets not spoil the fun (or the eggs!). */
+/*!
+   \internal
+   lets not spoil the fun (or the eggs!).
+*/
 void PatchManager::checkEaster()
 {
     qDebug() << Q_FUNC_INFO;
@@ -669,7 +674,7 @@ void PatchManager::checkForUpdates()
 }
 
 /*!
-    Saves the setting \a name to \a value over DBus.
+    Saves the setting \a name to \a value over D-Bus.
     Returns \c true when done, \c false otherwise.
 
     \sa {} {PatchManagerObject::putSettings(const QString &name, const QDBusVariant &value)}
@@ -686,7 +691,7 @@ bool PatchManager::putSettingsSync(const QString &name, const QVariant &value)
 }
 
 /*!
-    Saves the setting \a name to \a value over DBus.
+    Saves the setting \a name to \a value over D-Bus.
 
     Calls \a callback in success, \a errorCallback on failure.
 
@@ -697,7 +702,7 @@ void PatchManager::putSettingsAsync(const QString &name, const QVariant &value, 
 }
 
 /*!
-    Returns the setting \a name over DBus.
+    Returns the setting \a name over D-Bus.
     Defaults to \a def
 */
 QVariant PatchManager::getSettingsSync(const QString &name, const QVariant &def) const
@@ -711,7 +716,7 @@ QVariant PatchManager::getSettingsSync(const QString &name, const QVariant &def)
 }
 
 /*!
-    Retrieves the setting \a name over DBus.
+    Retrieves the setting \a name over D-Bus.
     Defaults to \a def
 
     Calls \a callback in success, \a errorCallback on failure.
@@ -746,7 +751,7 @@ void PatchManager::errorCall(QJSValue errorCallback, const QString &message)
 }
 
 /*!
-    Handler for the DBus signal. Sets the internal list to \a updates if different.
+    Handler for the D-Bus signal. Sets the internal list to \a updates if different.
 
     Emits signal /e updatesChanged()
 */
@@ -763,7 +768,7 @@ void PatchManager::onUpdatesAvailable(const QVariantMap &updates)
 }
 
 /*!
-    Handler for the DBus signal. Sets the internal list to \a toggle if different.
+    Handler for the D-Bus signal. Sets the internal list to \a toggle if different.
 
     Emits signal /e toggleServicesChanged(bool toggle)
 */
@@ -781,7 +786,7 @@ void PatchManager::onToggleServicesChanged(bool toggle)
 
 
 /*!
-    Handler for the DBus signal. Sets the internal property to \a failed if different.
+    Handler for the D-Bus signal. Sets the internal property to \a failed if different.
 
     Emits \e failureChanged(bool failed)
 */
@@ -798,7 +803,7 @@ void PatchManager::onFailureChanged(bool failed)
 }
 
 /*!
-    Handler for the DBus signal. Sets the internal list to \a loaded if different.
+    Handler for the D-Bus signal. Sets the internal list to \a loaded if different.
 
     Emits \e loadedChanged(bool loaded)
 */
@@ -814,6 +819,22 @@ void PatchManager::onLoadedChanged(bool loaded)
     emit loadedChanged(m_loaded);
 }
 
+/*! Calls the \e restorePatchList method on D-Bus */
+void PatchManager::restorePatchList()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_interface->restorePatchList();
+}
+
+/*! Calls the \e backupWorkingPatchList method on D-Bus */
+void PatchManager::backupWorkingPatchList()
+{
+    qDebug() << Q_FUNC_INFO;
+
+    m_interface->backupWorkingPatchList();
+}
+
 /*! Calls the \e resolveFailure method on D-Bus */
 void PatchManager::resolveFailure()
 {
@@ -823,7 +844,7 @@ void PatchManager::resolveFailure()
 }
 
 /*!
-    Helper to translate a DBus reply object \a val to a valid/usable QVariant
+    Helper to translate a D-Bus reply object \a val to a valid/usable QVariant
 
     Recurse up to \a depth (max. 32).
 
@@ -846,7 +867,7 @@ QVariant PatchManager::unwind(const QVariant &val, int depth)
 
     if( ++depth > maximum_dept ) {
         /* Leave result to invalid variant */
-        qWarning() << "Too deep recursion detected at userType:" << type;
+        qWarning() << Q_FUNC_INFO << "Too deep recursion detected at userType: " << type;
     }
     else if (type == QVariant::List) {
         /* Is built-in type, but does not get correctly converted
@@ -947,14 +968,14 @@ QVariant PatchManager::unwind(const QVariant &val, int depth)
 
         default:
             /* Unhandled types produce invalid QVariant */
-            qWarning() << "Unhandled QDBusArgument element type:" << elem;
+            qWarning() << Q_FUNC_INFO << "Unhandled QDBusArgument element type:" << elem;
             break;
         }
     } else {
         /* Default to using as is. This should leave for example QDBusError
          * types in a form that does not look like a string to qml code. */
         res = val;
-        qWarning() << "Unhandled QVariant userType:" << type;
+        qWarning() << Q_FUNC_INFO << "Unhandled QVariant userType:" << type;
     }
 
     return res;
@@ -1013,9 +1034,33 @@ bool PatchManagerTranslator::installTranslator(const QString &patch)
     return true;
 }
 
+/*
+    The only purpose of the following two dummy methods is to document
+    their corresponding definitions in /src/qml/patchmanager.h,
+    because qdoc warns about undocumented classes and functions, but
+    does not allow for qdoc source documentation in header files.
+*/
+
+/*! \fn void PatchManager::activation(const QString & patch, const QString & version);
+    \internal
+    using \a patch and \a version
+    \warning This seems to be dead code as nothing seems to attach to this slot, need to investigate removal
+*/
+
+/*! \fn void PatchManager::easterReceived(const QString &easterText);
+    \internal
+
+    This signal is emitted when checkEaster() has determined there is an easter
+    egg to display, and contains \a easterText as a string parameter.
+
+    Used in AboutPage to display an easter egg.
+
+    \sa AboutPage
+*/
+
 /*!
     Returns \e true if \a filename exists, \e false otherwise.
-    \sa https://doc.qt.io/qt-5/qfile.html#exists-1
+    \sa Qt::QFile::exists()
 */
 bool PatchManager::fileExists(const QString &filename)
 {

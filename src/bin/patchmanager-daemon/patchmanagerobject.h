@@ -130,6 +130,7 @@ public slots:
     bool getFailure() const;
     bool getLoaded() const;
     void resolveFailure();
+    void restorePatchList();
     void loadRequest(bool apply);
 
     void lipstickChanged(const QString &state);
@@ -152,7 +153,7 @@ private slots:
     void onFailureOccured();
 
     void doRegisterDBus();
-    void doPrepareCacheRoot();
+    void doApplyAllPatches();
     void doPrepareCache(const QString &patchName, bool apply = true);
     void doStartLocalServer();
 
@@ -188,7 +189,9 @@ private slots:
 private:
     void restartService(const QString &serviceName);
 
+#ifdef PM_ENABLE_LEGACY
     void resetSystem();
+#endif
     void clearFakeroot();
 
     void registerDBus();
@@ -219,11 +222,15 @@ private:
     QSet<QString> getAppliedPatches() const;
     void setAppliedPatches(const QSet<QString> &patches);
 
+    QSet<QString> getWorkingPatches() const;
+    void setWorkingPatches(const QSet<QString> &patches);
+    void setWorking();
+
     void getVersion();
 
     void lateInitialize();
     void refreshPatchList();
-    void prepareCacheRoot();
+    void applyAllPatches();
 
     void eraseRecursively(const QString &path);
 
@@ -245,6 +252,8 @@ private:
     QString m_osRelease;
 
     QStringList m_mangleCandidates;
+
+    QString pathToMangledPath(const QString &path, const QStringList &candidates) const;
 
     PatchManagerAdaptor *m_adaptor = nullptr;
     QNetworkAccessManager *m_nam = nullptr;
