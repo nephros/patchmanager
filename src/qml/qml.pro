@@ -6,9 +6,6 @@ QT = core qml network dbus gui
 CONFIG += qt plugin hide_symbols
 QMAKE_CXXFLAGS += -Werror
 
-# for testing:
-# DEFINES += DEBUG_SANITYCHECK
-
 INCLUDEPATH += $$_PRO_FILE_PWD_/../
 
 HEADERS += \

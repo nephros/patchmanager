@@ -1136,10 +1136,6 @@ void PatchManager::checkSystemSanity() { // static
             tofix = Solutions.value(Solution::Reinstall);
         }
     }
-#ifdef DEBUG_SANITYCHECK
-    report << Problems.value(Problem::DebugTest);
-    tofix = Solutions.value(Solution::None);
-#endif
     if (report.count() > 0) {
         qWarning() << Q_FUNC_INFO << "Found problems:" << report.join("\n\t");
         report << tofix;
