@@ -1148,6 +1148,11 @@ void PatchManager::checkSystemSanity() { // static
     }
 }
 
+void PatchManager::heal() {
+    qCDebug(patchmanagerPluginLog) << Q_FUNC_INFO;
+
+    m_interface->selfHeal();
+}
 
 /*! \fn PatchManager::getSystemSanityReport()
 

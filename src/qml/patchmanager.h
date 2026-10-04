@@ -123,6 +123,7 @@ public:
     QStringList toggleServicesList() const;
 
     bool hasSanityProblems() const { return m_systemSanityReport.count() > 0; };
+    Q_INVOKABLE void heal();
 
     bool toggleServices() const;
     bool failure() const;

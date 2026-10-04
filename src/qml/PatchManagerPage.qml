@@ -119,7 +119,9 @@ Page {
     }
 
     onStatusChanged: {
-        if (status == PageStatus.Deactivating) {
+        if (status == PageStatus.Activating) {
+            PatchManager.checkSystemSanity()
+        } else if (status == PageStatus.Deactivating) {
             startTimer.stop()
         }
     }

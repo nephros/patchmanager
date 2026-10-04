@@ -144,6 +144,15 @@ Page {
                                     .arg(report.join("\n"))
                 }
             }
+            ButtonLayout { visible: sanityLabel.visible
+                Button { text: qsTranslate("", "Try to self-heal")
+                    onClicked: {
+                        PatchManager.heal()
+                        window.__quickWindow.close()
+                        __quickWindow.close()
+                    }
+                }
+            }
 
             SectionHeader { text: qsTranslate("", "General") }
 
