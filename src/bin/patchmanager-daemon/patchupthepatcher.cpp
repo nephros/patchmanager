@@ -44,8 +44,6 @@ static const QString LD_SO_FILE = QStringLiteral("/etc/ld.so.preload");
 static const QString FIREJAIL_OUR_CONFIG_PATH = QStringLiteral("/etc/firejail/whitelist-common-patchmanager.local");
 static const QString FIREJAIL_SYS_CONFIG_PATH = QStringLiteral("/etc/firejail/whitelist-common.local");
 
-static const QString PM_PRELOAD_PATH64 = QStringLiteral("/usr/lib64/libpreloadpatchmanager.so");
-
 static const char PM_PRELOAD_LIB[]  = "libpreloadpatchmanager.so";
 static const char PM_FIREJAIL_CONFIG[] = "whitelist-common-patchmanager.local";
 
