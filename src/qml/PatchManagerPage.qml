@@ -287,7 +287,8 @@ Page {
             id: background
             menu: contextMenu
             contentHeight: content.height
-            enabled: !view.busy
+            enabled: !view.busy && !PatchManager.hasSanityProblems
+            opacity: PatchManager.hasSanityProblems ? Theme.opacityFaint : 1.0
 
             /* properties */
             property bool applying: appliedSwitch.busy
