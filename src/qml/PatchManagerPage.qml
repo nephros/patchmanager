@@ -272,15 +272,6 @@ Page {
         signal applyPatchFinished(string patchName)
         signal unapplyPatchFinished(string patchName)
 
-        add: Transition {
-            SequentialAnimation {
-                NumberAnimation { properties: "z"; to: -1; duration: 1 }
-                NumberAnimation { properties: "opacity"; to: 0.0; duration: 1 }
-                NumberAnimation { properties: "x,y"; duration: 1 }
-                NumberAnimation { properties: "z"; to: 0; duration: 200 }
-                NumberAnimation { properties: "opacity"; from: 0.0; to: 1.0; duration: 100 }
-            }
-        }
         remove: Transition {
             ParallelAnimation {
                 NumberAnimation { properties: "z"; to: -1; duration: 1 }
