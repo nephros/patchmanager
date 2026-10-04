@@ -101,12 +101,14 @@ enum Solution {
       , Restart
       , Reboot
 };
+/*
 static const QMap<Solution, QString> Solutions = {
       { Solution::None      , QCoreApplication::translate("SanityCheck", "Suggested Fix: No known solution") }
     , { Solution::Reinstall , QCoreApplication::translate("SanityCheck", "Suggested fix: Reinstall Patchmanager.") }
     , { Solution::Restart   , QCoreApplication::translate("SanityCheck", "Suggested fix: Restart Patchmanager daemon.") }
     , { Solution::Reboot    , QCoreApplication::translate("SanityCheck", "Suggested fix: Reboot the device.") }
 };
+*/
 }
 
 
@@ -1088,13 +1090,13 @@ bool PatchManagerTranslator::installTranslator(const QString &patch)
 */
 void PatchManager::checkSystemSanity() { // static
     using SanityCheck::Problem;  using SanityCheck::Problems;
-    using SanityCheck::Solution; using SanityCheck::Solutions;
+    //using SanityCheck::Solution; using SanityCheck::Solutions;
 
     QStringList report;
-    QString tofix = Solutions.value(Solution::None);
+    //QString tofix = Solutions.value(Solution::None);
     if(!QFile::exists(SanityCheck::preloadFile)) {
       report << Problems.value(Problem::PreloadFile);
-      tofix = Solutions.value(Solution::Reinstall);
+      //tofix = Solutions.value(Solution::Reinstall);
     } else {
         bool ok = false;
         QFile file(SanityCheck::preloadFile);
@@ -1111,12 +1113,12 @@ void PatchManager::checkSystemSanity() { // static
         } while (!line.isNull());
         if(!ok) {
             report << Problems.value(Problem::PreloadConfig);
-            tofix = Solutions.value(Solution::Reinstall);
+            //tofix = Solutions.value(Solution::Reinstall);
         }
     }
     if(!QFile::exists(SanityCheck::firejailFile)) {
       report << Problems.value( Problem::JailFile);
-      tofix = Solutions.value(Solution::Reinstall);
+      //tofix = Solutions.value(Solution::Reinstall);
     } else {
         bool ok = false;
         QFile file(SanityCheck::firejailFile);
@@ -1133,12 +1135,12 @@ void PatchManager::checkSystemSanity() { // static
         } while (!line.isNull());
         if(!ok) {
             report << Problems.value(Problem::JailConfig);
-            tofix = Solutions.value(Solution::Reinstall);
+            //tofix = Solutions.value(Solution::Reinstall);
         }
     }
     if (report.count() > 0) {
         qWarning() << Q_FUNC_INFO << "Found problems:" << report.join("\n\t");
-        report << tofix;
+        //report << tofix;
         // static
         PatchManager::GetInstance()->systemSanityChanged(report);
     }

@@ -127,7 +127,6 @@ Page {
                 title: qsTranslate("", "Settings")
             }
 
-            SectionHeader { id: sanityHeader; text: qsTranslate("", "Installation Sanity Check"); visible: sanityLabel.visible }
             Label { id: sanityLabel
                 visible: PatchManager.hasSanityProblems
                 anchors {
@@ -135,13 +134,13 @@ Page {
                     right: parent.right
                     left: parent.left
                 }
-                color: Theme.secondaryHighlightColor
+                color: Theme.highlightColor
                 wrapMode: Text.Wrap
                 text: qsTranslate("", "All fine, no problems detected.")
                 onVisibleChanged: if (visible) {
                     var report = PatchManager.getSystemSanityReport()
-                    sanityLabel.text = qsTranslate("", "WARNING: We detected the following problems with this installation:\n%1")
-                                    .arg(report.join("\n"))
+                    sanityLabel.text = qsTranslate("", "We detected the following problems with this installation:\n\t - %1")
+                                    .arg(report.join("\n\t - "))
                 }
             }
             ButtonLayout { visible: sanityLabel.visible
@@ -152,6 +151,18 @@ Page {
                         __quickWindow.close()
                     }
                 }
+            }
+            Label { id: sanityLabel2
+                visible: PatchManager.hasSanityProblems
+                anchors {
+                    leftMargin: Theme.paddingLarge*2 // align to TextSwitch labels
+                    right: parent.right
+                    left: parent.left
+                }
+                color: Theme.secondaryColor
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode: Text.Wrap
+                text: qsTranslate("", "Pressing this will try to fix the issues. The app will close after that.")
             }
 
             SectionHeader { text: qsTranslate("", "General") }
