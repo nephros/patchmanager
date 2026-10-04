@@ -44,7 +44,7 @@ static QString maxVersion(const QString &version1, const QString &version2)
 {
     const auto v1 = QVersionNumber::fromString(version1);
     const auto v2 = QVersionNumber::fromString(version2);
-    return (v2 > v1) ? v2.toString() : v1.toString();
+    return (v2 > v1) ? string2 : string1;
 }
 
 static QString pathToMangledPath(const QString &path, const QStringList &candidates)
