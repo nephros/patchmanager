@@ -38,6 +38,8 @@
 #include "patchmanagerobject.h"
 #include "patchmanager_adaptor.h"
 
+#include "patchupthepatcher.h"
+
 #include <QLocalSocket>
 #include <QLocalServer>
 
@@ -1733,6 +1735,18 @@ void PatchManagerObject::lipstickChanged(const QString &state)
         });
     }
 }
+
+void PatchManagerObject::selfHeal()
+{
+    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
+
+    PatchManager::SelfHeal medic;
+    if (!medic.applyBandAid()) {
+        qCWarning(patchmanagerDaemonLog) << Q_FUNC_INFO << "Attmept to self-heal failed" << medic.lastError();
+    }
+
+}
+
 /*!  Returns the Patchmanager version string.  */
 QString PatchManagerObject::getPatchmanagerVersion() const
 {

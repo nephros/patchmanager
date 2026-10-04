@@ -63,16 +63,12 @@ bool SelfHeal::fixLDPreload(const QString& file)
         m_error = QStringLiteral("Could not open %1").arg(file);
         return false;
     }
-    char buf[512];
-    while(-1 != f.readLine(buf, sizeof(buf))) {
-        if (buf[0] == '#') continue;                // skip comments
-        if(QString(buf).endsWith(QString::fromLatin1(PM_PRELOAD_LIB))) {  // nothing to fix
-            f.close();
-            return true;
-        }
-    }
-    f.reset();
+
     const QByteArray contents = f.readAll();
+    if(contents.contains(QByteArray(PM_PRELOAD_LIB))) {  // nothing to fix
+        f.close();
+        return true;
+    }
     f.close();
 
     QSaveFile sf(file);
@@ -115,16 +111,11 @@ bool SelfHeal::fixFirejail(const QString& systemConfig, const QString& ourConfig
         return false;
     }
 
-    char buf[512];
-    while(-1 != f.readLine(buf, sizeof(buf))) {
-        if (buf[0] == '#') continue;                // skip comments
-        if(QString(buf).endsWith(ourConfig)) {  // nothing to fix
-            f.close();
-            return true;
-        }
-    }
-    f.reset();
     const QByteArray contents = f.readAll();
+    if(contents.contains(ourConfig.toLatin1())) {  // nothing to fix
+        f.close();
+        return true;
+    }
     f.close();
 
     QSaveFile sf(systemConfig);
