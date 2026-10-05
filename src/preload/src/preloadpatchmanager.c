@@ -33,6 +33,19 @@ static orig_open_f_type orig_open64 = NULL;
 #define ENV_NO_PRELOAD "NO_PM_PRELOAD"
 #define ENV_DEBUG "PM_PRELOAD_DEBUG"
 
+#define FLAG_NOPRELOAD   (1u << 2)  /* 00000100 */
+#define FLAG_DEBUG       (1u << 1)  /* 00000010 */
+#define FLAG_INITIALIZED (1u << 0)  /* 00000001 */
+
+typedef unsigned char flags_t;
+static flags_t pm_flags = 0;
+
+static void init_from_env(void)
+{
+    if (getenv(ENV_DEBUG) != NULL)      pm_flags |= FLAG_DEBUG;
+    if (getenv(ENV_NO_PRELOAD) != NULL) pm_flags |= FLAG_NOPRELOAD;
+}
+
 static const char *blacklist_paths_startswith[] = {
     "/dev",
     "/sys",
@@ -46,15 +59,9 @@ static const char *blacklist_paths_equal[] = {
 };
 
 static int debug_output() {
-    static int debug_output_read = 0;
-    static int debug_output_value = 0;
-
-    if (!debug_output_read) {
-        debug_output_value = getenv(ENV_DEBUG) ? 1 : 0;
-        debug_output_read = 1;
-    }
-
-    return debug_output_value;
+    if (pm_flags == 0) // not initialized
+        init_from_env();
+    return pm_flags & FLAG_DEBUG;
 }
 
 static void pm_name(char new_name[]) {
@@ -135,15 +142,9 @@ static int pm_validate_name(const char *name)
 }
 
 static int no_preload() {
-    static int pm_preload_read = 0;
-    static int no_pm_preload = 0;
-
-    if (!pm_preload_read) {
-        no_pm_preload = getenv(ENV_NO_PRELOAD) ? 1 : 0;
-        pm_preload_read = 1;
-    }
-
-    return no_pm_preload;
+    if (pm_flags == 0) // not initialized
+        init_from_env();
+    return pm_flags & FLAG_NOPRELOAD;
 }
 
 #endif // #ifndef NO_INTERCEPT
