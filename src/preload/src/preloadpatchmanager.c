@@ -46,6 +46,15 @@ static void init_from_env(void)
     if (getenv(ENV_NO_PRELOAD) != NULL) pm_flags |= FLAG_NOPRELOAD;
 }
 
+__attribute__((constructor))
+static void init_library(void)
+{
+    // avoid "ISO C forbids conversion of object pointer to function pointer type"
+    *(void **)(&orig_open) = dlsym(RTLD_NEXT, "open");
+    // avoid "ISO C forbids conversion of object pointer to function pointer type"
+    *(void **)(&orig_open64) = dlsym(RTLD_NEXT, "open64");
+}
+
 static const char *blacklist_paths_startswith[] = {
     "/dev",
     "/sys",
@@ -152,8 +161,7 @@ static int no_preload() {
 int open64(const char *pathname, int flags, ...)
 {
     if (!orig_open64) {
-        // avoid "ISO C forbids conversion of object pointer to function pointer type"
-        *(void **)(&orig_open64) = dlsym(RTLD_NEXT, "open64");
+        init_library();
     }
 
     va_list args;
@@ -198,8 +206,7 @@ int open64(const char *pathname, int flags, ...)
 int open(const char *pathname, int flags, ...)
 {
     if (!orig_open) {
-        // avoid "ISO C forbids conversion of object pointer to function pointer type"
-        *(void **)(&orig_open) = dlsym(RTLD_NEXT, "open");
+        init_library();
     }
 
     va_list args;
