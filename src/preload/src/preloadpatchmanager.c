@@ -151,7 +151,8 @@ static int no_preload() {
 int open64(const char *pathname, int flags, ...)
 {
     if (!orig_open64) {
-        orig_open64 = (orig_open_f_type)dlsym(RTLD_NEXT, "open64");
+        // avoid "ISO C forbids conversion of object pointer to function pointer type"
+        *(void **)(&orig_open64) = dlsym(RTLD_NEXT, "open64");
     }
 
     va_list args;
@@ -196,7 +197,8 @@ int open64(const char *pathname, int flags, ...)
 int open(const char *pathname, int flags, ...)
 {
     if (!orig_open) {
-        orig_open = (orig_open_f_type)dlsym(RTLD_NEXT, "open");
+        // avoid "ISO C forbids conversion of object pointer to function pointer type"
+        *(void **)(&orig_open) = dlsym(RTLD_NEXT, "open");
     }
 
     va_list args;
