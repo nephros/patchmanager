@@ -2,7 +2,7 @@ TEMPLATE = lib
 QT =
 CONFIG -= qt
 CONFIG += plugin
-CONFIG += thread
+#CONFIG += thread
 CONFIG += use_c_linker
 #CONFIG += warn_on
 QMAKE_CFLAGS += -std=c11
