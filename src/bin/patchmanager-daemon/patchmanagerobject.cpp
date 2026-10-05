@@ -550,7 +550,9 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
 PatchManagerObject::~PatchManagerObject()
 {
     qInfo() << "Patchmanager version " << qApp->applicationVersion() << "shutting down.";
-    qInfo() << gatherStats();
+    if (m_startuptime.isValid()) { // if not, we're not running as daemon
+        qInfo() << gatherStats();
+    }
     if (m_dbusRegistered) {
         qInfo() << Q_FUNC_INFO << "Unregistering D-Bus object and service.";
         QDBusConnection connection = QDBusConnection::systemBus();
