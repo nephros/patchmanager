@@ -29,8 +29,6 @@ static orig_open_f_type orig_open64 = NULL;
 #include <getdef.h>
 #include <pwd.h>
 
-#include <pthread.h>
-
 #define SERVER_PATH "/tmp/patchmanager-socket"
 #define ENV_NO_PRELOAD "NO_PM_PRELOAD"
 #define ENV_DEBUG "PM_PRELOAD_DEBUG"
@@ -42,26 +40,10 @@ static orig_open_f_type orig_open64 = NULL;
 typedef unsigned char flags_t;
 static flags_t pm_flags = 0;
 
-// use pthread "once" inits
-static pthread_once_t open64_once = PTHREAD_ONCE_INIT;
-static pthread_once_t open_once = PTHREAD_ONCE_INIT;
-
 static void init_from_env(void)
 {
     if (getenv(ENV_DEBUG) != NULL)      pm_flags |= FLAG_DEBUG;
     if (getenv(ENV_NO_PRELOAD) != NULL) pm_flags |= FLAG_NOPRELOAD;
-}
-
-static void resolve_open64(void)
-{
-    // avoid "ISO C forbids conversion of object pointer to function pointer type"
-    *(void **)(&orig_open64) = dlsym(RTLD_NEXT, "open64");
-}
-
-static void resolve_open(void)
-{
-    // avoid "ISO C forbids conversion of object pointer to function pointer type"
-    *(void **)(&orig_open) = dlsym(RTLD_NEXT, "open");
 }
 
 static const char *blacklist_paths_startswith[] = {
@@ -169,7 +151,10 @@ static int no_preload() {
 
 int open64(const char *pathname, int flags, ...)
 {
-    pthread_once(&open64_once, resolve_open64);
+    if (!orig_open64) {
+        // avoid "ISO C forbids conversion of object pointer to function pointer type"
+        *(void **)(&orig_open64) = dlsym(RTLD_NEXT, "open64");
+    }
 
     va_list args;
     va_start(args, flags);
@@ -212,7 +197,10 @@ int open64(const char *pathname, int flags, ...)
 
 int open(const char *pathname, int flags, ...)
 {
-    pthread_once(&open_once, resolve_open);
+    if (!orig_open) {
+        // avoid "ISO C forbids conversion of object pointer to function pointer type"
+        *(void **)(&orig_open) = dlsym(RTLD_NEXT, "open");
+    }
 
     va_list args;
     va_start(args, flags);
