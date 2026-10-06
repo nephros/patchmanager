@@ -50,6 +50,9 @@
 #include "webcatalog.h"
 #include "patchmanager_interface.h"
 
+#include "grp.h"
+//#include "pwd.h"
+
 #include "common/loggingcategory.h"
 Q_LOGGING_CATEGORY(patchmanagerPluginLog, "patchmanager.plugin")
 
@@ -83,6 +86,8 @@ enum Problem {
       , PreloadConfig
       , JailFile
       , JailConfig
+      , NoInetGroup
+      , NoInetMember
 
       , DebugTest = 99
 };
@@ -92,6 +97,8 @@ static const QMap<Problem, QString> Problems = {
     , { Problem::PreloadConfig , QCoreApplication::translate("SanityCheck", "Preload config is not correct.") }
     , { Problem::JailFile      , QCoreApplication::translate("SanityCheck", "Firejail config does not exist.") }
     , { Problem::JailConfig    , QCoreApplication::translate("SanityCheck", "Firejail config is not correct.") }
+    , { Problem::NoInetGroup   , QCoreApplication::translate("SanityCheck", "The system lacks the `inet` group.") }
+    , { Problem::NoInetMember  , QCoreApplication::translate("SanityCheck", "This user is not a membr of the `inet` group.") }
 
     , { Problem::DebugTest    , QCoreApplication::translate("SanityCheck", "THIS IS A TEST PROBLEM") }
 };
@@ -1081,6 +1088,43 @@ bool PatchManagerTranslator::installTranslator(const QString &patch)
     return true;
 }
 
+static QStringList getAllGroups() {
+    QStringList out;
+    group *gr;
+    while ((gr = getgrent()) != nullptr) {
+        out.append(gr->gr_name);
+    }
+    endgrent();
+    return out;
+}
+
+/*
+static QStringList getGroups() {
+    QStringList out;
+
+    __uid_t uid = atoi(qgetenv("UID").constData());
+
+    struct passwd* pw = getpwuid(uid);
+    if(pw == NULL)
+        return out;
+
+    int ngroups = 0;
+    getgrouplist(pw->pw_name, pw->pw_gid, NULL, &ngroups);
+    __gid_t groups[ngroups];
+
+    getgrouplist(pw->pw_name, pw->pw_gid, groups, &ngroups);
+
+    for (int i = 0; i < ngroups; i++){
+        struct group* gr = getgrgid(groups[i]);
+        if(gr == NULL)
+            continue;
+        out.append(gr->gr_name);
+    }
+    return out;
+}
+*/
+
+
 /*! \fn static void PatchManager::checkSystemSanity();
     \internal
 
@@ -1138,6 +1182,13 @@ void PatchManager::checkSystemSanity() { // static
             //tofix = Solutions.value(Solution::Reinstall);
         }
     }
+    if(!getAllGroups().contains("inet"))
+        report << Problems.value(Problem::NoInetGroup);
+    /*
+    if(!getGroups().contains("inet"))
+        report << Problems.value(Problem::NoInetMember);
+    */
+
     if (report.count() > 0) {
         qWarning() << Q_FUNC_INFO << "Found problems:" << report.join("\n\t");
         //report << tofix;
