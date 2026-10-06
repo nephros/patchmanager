@@ -67,9 +67,25 @@ static const char *blacklist_paths_equal[] = {
     "/",
 };
 
+char *process_name = 0;
+//__attribute__((hidden))
+static void get_process_name() {
+    char buf[16]; // linux kernel TASK_COMM_LEN
+    FILE *fp = fopen("/proc/self/comm", "r");
+    if (fp) {
+        if (fgets(buf, sizeof(buf), fp)) {
+            buf[strcspn(buf, "\n")] = '\0';
+            strcpy(process_name, buf);
+        }
+        fclose(fp);
+    }
+}
+
 static int debug_output() {
     if (pm_flags == 0) // not initialized
         init_from_env();
+    if (process_name == 0)
+        get_process_name();
     return pm_flags & FLAG_DEBUG;
 }
 
@@ -185,8 +201,8 @@ int open64(const char *pathname, int flags, ...)
         strcpy(dir_name, new_name);
         dirname(dir_name);
 
-        fprintf(stderr, "[open64] pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
-                getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
+        fprintf(stderr, "[open64] name: %s, pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
+                process_name, getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
     }
 
     if (!d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
@@ -230,8 +246,8 @@ int open(const char *pathname, int flags, ...)
         strcpy(dir_name, new_name);
         dirname(dir_name);
 
-        fprintf(stderr, "[open] pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
-                getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
+        fprintf(stderr, "[open] name: %s, pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
+                process_name, getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
     }
 
     if (!d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
