@@ -50,8 +50,8 @@
 #include "webcatalog.h"
 #include "patchmanager_interface.h"
 
-#include "pwd.h"
 #include "grp.h"
+//#include "pwd.h"
 
 #include "common/loggingcategory.h"
 Q_LOGGING_CATEGORY(patchmanagerPluginLog, "patchmanager.plugin")
@@ -1100,9 +1100,6 @@ bool PatchManagerTranslator::installTranslator(const QString &patch)
     return true;
 }
 
-
-
-
 static QStringList getAllGroups() {
     QStringList out;
     group *gr;
@@ -1113,7 +1110,7 @@ static QStringList getAllGroups() {
     return out;
 }
 
-
+/*
 static QStringList getGroups() {
     QStringList out;
 
@@ -1137,6 +1134,7 @@ static QStringList getGroups() {
     }
     return out;
 }
+*/
 
 
 /*! \fn static void PatchManager::checkSystemSanity();
@@ -1198,8 +1196,10 @@ void PatchManager::checkSystemSanity() { // static
     }
     if(!getAllGroups().contains("inet"))
         report << Problems.value(Problem::NoInetGroup);
+    /*
     if(!getGroups().contains("inet"))
         report << Problems.value(Problem::NoInetMember);
+    */
 
     if (report.count() > 0) {
         qWarning() << Q_FUNC_INFO << "Found problems:" << report.join("\n\t");
