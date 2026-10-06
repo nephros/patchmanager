@@ -38,6 +38,8 @@
 #include "patchmanagerobject.h"
 #include "patchmanager_adaptor.h"
 
+#include "patchupthepatcher.h"
+
 #include <QLocalSocket>
 #include <QLocalServer>
 
@@ -153,6 +155,31 @@ static const QString PHONE_CODE       = QStringLiteral("phone");
 static const QString SILICA_CODE      = QStringLiteral("silica");
 static const QString SETTINGS_CODE    = QStringLiteral("settings");
 static const QString KEYBOARD_CODE    = QStringLiteral("keyboard");
+
+static const QHash<QString, QString> CATEGORY_EXE_MAP = {
+    { BROWSER_CODE,     QStringLiteral("sailfish-browser") },
+    { CAMERA_CODE,      QStringLiteral("jolla-camera") },
+    { CALENDAR_CODE,    QStringLiteral("jolla-calendar") },
+    { CLOCK_CODE,       QStringLiteral("jolla-clock") },
+    { CONTACTS_CODE,    QStringLiteral("jolla-contacts") },
+    { EMAIL_CODE,       QStringLiteral("jolla-email") },
+    { GALLERY_CODE,     QStringLiteral("jolla-gallery") },
+    { MEDIA_CODE,       QStringLiteral("jolla-mediaplayer") },
+    { MESSAGES_CODE,    QStringLiteral("jolla-messages") },
+    { PHONE_CODE,       QStringLiteral("voicecall-ui") },
+    { SETTINGS_CODE,    QStringLiteral("jolla-settings") },
+};
+
+
+static const QHash<QString, QString> CATEGORY_BOOSTER_MAP = {
+    { EMAIL_CODE,       QStringLiteral("booster-browser@jolla-email.service") }
+  , { BROWSER_CODE,     QStringLiteral("booster-browser@sailfish-browser.service") }
+  , { CAMERA_CODE,      QStringLiteral("booster-silica-media@jolla-camera.service") }
+//  , { CAMERA_CODE,    QStringLiteral("booster-silica-media@jolla-camera-lockscreen.service") }
+//  , { SILICA_CODE,      QStringLiteral("booster-silica-qt5.service") }
+//  , { HOMESCREEN_CODE,  QStringLiteral("booster-silica-qt5.service") }
+//  , { MEDIA_CODE,       QStringLiteral("booster-silica-media.service") }
+};
 
 /*!
   \class PatchManagerObject
@@ -418,6 +445,20 @@ QStringList PatchManagerObject::getMangleCandidates()
     return m_mangleCandidates;
 }
 
+QString PatchManagerObject::gatherStats() const
+{
+    qint64 uptime = m_startuptime.secsTo(QDateTime::currentDateTimeUtc()) ;
+    const QString appliedcount = QString::number(m_appliedPatches.count());
+    const QString filescount = (m_originalWatcher)  ? QString::number(m_originalWatcher->files().count()) : "?";
+    return QStringLiteral("Patchmanager Daemon runtime stats:")
+            + QStringLiteral("\n  Daemon life-time: ............... %1").arg(uptime)
+            + QStringLiteral("\n  Currently active patches: ....... %1").arg(appliedcount)
+            + QStringLiteral("\n  File accesses redirected: ....... %1").arg(m_sockrq_patched)
+            + QStringLiteral("\n  File accesses passed as-is: ..... %1").arg(m_sockrq_passed)
+            + QStringLiteral("\n  Known patched files: ............ %1").arg(filescount)
+            + QStringLiteral("\n===========================");
+}
+
 /*!
     Reads operating system (\c{VERSION_ID}) version from \c /etc/os-release and sets \c m_osRelease to its value.
     Calls lateInitialize() afterwards.
@@ -535,7 +576,12 @@ PatchManagerObject::PatchManagerObject(QObject *parent)
 
 PatchManagerObject::~PatchManagerObject()
 {
+    qInfo() << "Patchmanager version " << qApp->applicationVersion() << "shutting down.";
+    if (m_startuptime.isValid()) { // if not, we're not running as daemon
+        qInfo() << gatherStats();
+    }
     if (m_dbusRegistered) {
+        qInfo() << Q_FUNC_INFO << "Unregistering D-Bus object and service.";
         QDBusConnection connection = QDBusConnection::systemBus();
         connection.unregisterService(DBUS_SERVICE_NAME);
         connection.unregisterObject(DBUS_PATH_NAME);
@@ -799,6 +845,8 @@ void PatchManagerObject::doStartLocalServer()
 void PatchManagerObject::initialize()
 {
     qCInfo(patchmanagerDaemonLog) << "Patchmanager: Initialized version " << qApp->applicationVersion();
+
+    m_startuptime = QDateTime::currentDateTimeUtc();
 
     QTranslator *translator = new QTranslator(this);
     bool success = translator->load(QLocale(getLang()),
@@ -1241,6 +1289,11 @@ QVariantMap PatchManagerObject::listVersions()
     return versionsList;
 }
 
+QString PatchManagerObject::statistics()
+{
+    return gatherStats();
+}
+
 /*!  Returns whether \a patch is in the list of currently active (applied) Patches. */
 bool PatchManagerObject::isPatchApplied(const QString &patch)
 {
@@ -1296,7 +1349,7 @@ QVariantMap PatchManagerObject::unapplyPatch(const QString &patch)
 
 /*!
     Calls the corresponding method over D-Bus to deactivate (unapply) all active Patches.
-    
+
     Returns \c true if successful.
 */
 bool PatchManagerObject::unapplyAllPatches()
@@ -1560,28 +1613,18 @@ void PatchManagerObject::restartServices()
         } else if (category == KEYBOARD_CODE) {
             restartKeyboard();
         } else {
-            QHash<QString, QString> categoryToProcess = {
-                { BROWSER_CODE, QStringLiteral("sailfish-browser") },
-                { CAMERA_CODE, QStringLiteral("jolla-camera") },
-                { CALENDAR_CODE, QStringLiteral("jolla-calendar") },
-                { CLOCK_CODE, QStringLiteral("jolla-clock") },
-                { CONTACTS_CODE, QStringLiteral("jolla-contacts") },
-                { EMAIL_CODE, QStringLiteral("jolla-email") },
-                { GALLERY_CODE, QStringLiteral("jolla-gallery") },
-                { MEDIA_CODE, QStringLiteral("jolla-mediaplayer") },
-                { MESSAGES_CODE, QStringLiteral("jolla-messages") },
-                { PHONE_CODE, QStringLiteral("voicecall-ui") },
-                { SETTINGS_CODE, QStringLiteral("jolla-settings") },
-            };
-
-            if (!categoryToProcess.contains(category)) {
+            if (!CATEGORY_EXE_MAP.contains(category)) {
                 qCWarning(patchmanagerDaemonLog) << Q_FUNC_INFO << "Invalid category:" << category;
                 continue;
             }
 
             QStringList arguments;
-            arguments << categoryToProcess[category];
+            arguments << CATEGORY_EXE_MAP[category];
             QProcess::execute(QStringLiteral("killall"), arguments);
+        }
+        if (CATEGORY_BOOSTER_MAP.contains(category)
+                && getSettings(QStringLiteral("restartBoosters"), false).toBool()) {
+            restartService(CATEGORY_BOOSTER_MAP.value(category));
         }
     }
 
@@ -1733,6 +1776,18 @@ void PatchManagerObject::lipstickChanged(const QString &state)
         });
     }
 }
+
+void PatchManagerObject::selfHeal()
+{
+    qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
+
+    PatchManager::SelfHeal medic;
+    if (!medic.applyBandAid()) {
+        qCWarning(patchmanagerDaemonLog) << Q_FUNC_INFO << "Attmept to self-heal failed" << medic.lastError();
+    }
+
+}
+
 /*!  Returns the Patchmanager version string.  */
 QString PatchManagerObject::getPatchmanagerVersion() const
 {
@@ -1835,6 +1890,7 @@ void PatchManagerObject::onTimerAction()
 {
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
     checkForUpdates();
+    qInfo() << gatherStats();
 }
 
 void PatchManagerObject::startReadingLocalServer()
@@ -1868,11 +1924,13 @@ void PatchManagerObject::startReadingLocalServer()
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Requested:" << request << "Sending:" << payload;
             }
+            m_sockrq_patched  += 1; // accounting
         } else {
             payload = request;
             if (qEnvironmentVariableIsSet("PM_DEBUG_SOCKET")) {
                 qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Requested:" << request << "is sent unaltered.";
             }
+            m_sockrq_passed += 1; // accounting
         }
         clientConnection->write(payload);
         clientConnection->flush();
@@ -2136,6 +2194,7 @@ void PatchManagerObject::doRefreshPatchList()
     if (m_adaptor) {
         emit m_adaptor->listPatchesChanged();
     }
+
 }
 
 void PatchManagerObject::doListPatches(const QDBusMessage &message)

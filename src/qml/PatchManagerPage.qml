@@ -78,6 +78,7 @@ Page {
     }
 
     Component.onCompleted: migrateDevModeSettings()
+
     /*! \qmlmethod migrateDevModeSettings()
         Manages migration from legacy \e developerMode setting to the new \e patchDevelMode and \e sfosVersionCheck settings, then sets \e developerMode to \e false.
         \internal
@@ -118,7 +119,9 @@ Page {
     }
 
     onStatusChanged: {
-        if (status == PageStatus.Deactivating) {
+        if (status == PageStatus.Activating) {
+            PatchManager.checkSystemSanity()
+        } else if (status == PageStatus.Deactivating) {
             startTimer.stop()
         }
     }
@@ -269,15 +272,6 @@ Page {
         signal applyPatchFinished(string patchName)
         signal unapplyPatchFinished(string patchName)
 
-        add: Transition {
-            SequentialAnimation {
-                NumberAnimation { properties: "z"; to: -1; duration: 1 }
-                NumberAnimation { properties: "opacity"; to: 0.0; duration: 1 }
-                NumberAnimation { properties: "x,y"; duration: 1 }
-                NumberAnimation { properties: "z"; to: 0; duration: 200 }
-                NumberAnimation { properties: "opacity"; from: 0.0; to: 1.0; duration: 100 }
-            }
-        }
         remove: Transition {
             ParallelAnimation {
                 NumberAnimation { properties: "z"; to: -1; duration: 1 }
@@ -293,7 +287,8 @@ Page {
             id: background
             menu: contextMenu
             contentHeight: content.height
-            enabled: !view.busy
+            enabled: !view.busy && !PatchManager.hasSanityProblems
+            opacity: PatchManager.hasSanityProblems ? Theme.opacityFaint : 1.0
 
             /* properties */
             property bool applying: appliedSwitch.busy
@@ -679,10 +674,17 @@ Page {
 
         }
 
+        ViewPlaceholder { id: sanityProblemInfo
+            enabled:   PatchManager.hasSanityProblems
+            text:      qsTranslate("", "Problems with the installation detected.")
+            hintText:  qsTranslate("", "Please see the Settings page for details.")
+        }
+
         ViewPlaceholder {
             enabled: view.count == 0
             text: qsTranslate("", "No Patches available")
         }
+
         RemorsePopup { id: menuRemorse }
         VerticalScrollDecorator {}
     }

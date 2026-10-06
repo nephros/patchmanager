@@ -87,6 +87,7 @@ class PatchManager: public QObject
     Q_PROPERTY(bool notifyOnSuccess READ notifyOnSuccess WRITE setNotifyOnSuccess NOTIFY notifyOnSuccessChanged)
     Q_PROPERTY(bool bitnessMangle READ bitnessMangle WRITE setBitnessMangle NOTIFY bitnessMangleChanged)
     Q_PROPERTY(QStringList mangleCandidates READ mangleCandidates NOTIFY mangleCandidatesChanged)
+    Q_PROPERTY(bool restartBoosters READ restartBoosters WRITE setRestartBoosters NOTIFY restartBoostersChanged)
     Q_PROPERTY(PatchManagerModel *installedModel READ installedModel CONSTANT)
     Q_PROPERTY(QVariantMap updates READ getUpdates NOTIFY updatesChanged)
     Q_PROPERTY(QStringList updatesNames READ getUpdatesNames NOTIFY updatesChanged)
@@ -94,6 +95,7 @@ class PatchManager: public QObject
     Q_PROPERTY(bool appsNeedRestart READ toggleServices NOTIFY toggleServicesChanged)
     Q_PROPERTY(bool failure READ failure NOTIFY failureChanged)
     Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged)
+    Q_PROPERTY(bool hasSanityProblems READ hasSanityProblems NOTIFY systemSanityChanged)
     Q_PROPERTY(QString patchmanagerVersion READ patchmanagerVersion NOTIFY patchmanagerVersionChanged)
     Q_PROPERTY(QString osVersion MEMBER m_osVersion CONSTANT)
 
@@ -113,6 +115,8 @@ public:
     void setNotifyOnSuccess(bool notifyOnSuccess);
     bool bitnessMangle() const;
     void setBitnessMangle(bool bitnessMangle);
+    bool restartBoosters() const;
+    void setRestartBoosters(bool restart);
     QStringList mangleCandidates() const;
     PatchManagerModel *installedModel();
     QString trCategory(const QString &category) const;
@@ -120,6 +124,9 @@ public:
     QStringList getUpdatesNames() const;
     QString patchmanagerVersion() const;
     QStringList toggleServicesList() const;
+
+    bool hasSanityProblems() const { return m_systemSanityReport.count() > 0; };
+    Q_INVOKABLE void heal();
 
     bool toggleServices() const;
     bool failure() const;
@@ -186,6 +193,9 @@ public slots:
     void restorePatchList();
     void resolveFailure();
 
+    static void checkSystemSanity();
+    QStringList getSystemSanityReport();
+
 signals:
     void easterReceived(const QString & easterText);
     void developerModeChanged(bool developerMode);
@@ -195,12 +205,14 @@ signals:
     void notifyOnSuccessChanged(bool notifyOnSuccess);
     void bitnessMangleChanged(bool bitnessMangle);
     void mangleCandidatesChanged(const QStringList &mangleCandidates);
+    void restartBoostersChanged(bool restartBoosters);
     void updatesChanged();
     void toggleServicesChanged(bool toggleServices);
     void failureChanged(bool failed);
     void loadedChanged(bool loaded);
     void patchmanagerVersionChanged(const QString &patchmanagerVersion);
     void toggleServicesListChanged(const QStringList &servicesToBeToggled);
+    void systemSanityChanged(const QStringList& report);
 
 private:
     void successCall(QJSValue callback, const QVariant &value);
@@ -217,6 +229,8 @@ private:
     bool m_toggleServices = false;
     bool m_failed = false;
     bool m_loaded = false;
+
+    QStringList m_systemSanityReport;
 
     QString m_patchmanagerVersion;
     QString m_osVersion;

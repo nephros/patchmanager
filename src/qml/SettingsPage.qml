@@ -127,6 +127,44 @@ Page {
                 title: qsTranslate("", "Settings")
             }
 
+            Label { id: sanityLabel
+                visible: PatchManager.hasSanityProblems
+                anchors {
+                    leftMargin: Theme.paddingLarge*2 // align to TextSwitch labels
+                    right: parent.right
+                    left: parent.left
+                }
+                color: Theme.highlightColor
+                wrapMode: Text.Wrap
+                text: qsTranslate("", "All fine, no problems detected.")
+                onVisibleChanged: if (visible) {
+                    var report = PatchManager.getSystemSanityReport()
+                    sanityLabel.text = qsTranslate("", "We detected the following problems with this installation:\n\t - %1")
+                                    .arg(report.join("\n\t - "))
+                }
+            }
+            ButtonLayout { visible: sanityLabel.visible
+                Button { text: qsTranslate("", "Try to self-heal")
+                    onClicked: {
+                        PatchManager.heal()
+                        window.__quickWindow.close()
+                        __quickWindow.close()
+                    }
+                }
+            }
+            Label { id: sanityLabel2
+                visible: PatchManager.hasSanityProblems
+                anchors {
+                    leftMargin: Theme.paddingLarge*2 // align to TextSwitch labels
+                    right: parent.right
+                    left: parent.left
+                }
+                color: Theme.secondaryColor
+                font.pixelSize: Theme.fontSizeSmall
+                wrapMode: Text.Wrap
+                text: qsTranslate("", "Pressing this will try to fix the issues. The app will close after that.")
+            }
+
             SectionHeader { text: qsTranslate("", "General") }
 
             TextSwitch {
@@ -249,6 +287,16 @@ Page {
                 text: PatchManager.mangleCandidates.join("\n")
                 enabled: fixBitSwitch.checked
             }
+
+            TextSwitch {
+                id: boosterSwitch
+                text: qsTranslate("", "Restart Boosters along with services")
+                description: qsTranslate("", "If a patched application has an associated \"Booster\", restart it as well.")
+                checked: PatchManager.restartBooster
+                onClicked: PatchManager.restartBooster = !PatchManager.restartBooster
+                automaticCheck: false
+            }
+
         }
     }
 }
