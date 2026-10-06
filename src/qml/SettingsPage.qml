@@ -292,11 +292,10 @@ Page {
                 id: boosterSwitch
                 text: qsTranslate("", "Restart Boosters along with services")
                 description: qsTranslate("", "If a patched application has an associated \"Booster\", restart it as well.")
-                checked: PatchManager.restartBooster
-                onClicked: PatchManager.restartBooster = !PatchManager.restartBooster
+                checked: PatchManager.restartBoosters
+                onClicked: PatchManager.restartBoosters = !PatchManager.restartBoosters
                 automaticCheck: false
             }
-
         }
     }
 }
