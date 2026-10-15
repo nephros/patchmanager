@@ -227,28 +227,6 @@ Page {
                 automaticCheck: false
             }
             */
-
-            TextSwitch {
-                id: fixBitSwitch
-                text: qsTranslate("", "Convert Patches between 32-bit and 64-bit")
-                description: qsTranslate("", "Automatically convert lib or lib64 for select paths shown below.")
-                checked: PatchManager.bitnessMangle
-                onClicked: PatchManager.bitnessMangle = !PatchManager.bitnessMangle
-                automaticCheck: false
-            }
-
-            TextArea {
-                // align to the right of TextSwitch indicator
-                anchors {
-                  left: fixBitSwitch.left
-                  leftMargin: fixBitSwitch.leftMargin + Theme.paddingLarge
-                }
-                color: Theme.secondaryColor
-                font.pixelSize: Theme.fontSizeSmall
-                readOnly: true
-                text: PatchManager.mangleCandidates.join("\n")
-                enabled: fixBitSwitch.checked
-            }
         }
     }
 }
