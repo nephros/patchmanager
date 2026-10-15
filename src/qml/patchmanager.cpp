@@ -247,21 +247,6 @@ bool PatchManager::applyOnBoot() const
     return getSettingsSync(QStringLiteral("applyOnBoot"), false).toBool();
 }
 
-
-/*! \property PatchManager::mangleCandidates
-    List of mangle candidates from the config
-*/
-QStringList PatchManager::mangleCandidates() const
-{
-    QDBusPendingReply<QStringList> reply = m_interface->getMangleCandidates();
-    reply.waitForFinished();
-    if (reply.isFinished()) {
-        qCDebug(patchmanagerPluginLog) << Q_FUNC_INFO << "mangleCandidates() dbus replied:" << reply.value();
-        return reply.value();
-    }
-    return QStringList();
-}
-
 /*!
     Saves the \e applyOnBoot settings value to \a applyOnBoot
     \sa applyOnBootChanged(bool value)
@@ -297,22 +282,6 @@ void PatchManager::setNotifyOnSuccess(bool notifyOnSuccess)
 {
     if (putSettingsSync(QStringLiteral("notifyOnSuccess"), notifyOnSuccess)) {
         emit notifyOnSuccessChanged(notifyOnSuccess);
-    }
-}
-
-/*! \property PatchManager::bitnessMangle
-*/
-/*! \qmlproperty bool PatchManager::bitnessMangle
-*/
-bool PatchManager::bitnessMangle() const
-{
-    return getSettingsSync(QStringLiteral("bitnessMangle"), true).toBool();
-}
-
-void PatchManager::setBitnessMangle(bool bitnessMangle)
-{
-    if (putSettingsSync(QStringLiteral("bitnessMangle"), bitnessMangle)) {
-        emit bitnessMangleChanged(bitnessMangle);
     }
 }
 
