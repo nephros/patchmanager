@@ -407,17 +407,6 @@ void PatchManagerObject::setWorking()
     setWorkingPatches(getAppliedPatches());
 }
 
-QStringList PatchManagerObject::getMangleCandidates()
-{
-    if (m_mangleCandidates.empty()) {
-        qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
-        auto mangleCandidates = QSettings(MANGLE_CONFIG_FILE, QSettings::IniFormat).value("MANGLE_CANDIDATES", "").toString();
-        m_mangleCandidates = mangleCandidates.split(' ', QString::SplitBehavior::SkipEmptyParts);
-        qCDebug(patchmanagerDaemonLog) << "Loaded mangle candidates:" << m_mangleCandidates;
-    }
-    return m_mangleCandidates;
-}
-
 /*!
     Reads operating system (\c{VERSION_ID}) version from \c /etc/os-release and sets \c m_osRelease to its value.
     Calls lateInitialize() afterwards.
@@ -936,6 +925,11 @@ void PatchManagerObject::initialize()
     }
 
     getVersion();
+
+    auto mangleCandidates = QSettings(MANGLE_CONFIG_FILE, QSettings::IniFormat).value("MANGLE_CANDIDATES", "").toString();
+    m_mangleCandidates = mangleCandidates.split(' ', QString::SplitBehavior::SkipEmptyParts);
+    qCDebug(patchmanagerDaemonLog) << "Loaded mangle candidates:" << m_mangleCandidates;
+
 }
 
 /*!  Returns a pretty name (the \c display_name field) from the metadata of \a patch.  */
@@ -1966,9 +1960,7 @@ void PatchManagerObject::doRefreshPatchList()
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO;
 
     // load applied patches
-
     m_appliedPatches = getAppliedPatches();
-    if (m_mangleCandidates.empty()) getMangleCandidates();
 
     // scan all Patches
     // collect conflicts per file
