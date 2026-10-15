@@ -193,19 +193,39 @@ Page {
 
             SectionHeader { text: qsTranslate("", "Startup Activation") }
 
-            TextSwitch {
-                text: qsTranslate("", "Activate Patches on first login")
-                description: qsTranslate("", "Automatically activate all enabled Patches after Home Screen has been started for the first time.")
-                checked: !PatchManager.applyOnBoot
-                onClicked: PatchManager.applyOnBoot = !PatchManager.applyOnBoot
-                automaticCheck: false
-            }
-
-            Slider {
+            ComboBox { id: onBootBox
                 anchors {
                     leftMargin: Theme.paddingLarge*2 // align to TextSwitch labels
                     right: parent.right
                     left: parent.left
+                }
+                label: qsTranslate("", "Activate Patches")
+                description: PatchManager.applyOnBoot
+                    ? qsTranslate("", "Automatically activate all enabled Patches when SailfishOS starts.")
+                    : qsTranslate("", "Automatically activate all enabled Patches after Home Screen has been started for the first time.")
+                currentIndex: -1
+                menu: ContextMenu {
+                    MenuItem {
+                        text: qsTranslate("", "on first login")
+                    }
+                    MenuItem {
+                        text: qsTranslate("", "when booting")
+                    }
+                }
+                Component.onCompleted: {
+                    currentIndex = PatchManager.applyOnBoot ? 1 : 0
+                }
+                onCurrentIndexChanged: {
+                    if (currentIndex != -1) { // guard against initialization
+                        PatchManager.applyOnBoot = (currentIndex == 1)
+                    }
+                }
+            }
+
+            Slider {
+                anchors {
+                    right: onBootBox.right
+                    left: onBootBox.left
                 }
                 enabled: !PatchManager.applyOnBoot
                 opacity: enabled ? 1.0 : Theme.opacityLow
@@ -217,14 +237,6 @@ Page {
                 stepSize: 5
                 value: dialogConf.value
                 onSliderValueChanged: dialogConf.value = sliderValue
-            }
-
-            TextSwitch {
-                text: qsTranslate("", "Activate Patches when booting")
-                description: qsTranslate("", "Automatically activate all enabled Patches when SailfishOS starts.")
-                checked: PatchManager.applyOnBoot
-                onClicked: PatchManager.applyOnBoot = !PatchManager.applyOnBoot
-                automaticCheck: false
             }
 
             SectionHeader { text: qsTranslate("", "Advanced") }
@@ -265,29 +277,6 @@ Page {
                 automaticCheck: false
             }
             */
-
-            TextSwitch {
-                id: fixBitSwitch
-                text: qsTranslate("", "Convert Patches between 32-bit and 64-bit")
-                description: qsTranslate("", "Automatically convert lib or lib64 for select paths shown below.")
-                checked: PatchManager.bitnessMangle
-                onClicked: PatchManager.bitnessMangle = !PatchManager.bitnessMangle
-                automaticCheck: false
-            }
-
-            TextArea {
-                // align to the right of TextSwitch indicator
-                anchors {
-                  left: fixBitSwitch.left
-                  leftMargin: fixBitSwitch.leftMargin + Theme.paddingLarge
-                }
-                color: Theme.secondaryColor
-                font.pixelSize: Theme.fontSizeSmall
-                readOnly: true
-                text: PatchManager.mangleCandidates.join("\n")
-                enabled: fixBitSwitch.checked
-            }
-
             TextSwitch {
                 id: boosterSwitch
                 text: qsTranslate("", "Restart Boosters along with services")

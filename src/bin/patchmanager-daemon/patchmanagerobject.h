@@ -189,8 +189,6 @@ private slots:
     void restartKeyboard();
     void doRestartKeyboard();
 
-    QStringList getMangleCandidates();
-
 private:
     void restartService(const QString &serviceName);
 

@@ -85,8 +85,6 @@ class PatchManager: public QObject
     Q_PROPERTY(int sfosVersionCheck READ sfosVersionCheck WRITE setSfosVersionCheck NOTIFY sfosVersionCheckChanged)
     Q_PROPERTY(bool applyOnBoot READ applyOnBoot WRITE setApplyOnBoot NOTIFY applyOnBootChanged)
     Q_PROPERTY(bool notifyOnSuccess READ notifyOnSuccess WRITE setNotifyOnSuccess NOTIFY notifyOnSuccessChanged)
-    Q_PROPERTY(bool bitnessMangle READ bitnessMangle WRITE setBitnessMangle NOTIFY bitnessMangleChanged)
-    Q_PROPERTY(QStringList mangleCandidates READ mangleCandidates NOTIFY mangleCandidatesChanged)
     Q_PROPERTY(bool restartBoosters READ restartBoosters WRITE setRestartBoosters NOTIFY restartBoostersChanged)
     Q_PROPERTY(PatchManagerModel *installedModel READ installedModel CONSTANT)
     Q_PROPERTY(QVariantMap updates READ getUpdates NOTIFY updatesChanged)
@@ -113,11 +111,8 @@ public:
     bool notifyOnSuccess() const;
     void setApplyOnBoot(bool applyOnBoot);
     void setNotifyOnSuccess(bool notifyOnSuccess);
-    bool bitnessMangle() const;
-    void setBitnessMangle(bool bitnessMangle);
     bool restartBoosters() const;
     void setRestartBoosters(bool restart);
-    QStringList mangleCandidates() const;
     PatchManagerModel *installedModel();
     QString trCategory(const QString &category) const;
     QVariantMap getUpdates() const;
@@ -203,8 +198,6 @@ signals:
     void sfosVersionCheckChanged(bool sfosVersionCheck);
     void applyOnBootChanged(bool applyOnBoot);
     void notifyOnSuccessChanged(bool notifyOnSuccess);
-    void bitnessMangleChanged(bool bitnessMangle);
-    void mangleCandidatesChanged(const QStringList &mangleCandidates);
     void restartBoostersChanged(bool restartBoosters);
     void updatesChanged();
     void toggleServicesChanged(bool toggleServices);
