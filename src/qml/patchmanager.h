@@ -95,6 +95,7 @@ class PatchManager: public QObject
     Q_PROPERTY(bool appsNeedRestart READ toggleServices NOTIFY toggleServicesChanged)
     Q_PROPERTY(bool failure READ failure NOTIFY failureChanged)
     Q_PROPERTY(bool loaded READ loaded NOTIFY loadedChanged)
+    Q_PROPERTY(bool hasSanityProblems READ hasSanityProblems NOTIFY systemSanityChanged)
     Q_PROPERTY(QString patchmanagerVersion READ patchmanagerVersion NOTIFY patchmanagerVersionChanged)
     Q_PROPERTY(QString osVersion MEMBER m_osVersion CONSTANT)
 
@@ -123,6 +124,9 @@ public:
     QStringList getUpdatesNames() const;
     QString patchmanagerVersion() const;
     QStringList toggleServicesList() const;
+
+    bool hasSanityProblems() const { return m_systemSanityReport.count() > 0; };
+    Q_INVOKABLE void heal();
 
     bool toggleServices() const;
     bool failure() const;
@@ -189,6 +193,9 @@ public slots:
     void restorePatchList();
     void resolveFailure();
 
+    static void checkSystemSanity();
+    QStringList getSystemSanityReport();
+
 signals:
     void easterReceived(const QString & easterText);
     void developerModeChanged(bool developerMode);
@@ -205,6 +212,7 @@ signals:
     void loadedChanged(bool loaded);
     void patchmanagerVersionChanged(const QString &patchmanagerVersion);
     void toggleServicesListChanged(const QStringList &servicesToBeToggled);
+    void systemSanityChanged(const QStringList& report);
 
 private:
     void successCall(QJSValue callback, const QVariant &value);
@@ -221,6 +229,8 @@ private:
     bool m_toggleServices = false;
     bool m_failed = false;
     bool m_loaded = false;
+
+    QStringList m_systemSanityReport;
 
     QString m_patchmanagerVersion;
     QString m_osVersion;

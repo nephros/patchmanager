@@ -121,6 +121,8 @@ public slots:
 
     void lipstickChanged(const QString &state);
 
+    void selfHeal();
+
     QString getPatchmanagerVersion() const;
     QString getOsVersion() const;
 

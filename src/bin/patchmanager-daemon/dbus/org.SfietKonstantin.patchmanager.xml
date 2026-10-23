@@ -130,6 +130,9 @@
             <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
             <arg name="state" type="s" direction="in" />
         </method>
+        <method name="selfHeal">
+            <annotation name="org.freedesktop.DBus.Method.NoReply" value="true"/>
+        </method>
         <signal name="applyPatchFinished">
           <arg name="patch" type="s"/>
         </signal>
