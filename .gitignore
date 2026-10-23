@@ -3,6 +3,10 @@ build/
 src/bin/patchmanager-daemon/adaptor.*
 src/bin/patchmanager-daemon/patchmanager
 
+tests/preload/preload-test
+tests/preload/*.err
+tests/preload/*.log
+
 *.rpm
 *.so*
 Makefile
