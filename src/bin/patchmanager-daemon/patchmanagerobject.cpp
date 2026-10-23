@@ -618,6 +618,24 @@ void PatchManagerObject::doRegisterDBus()
     }
     qCInfo(patchmanagerDaemonLog) << "Successfully registered D-Bus service" << DBUS_SERVICE_NAME;
     m_dbusRegistered = true;
+
+    if (m_clientWatcher)
+        return;
+    m_clientWatcher  = new QDBusServiceWatcher(this);
+    m_clientWatcher->setConnection(connection);
+    m_clientWatcher->addWatchedService(DBUS_SERVICE_NAME);
+    m_clientWatcher->setWatchMode(QDBusServiceWatcher::WatchForOwnerChange);
+
+    qCInfo(patchmanagerDaemonLog) << "Installed D-Bus client watcher" << m_clientWatcher->watchedServices();
+
+    connect(m_clientWatcher, &QDBusServiceWatcher::serviceOwnerChanged,
+            this, [](const QString &serviceName, const QString &oldOwner, const QString &newOwner) {
+                //static QSet<QString> clients;
+                qDebug() << "Patchmanager Daemon: client dis/connected:" << serviceName << oldOwner << newOwner;
+                //clients.remove(oldOwner);
+                //clients.insert(newOwner);
+            });
+
 }
 
 /*!

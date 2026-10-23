@@ -45,6 +45,7 @@
 #include <QtCore/QCommandLineParser>
 
 #include <QDBusConnection>
+#include <QDBusServiceWatcher>
 #include <QDBusContext>
 #include <QDBusMessage>
 #include <QDBusVariant>
@@ -255,6 +256,8 @@ private:
 
     QTimer *m_sessionBusConnector = nullptr;
     QDBusConnection m_sbus;
+
+    QDBusServiceWatcher* m_clientWatcher = nullptr;
 };
 
 #endif // PATCHMANAGEROBJECT_H
