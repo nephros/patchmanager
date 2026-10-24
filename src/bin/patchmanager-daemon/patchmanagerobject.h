@@ -54,12 +54,31 @@
 #include <systemd/sd-journal.h>
 
 #include "common/webcatalog.h"
+#include "patchmanagerfilter.h"
+
+#ifndef SERVER_URL
+#define SERVER_URL          "https://coderus.openrepos.net"
+#endif
+
+#ifndef API_PATH
+#define API_PATH            "pm2/api"
+#endif
+
+#define PROJECTS_PATH       "projects"
+#define PROJECT_PATH        "project"
+#define RATING_PATH         "rating"
+#define FILES_PATH          "files"
+#define MEDIA_PATH          "media"
+
+#define CATALOG_URL         SERVER_URL "/" API_PATH
+#define MEDIA_URL           SERVER_URL "/" MEDIA_PATH
 
 class QTimer;
 class QSettings;
 class QNetworkAccessManager;
 class PatchManagerAdaptor;
 class QLocalServer;
+
 class PatchManagerObject : public QObject, public QDBusContext
 {
     Q_OBJECT
@@ -81,6 +100,7 @@ public slots:
 
     QVariantList listPatches();
     QVariantMap listVersions();
+    QString statistics(bool verbose);
     bool isPatchApplied(const QString &patch);
     QVariantMap applyPatch(const QString &patch);
     QVariantMap unapplyPatch(const QString &patch);
@@ -147,6 +167,7 @@ private slots:
 
     void doRefreshPatchList();
     void doListPatches(const QDBusMessage &message);
+    void doStatistics(const QVariantMap &params, const QDBusMessage &message);
 
     bool doPatch(const QString &patchName, bool apply, QString *patchLog = nullptr);
     void doPatch(const QVariantMap &params, const QDBusMessage &message, bool apply);
@@ -259,6 +280,10 @@ private:
     QDBusConnection m_sbus;
 
     QDBusServiceWatcher* m_clientWatcher = nullptr;
+
+    PatchManagerFilter *m_filter = nullptr;
+    void setupFilter();
+
 };
 
 #endif // PATCHMANAGEROBJECT_H
