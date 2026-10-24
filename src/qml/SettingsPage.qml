@@ -302,6 +302,8 @@ Page {
                 visible: PatchManager.patchDevelMode
             }
 
+            SectionHeader { text: qsTranslate("", "Experimental") }
+
             TextSwitch {
                 id: boosterSwitch
                 text: qsTranslate("", "Restart Boosters along with services")
