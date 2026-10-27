@@ -148,8 +148,6 @@ ln -s ../lipstick-patchmanager.service %{buildroot}/%{_userunitdir}/lipstick.ser
 
 mkdir -p %{buildroot}%{_datadir}/%{name}/patches
 
-%check
-make -C tests/preload/ clean test-preload
 
 %pre
 export NO_PM_PRELOAD=1

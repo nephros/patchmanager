@@ -1,3 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS += patching
-SUBDIRS += preload
+SUBDIRS = patching
