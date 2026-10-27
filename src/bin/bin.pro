@@ -1,2 +1,2 @@
 TEMPLATE = subdirs
-SUBDIRS = patchmanager-daemon dialog doctor
+SUBDIRS = patchmanager-daemon dialog
