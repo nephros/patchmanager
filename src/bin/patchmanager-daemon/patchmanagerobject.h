@@ -259,7 +259,6 @@ private:
     QDBusServiceWatcher* m_clientWatcher = nullptr;
 
     QCommandLineParser* m_parser;
-
 };
 
 #endif // PATCHMANAGEROBJECT_H
