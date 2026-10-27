@@ -2321,8 +2321,7 @@ void PatchManagerObject::doInstallPatch(const QVariantMap &params, const QDBusMe
     const QString &version = params.value(QStringLiteral("version")).toString();
     const QString &jsonUrl = QStringLiteral("%1/%2").arg(CATALOG_URL, PROJECT_PATH);
 
-    qCInfo(patchmanagerDaemonLog) << "Installing " << patch << " Version " << version
-            << "from" << jsonUrl;
+    qCInfo(patchmanagerDaemonLog) << "Installing " << patch << " Version " << version;
 
     QUrl url(jsonUrl);
     QUrlQuery query;
@@ -2380,15 +2379,11 @@ void PatchManagerObject::downloadPatchArchive(const QVariantMap &params, const Q
     qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << "Saving archive to" << archive;
     QDir workDir(PATCHES_WORK_DIR);
     if (!workDir.mkpath(PATCHES_WORK_DIR)) {
-        qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << QStringLiteral("Error: Failed to create working directory") << workDir;
-        return;
+            qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO << QStringLiteral("Error: Failed to create working directory") << workDir;
+            return;
     };
     QFile *archiveFile = new QFile(archive, this);
     if (!archiveFile->open(QFile::WriteOnly)) {
-        qCDebug(patchmanagerDaemonLog) << Q_FUNC_INFO
-                << QStringLiteral("Error: Could not open for writing:")
-                << archiveFile->fileName()
-                << archiveFile->error();
         return;
     }
 
@@ -2894,7 +2889,6 @@ void PatchManagerObject::sendMessageError(const QDBusMessage &message, const QSt
 {
     QDBusConnection connection = QDBusConnection::systemBus();
     QDBusMessage replyError = message.createErrorReply(QDBusError::Other, errorString);
-    qCWarning(patchmanagerDaemonLog) << Q_FUNC_INFO << errorString;
     connection.send(replyError);
 }
 
