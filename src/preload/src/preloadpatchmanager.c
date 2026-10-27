@@ -33,6 +33,28 @@ static orig_open_f_type orig_open64 = NULL;
 #define ENV_NO_PRELOAD "NO_PM_PRELOAD"
 #define ENV_DEBUG "PM_PRELOAD_DEBUG"
 
+#define FLAG_NOPRELOAD   (1u << 2)  /* 00000100 */
+#define FLAG_DEBUG       (1u << 1)  /* 00000010 */
+#define FLAG_INITIALIZED (1u << 0)  /* 00000001 */
+
+typedef unsigned char flags_t;
+static flags_t pm_flags = 0;
+
+static void init_from_env(void)
+{
+    if (getenv(ENV_DEBUG) != NULL)      pm_flags |= FLAG_DEBUG;
+    if (getenv(ENV_NO_PRELOAD) != NULL) pm_flags |= FLAG_NOPRELOAD;
+}
+
+__attribute__((constructor))
+static void init_library(void)
+{
+    // avoid "ISO C forbids conversion of object pointer to function pointer type"
+    *(void **)(&orig_open) = dlsym(RTLD_NEXT, "open");
+    // avoid "ISO C forbids conversion of object pointer to function pointer type"
+    *(void **)(&orig_open64) = dlsym(RTLD_NEXT, "open64");
+}
+
 static const char *blacklist_paths_startswith[] = {
     "/dev",
     "/sys",
@@ -45,16 +67,28 @@ static const char *blacklist_paths_equal[] = {
     "/",
 };
 
-static int debug_output() {
-    static int debug_output_read = 0;
-    static int debug_output_value = 0;
-
-    if (!debug_output_read) {
-        debug_output_value = getenv(ENV_DEBUG) ? 1 : 0;
-        debug_output_read = 1;
+char *process_name = 0;
+//__attribute__((hidden))
+static void get_process_name() {
+    char buf[16]; // linux kernel TASK_COMM_LEN
+    FILE *fp = fopen("/proc/self/comm", "r");
+    if (fp) {
+        if (fgets(buf, sizeof(buf), fp)) {
+            buf[strcspn(buf, "\n")] = '\0';
+            process_name = strdup(buf);
+//       } else fprintf(stderr, "Could not read comm\n");
+        }
+        fclose(fp);
+//    } else fprintf(stderr, "Could not open /proc/self/comm\n");
     }
+}
 
-    return debug_output_value;
+static int debug_output() {
+    if (pm_flags == 0) // not initialized
+        init_from_env();
+    if (process_name == 0)
+        get_process_name();
+    return pm_flags & FLAG_DEBUG;
 }
 
 static void pm_name(char new_name[]) {
@@ -135,15 +169,9 @@ static int pm_validate_name(const char *name)
 }
 
 static int no_preload() {
-    static int pm_preload_read = 0;
-    static int no_pm_preload = 0;
-
-    if (!pm_preload_read) {
-        no_pm_preload = getenv(ENV_NO_PRELOAD) ? 1 : 0;
-        pm_preload_read = 1;
-    }
-
-    return no_pm_preload;
+    if (pm_flags == 0) // not initialized
+        init_from_env();
+    return pm_flags & FLAG_NOPRELOAD;
 }
 
 #endif // #ifndef NO_INTERCEPT
@@ -151,7 +179,7 @@ static int no_preload() {
 int open64(const char *pathname, int flags, ...)
 {
     if (!orig_open64) {
-        orig_open64 = (orig_open_f_type)dlsym(RTLD_NEXT, "open64");
+        init_library();
     }
 
     va_list args;
@@ -175,8 +203,8 @@ int open64(const char *pathname, int flags, ...)
         strcpy(dir_name, new_name);
         dirname(dir_name);
 
-        fprintf(stderr, "[open64] pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
-                getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
+        fprintf(stderr, "[open64] name: %s, pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
+                process_name, getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
     }
 
     if (!d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
@@ -196,7 +224,7 @@ int open64(const char *pathname, int flags, ...)
 int open(const char *pathname, int flags, ...)
 {
     if (!orig_open) {
-        orig_open = (orig_open_f_type)dlsym(RTLD_NEXT, "open");
+        init_library();
     }
 
     va_list args;
@@ -220,8 +248,8 @@ int open(const char *pathname, int flags, ...)
         strcpy(dir_name, new_name);
         dirname(dir_name);
 
-        fprintf(stderr, "[open] pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
-                getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
+        fprintf(stderr, "[open] name: %s, pid: %d, path: %s (%s), dir: %s, flags: %d, mode: %d, no_preload: %d, validate_uid: %d, validate_flags: %d, validate_name: %d\n",
+                process_name, getpid(), new_name, pathname, dir_name, flags, mode, d_no_preload, d_pm_validate_uid, d_pm_validate_flags, d_pm_validate_name);
     }
 
     if (!d_no_preload && d_pm_validate_uid && d_pm_validate_flags && d_pm_validate_name) {
