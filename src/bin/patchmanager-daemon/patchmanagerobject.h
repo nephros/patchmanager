@@ -87,6 +87,8 @@ public:
         NotifyActionFailedApply,
         NotifyActionFailedUnapply,
         NotifyActionUpdateAvailable,
+        NotifyActionDaemonLoaded,
+        NotifyActionDaemonFailed,
     };
     Q_ENUM(NotifyAction)
 

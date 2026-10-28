@@ -324,6 +324,18 @@ void PatchManagerObject::notify(const QString &patch, NotifyAction action)
         summary = qApp->translate("", "Failed to deactivate Patch");
         body = qApp->translate("", "Deactivating Patch %1 failed!").arg(patch);
         break;
+    case NotifyActionDaemonLoaded:
+        summary = qApp->translate("", "Patchmanager daemon started and ready.");
+        notification.setIsTransient(true);
+        notification.setUrgency(Notification::Low);
+        //body = qApp->translate("", "Deactivating Patch %1 failed!").arg(patch);
+        break;
+    case NotifyActionDaemonFailed:
+        summary = qApp->translate("", "Patchmanager daemon has encountered an error.");
+        body = qApp->translate("", "All Patches have been disabled!");
+        notification.setIsTransient(true);
+        notification.setUrgency(Notification::Critical);
+        break;
     case NotifyActionUpdateAvailable:
         summary = qApp->translate("", "Update available");
         body = qApp->translate("", "An update for Patch %1 is available.").arg(patch);
@@ -506,6 +518,8 @@ void PatchManagerObject::lateInitialize()
 
     registerDBus();
     checkForUpdates();
+
+    notify("", NotifyActionDaemonLoaded);
 }
 
 QList<QVariantMap> PatchManagerObject::listPatchesFromDir(const QString &dir, QSet<QString> &existingPatches, bool existing)
@@ -1809,6 +1823,7 @@ void PatchManagerObject::onLipstickChanged(const QString &, const QVariantMap &c
     if (activeState == QStringLiteral("failed")) {
         qCCritical(patchmanagerDaemonLog) << "Detected lipstick crash, hence deactivating and disabling all Patches.";
         unapplyAllPatches();
+        notify("", NotifyActionDaemonFailed);
     } else if (activeState == QStringLiteral("active") && !getLoaded() && !m_failed && !getSettings(QStringLiteral("applyOnBoot"), false).toBool()) {
         qCInfo(patchmanagerDaemonLog) << "Automatically activating all enabled Patches.";
         QTimer::singleShot(5000, this, [this](){
